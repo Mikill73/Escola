@@ -1,1 +1,1 @@
-{"Segunda":[{"materia":"Matemática","horario":"07:00"},{"materia":"Química","horario":"07:50"},{"materia":"Física","horario":"08:40"}],"Terca":[],"Quarta":[],"Quinta":[],"Sexta":[]}
+{"Segunda":["Matemática","Química","Física","Eletiva","Eletiva","E.O.M"],"Terca":["Matemática","Português","Educação Física","Geografia","Física","E.O.P"],"Quarta":["Sociologia","Biologia","E.O.P","E.O.M","Matemática","Português"],"Quinta":["Matemática","Biologia","Português","Geografia","História","Inglês"],"Sexta":["Português","E.O.P","Sociologia","Química","Arte","História"]}
