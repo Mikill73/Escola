@@ -21,15 +21,8 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
         }
         
         .abas {
@@ -126,19 +119,6 @@
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
         
-        .card.expandido {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            max-width: 600px;
-            height: auto;
-            max-height: 80vh;
-            z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        
         .card-titulo {
             font-size: 18px;
             font-weight: 600;
@@ -160,7 +140,7 @@
             color: #ddd;
             line-height: 1.5;
             padding-right: 5px;
-            white-space: pre-wrap; /* Manter quebras de linha */
+            white-space: pre-wrap;
         }
         
         .card-descricao::-webkit-scrollbar {
@@ -294,7 +274,7 @@
             margin-bottom: 10px;
             color: #ddd;
             position: relative;
-            white-space: pre-wrap; /* Manter quebras de linha */
+            white-space: pre-wrap;
         }
         
         .conteudo-item:before {
@@ -317,19 +297,108 @@
             padding: 10px;
         }
         
-        .overlay {
+        .modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 999;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .overlay.ativo {
-            display: block;
+        .modal.ativo {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-conteudo {
+            background: #444;
+            border-radius: 10px;
+            padding: 25px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .modal.ativo .modal-conteudo {
+            transform: scale(1);
+        }
+        
+        .modal-titulo {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #fff;
+            border-bottom: 1px solid #666;
+            padding-bottom: 10px;
+        }
+        
+        .modal-data {
+            color: #bbb;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .modal-descricao {
+            color: #ddd;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #555;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .modal-descricao::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .modal-descricao::-webkit-scrollbar-track {
+            background: #444;
+            border-radius: 4px;
+        }
+        
+        .modal-descricao::-webkit-scrollbar-thumb {
+            background: #777;
+            border-radius: 4px;
+        }
+        
+        .modal-descricao::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
+        
+        .modal-fechar {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #722;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .modal-fechar:hover {
+            background: #933;
         }
         
         .proxima-aula {
@@ -352,9 +421,9 @@
                 margin-bottom: 5px;
             }
             
-            .card.expandido {
+            .modal-conteudo {
                 width: 95%;
-                height: 70vh;
+                padding: 20px;
             }
         }
     </style>
@@ -393,7 +462,15 @@
             <div id="lista-conteudos"></div>
         </div>
         
-        <div class="overlay" id="overlay"></div>
+        <div class="modal" id="modal">
+            <div class="modal-conteudo">
+                <div class="modal-fechar" id="modal-fechar">X</div>
+                <div class="modal-titulo" id="modal-titulo"></div>
+                <div class="modal-data" id="modal-data"></div>
+                <div class="modal-descricao" id="modal-descricao"></div>
+                <div class="card-acoes" id="modal-acoes"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -418,12 +495,18 @@
         document.getElementById('pesquisa-tarefas').addEventListener('input', filtrarTarefas);
         document.getElementById('pesquisa-estudos').addEventListener('input', filtrarEstudos);
         
-        // Fechar card expandido ao clicar no overlay
-        document.getElementById('overlay').addEventListener('click', () => {
-            const cardExpandido = document.querySelector('.card.expandido');
-            if (cardExpandido) {
-                cardExpandido.classList.remove('expandido');
-                document.getElementById('overlay').classList.remove('ativo');
+        // Fechar modal
+        document.getElementById('modal-fechar').addEventListener('click', fecharModal);
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modal')) {
+                fecharModal();
+            }
+        });
+        
+        // Fechar modal com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fecharModal();
             }
         });
         
@@ -478,13 +561,18 @@
                     }
                 }
                 
+                // Limitar descrição para caber no card
+                const descricaoResumida = tarefa.descricao.length > 150 
+                    ? tarefa.descricao.substring(0, 150) + '...' 
+                    : tarefa.descricao;
+                
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
                     <div class="card-data">${dataFormatada}</div>
                     ${proximaAulaInfo}
-                    <div class="card-descricao">${tarefa.descricao}</div>
+                    <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarCard(this.parentNode.parentNode)">Visualizar</button>
+                        <button class="btn btn-visualizar" onclick="visualizarTarefa(${index})">Visualizar</button>
                         <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar</button>
                     </div>
                 `;
@@ -505,15 +593,18 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 
-                const temArquivo = estudo.arquivo ? '<button class="btn btn-download" onclick="baixarEstudoPDF(' + index + ')">Baixar PDF</button>' : '';
+                // Limitar descrição para caber no card
+                const descricaoResumida = estudo.descricao.length > 150 
+                    ? estudo.descricao.substring(0, 150) + '...' 
+                    : estudo.descricao;
                 
                 card.innerHTML = `
                     <div class="card-titulo">${estudo.materia}</div>
-                    <div class="card-descricao">${estudo.descricao}</div>
+                    <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarCard(this.parentNode.parentNode)">Visualizar</button>
+                        <button class="btn btn-visualizar" onclick="visualizarEstudo(${index})">Visualizar</button>
                         <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
-                        ${temArquivo}
+                        ${estudo.arquivo ? '<button class="btn btn-download" onclick="baixarEstudoPDF(' + index + ')">Baixar PDF</button>' : ''}
                     </div>
                 `;
                 
@@ -521,21 +612,57 @@
             });
         }
         
-        function visualizarCard(card) {
-            // Fechar qualquer card já expandido
-            const cardExpandido = document.querySelector('.card.expandido');
-            if (cardExpandido) {
-                cardExpandido.classList.remove('expandido');
+        function visualizarTarefa(index) {
+            const tarefa = tarefas[index];
+            
+            // Formatar data - se for indefinida, mostrar próxima aula
+            let dataFormatada = tarefa.data;
+            let proximaAulaInfo = '';
+            
+            if (tarefa.data.toLowerCase() === 'indefinido' || !tarefa.data) {
+                dataFormatada = 'Data indefinida';
+                const proximaAula = encontrarProximaAula(tarefa.materia);
+                if (proximaAula) {
+                    proximaAulaInfo = `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>`;
+                }
             }
             
-            // Expandir o card clicado
-            card.classList.add('expandido');
-            document.getElementById('overlay').classList.add('ativo');
+            document.getElementById('modal-titulo').innerHTML = tarefa.materia;
+            document.getElementById('modal-data').innerHTML = dataFormatada + proximaAulaInfo;
+            document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
             
-            // Prevenir que o clique no card feche o overlay
-            card.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
+            // Botões de ação no modal
+            document.getElementById('modal-acoes').innerHTML = `
+                <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar Tarefa</button>
+            `;
+            
+            abrirModal();
+        }
+        
+        function visualizarEstudo(index) {
+            const estudo = estudos[index];
+            
+            document.getElementById('modal-titulo').innerHTML = estudo.materia;
+            document.getElementById('modal-data').innerHTML = '';
+            document.getElementById('modal-descricao').innerHTML = estudo.descricao;
+            
+            // Botões de ação no modal
+            document.getElementById('modal-acoes').innerHTML = `
+                <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
+                ${estudo.arquivo ? '<button class="btn btn-download" onclick="baixarEstudoPDF(' + index + ')">Baixar PDF</button>' : ''}
+            `;
+            
+            abrirModal();
+        }
+        
+        function abrirModal() {
+            document.getElementById('modal').classList.add('ativo');
+            document.body.style.overflow = 'hidden'; // Impede scroll da página principal
+        }
+        
+        function fecharModal() {
+            document.getElementById('modal').classList.remove('ativo');
+            document.body.style.overflow = 'auto'; // Restaura scroll da página principal
         }
         
         function encontrarProximaAula(materia) {
