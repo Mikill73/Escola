@@ -117,11 +117,26 @@
             flex-direction: column;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
         }
         
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card.expandido {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+            height: auto;
+            max-height: 80vh;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         
         .card-titulo {
@@ -145,6 +160,7 @@
             color: #ddd;
             line-height: 1.5;
             padding-right: 5px;
+            white-space: pre-wrap; /* Manter quebras de linha */
         }
         
         .card-descricao::-webkit-scrollbar {
@@ -193,6 +209,14 @@
         
         .btn-download:hover {
             background: #3a6cc4;
+        }
+        
+        .btn-visualizar {
+            background: #2a7d2a;
+        }
+        
+        .btn-visualizar:hover {
+            background: #339933;
         }
         
         .vazio {
@@ -270,6 +294,7 @@
             margin-bottom: 10px;
             color: #ddd;
             position: relative;
+            white-space: pre-wrap; /* Manter quebras de linha */
         }
         
         .conteudo-item:before {
@@ -292,6 +317,27 @@
             padding: 10px;
         }
         
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+        
+        .overlay.ativo {
+            display: block;
+        }
+        
+        .proxima-aula {
+            font-size: 12px;
+            color: #aaccaa;
+            margin-top: 5px;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -304,6 +350,11 @@
             .aba {
                 flex: 1 0 50%;
                 margin-bottom: 5px;
+            }
+            
+            .card.expandido {
+                width: 95%;
+                height: 70vh;
             }
         }
     </style>
@@ -341,6 +392,8 @@
         <div id="conteudos" class="conteudo-aba">
             <div id="lista-conteudos"></div>
         </div>
+        
+        <div class="overlay" id="overlay"></div>
     </div>
 
     <script>
@@ -364,6 +417,15 @@
         
         document.getElementById('pesquisa-tarefas').addEventListener('input', filtrarTarefas);
         document.getElementById('pesquisa-estudos').addEventListener('input', filtrarEstudos);
+        
+        // Fechar card expandido ao clicar no overlay
+        document.getElementById('overlay').addEventListener('click', () => {
+            const cardExpandido = document.querySelector('.card.expandido');
+            if (cardExpandido) {
+                cardExpandido.classList.remove('expandido');
+                document.getElementById('overlay').classList.remove('ativo');
+            }
+        });
         
         function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
@@ -404,11 +466,25 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 
+                // Formatar data - se for indefinida, mostrar próxima aula
+                let dataFormatada = tarefa.data;
+                let proximaAulaInfo = '';
+                
+                if (tarefa.data.toLowerCase() === 'indefinido' || !tarefa.data) {
+                    dataFormatada = 'Data indefinida';
+                    const proximaAula = encontrarProximaAula(tarefa.materia);
+                    if (proximaAula) {
+                        proximaAulaInfo = `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>`;
+                    }
+                }
+                
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
-                    <div class="card-data">${tarefa.data}</div>
+                    <div class="card-data">${dataFormatada}</div>
+                    ${proximaAulaInfo}
                     <div class="card-descricao">${tarefa.descricao}</div>
                     <div class="card-acoes">
+                        <button class="btn btn-visualizar" onclick="visualizarCard(this.parentNode.parentNode)">Visualizar</button>
                         <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar</button>
                     </div>
                 `;
@@ -435,6 +511,7 @@
                     <div class="card-titulo">${estudo.materia}</div>
                     <div class="card-descricao">${estudo.descricao}</div>
                     <div class="card-acoes">
+                        <button class="btn btn-visualizar" onclick="visualizarCard(this.parentNode.parentNode)">Visualizar</button>
                         <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
                         ${temArquivo}
                     </div>
@@ -442,6 +519,64 @@
                 
                 container.appendChild(card);
             });
+        }
+        
+        function visualizarCard(card) {
+            // Fechar qualquer card já expandido
+            const cardExpandido = document.querySelector('.card.expandido');
+            if (cardExpandido) {
+                cardExpandido.classList.remove('expandido');
+            }
+            
+            // Expandir o card clicado
+            card.classList.add('expandido');
+            document.getElementById('overlay').classList.add('ativo');
+            
+            // Prevenir que o clique no card feche o overlay
+            card.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+        
+        function encontrarProximaAula(materia) {
+            if (!horario) return null;
+            
+            const diasSemana = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
+            const hoje = new Date();
+            const diaAtual = hoje.getDay(); // 0=Domingo, 1=Segunda, ..., 6=Sábado
+            
+            // Converter para nosso formato (1=Segunda, 2=Terça, etc.)
+            let diaIndex = diaAtual === 0 ? 6 : diaAtual - 1;
+            
+            // Verificar a partir de hoje
+            for (let i = 0; i < 7; i++) {
+                const diaVerificar = (diaIndex + i) % 7;
+                if (diaVerificar >= 5) continue; // Pular fim de semana
+                
+                const diaSemana = diasSemana[diaVerificar];
+                if (horario[diaSemana]) {
+                    const aulaIndex = horario[diaSemana].findIndex(aula => aula === materia);
+                    if (aulaIndex !== -1) {
+                        let nomeDia = '';
+                        switch(diaSemana) {
+                            case 'Segunda': nomeDia = 'Segunda-feira'; break;
+                            case 'Terca': nomeDia = 'Terça-feira'; break;
+                            case 'Quarta': nomeDia = 'Quarta-feira'; break;
+                            case 'Quinta': nomeDia = 'Quinta-feira'; break;
+                            case 'Sexta': nomeDia = 'Sexta-feira'; break;
+                        }
+                        
+                        let periodo = '';
+                        if (aulaIndex === 0) periodo = '1ª aula';
+                        else if (aulaIndex === 1) periodo = '2ª aula';
+                        else periodo = `${aulaIndex + 1}ª aula`;
+                        
+                        return { dia: nomeDia, periodo: periodo };
+                    }
+                }
+            }
+            
+            return null;
         }
         
         function renderizarHorario() {
