@@ -200,11 +200,11 @@
         }
         
         .btn-concluida {
-            background: #2a7d7d;
+            background: #2a7d2a;
         }
         
         .btn-concluida:hover {
-            background: #339999;
+            background: #339933;
         }
         
         .vazio {
@@ -415,35 +415,39 @@
             margin-top: 5px;
         }
         
-        .concluida {
+        .tarefa-concluida {
             text-decoration: line-through;
             opacity: 0.7;
         }
         
-        .sub-aba {
-            display: inline-block;
-            padding: 8px 15px;
-            margin-right: 10px;
+        .subtabs {
+            display: flex;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 3px;
+        }
+        
+        .subtab {
+            flex: 1;
+            padding: 10px;
             background: transparent;
             border: none;
             color: #ccc;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 6px;
             transition: all 0.3s;
+            font-size: 14px;
         }
         
-        .sub-aba.ativa {
-            background: #555;
-            color: #fff;
-        }
-        
-        .sub-aba:hover {
+        .subtab.ativa {
             background: #3a3a3a;
             color: #fff;
         }
         
-        .sub-abas-container {
-            margin-bottom: 15px;
+        .subtab:hover {
+            background: #444;
+            color: #fff;
         }
         
         @media (max-width: 768px) {
@@ -478,9 +482,9 @@
         </div>
         
         <div id="tarefas" class="conteudo-aba ativa">
-            <div class="sub-abas-container">
-                <button class="sub-aba ativa" data-subaba="pendentes">Pendentes</button>
-                <button class="sub-aba" data-subaba="concluidas">Concluídas</button>
+            <div class="subtabs">
+                <button class="subtab ativa" data-subtab="pendentes">Pendentes</button>
+                <button class="subtab" data-subtab="concluidas">Concluídas</button>
             </div>
             
             <div class="pesquisa-container">
@@ -526,7 +530,7 @@
         let conteudos = [];
         let todasMaterias = [];
         let tarefasConcluidas = JSON.parse(localStorage.getItem('tarefasConcluidas')) || [];
-        let subAbaAtiva = 'pendentes';
+        let subtabAtiva = 'pendentes';
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -538,11 +542,11 @@
             });
         });
         
-        document.querySelectorAll('.sub-aba').forEach(subAba => {
-            subAba.addEventListener('click', () => {
-                document.querySelectorAll('.sub-aba').forEach(s => s.classList.remove('ativa'));
-                subAba.classList.add('ativa');
-                subAbaAtiva = subAba.dataset.subaba;
+        document.querySelectorAll('.subtab').forEach(subtab => {
+            subtab.addEventListener('click', () => {
+                document.querySelectorAll('.subtab').forEach(s => s.classList.remove('ativa'));
+                subtab.classList.add('ativa');
+                subtabAtiva = subtab.dataset.subtab;
                 filtrarTarefas();
             });
         });
@@ -568,27 +572,17 @@
             const container = document.getElementById('lista-tarefas');
             container.innerHTML = '';
             
-            let tarefasParaExibir = [];
+            let tarefasFiltradas = subtabAtiva === 'pendentes' 
+                ? tarefas.filter(tarefa => !tarefasConcluidas.includes(tarefa.id))
+                : tarefas.filter(tarefa => tarefasConcluidas.includes(tarefa.id));
             
-            if (subAbaAtiva === 'pendentes') {
-                tarefasParaExibir = tarefas.filter(tarefa => 
-                    !tarefasConcluidas.includes(tarefa.id) && 
-                    (tarefa.materia.toLowerCase().includes(termo) || 
-                     tarefa.descricao.toLowerCase().includes(termo) ||
-                     tarefa.data.toLowerCase().includes(termo))
-                );
-            } else {
-                const tarefasConcluidasFiltradas = tarefas.filter(tarefa => 
-                    tarefasConcluidas.includes(tarefa.id) && 
-                    (tarefa.materia.toLowerCase().includes(termo) || 
-                     tarefa.descricao.toLowerCase().includes(termo) ||
-                     tarefa.data.toLowerCase().includes(termo))
-                );
-                
-                tarefasParaExibir = tarefasConcluidasFiltradas;
-            }
+            tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
+                tarefa.materia.toLowerCase().includes(termo) || 
+                tarefa.descricao.toLowerCase().includes(termo) ||
+                tarefa.data.toLowerCase().includes(termo)
+            );
             
-            renderizarTarefas(tarefasParaExibir);
+            renderizarTarefas(tarefasFiltradas);
         }
         
         function filtrarEstudos() {
@@ -604,21 +598,18 @@
             renderizarEstudos(estudosFiltrados);
         }
         
-        function renderizarTarefas(listaTarefas) {
+        function renderizarTarefas(listaTarefas = tarefas) {
             const container = document.getElementById('lista-tarefas');
             
             if (listaTarefas.length === 0) {
-                const mensagem = subAbaAtiva === 'pendentes' 
-                    ? 'Nenhuma tarefa pendente' 
-                    : 'Nenhuma tarefa concluída';
-                container.innerHTML = `<div class="vazio">${mensagem}</div>`;
+                container.innerHTML = '<div class="vazio">Nenhuma tarefa encontrada</div>';
                 return;
             }
             
             listaTarefas.forEach((tarefa, index) => {
-                const estaConcluida = tarefasConcluidas.includes(tarefa.id);
+                const concluida = tarefasConcluidas.includes(tarefa.id);
                 const card = document.createElement('div');
-                card.className = `card ${estaConcluida ? 'concluida' : ''}`;
+                card.className = `card ${concluida ? 'tarefa-concluida' : ''}`;
                 
                 let dataFormatada = tarefa.data;
                 let proximaAulaInfo = '';
@@ -641,8 +632,8 @@
                     ${proximaAulaInfo}
                     <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
-                        ${!estaConcluida ? `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id})">Concluir</button>` : ''}
                         <button class="btn btn-visualizar" onclick="visualizarTarefa(${index})">Visualizar</button>
+                        ${!concluida ? `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id})">Concluir</button>` : ''}
                         <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar</button>
                     </div>
                 `;
@@ -683,6 +674,7 @@
         
         function visualizarTarefa(index) {
             const tarefa = tarefas[index];
+            const concluida = tarefasConcluidas.includes(tarefa.id);
             
             let dataFormatada = tarefa.data;
             let proximaAulaInfo = '';
@@ -695,14 +687,12 @@
                 }
             }
             
-            document.getElementById('modal-titulo').innerHTML = tarefa.materia;
+            document.getElementById('modal-titulo').innerHTML = `${tarefa.materia} ${concluida ? '(Concluída)' : ''}`;
             document.getElementById('modal-data').innerHTML = dataFormatada + proximaAulaInfo;
             document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
             
-            const estaConcluida = tarefasConcluidas.includes(tarefa.id);
-            
             document.getElementById('modal-acoes').innerHTML = `
-                ${!estaConcluida ? `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id}); fecharModal();">Concluir</button>` : ''}
+                ${!concluida ? `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id});fecharModal();">Marcar como Concluída</button>` : ''}
                 <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar Tarefa</button>
             `;
             
@@ -724,6 +714,14 @@
             abrirModal();
         }
         
+        function marcarTarefaConcluida(id) {
+            if (!tarefasConcluidas.includes(id)) {
+                tarefasConcluidas.push(id);
+                localStorage.setItem('tarefasConcluidas', JSON.stringify(tarefasConcluidas));
+                filtrarTarefas();
+            }
+        }
+        
         function abrirModal() {
             document.getElementById('modal').classList.add('ativo');
             document.body.style.overflow = 'hidden';
@@ -732,14 +730,6 @@
         function fecharModal() {
             document.getElementById('modal').classList.remove('ativo');
             document.body.style.overflow = 'auto';
-        }
-        
-        function marcarTarefaConcluida(id) {
-            if (!tarefasConcluidas.includes(id)) {
-                tarefasConcluidas.push(id);
-                localStorage.setItem('tarefasConcluidas', JSON.stringify(tarefasConcluidas));
-                filtrarTarefas();
-            }
         }
         
         function encontrarProximaAula(materia) {
@@ -872,15 +862,29 @@
                 
                 const materiaConteudos = conteudos.find(c => c.materia === materia);
                 
-                if (materiaConteudos && materiaConteudos.conteudos && materiaConteudos.conteudos.length > 0) {
-                    materiaConteudos.conteudos.forEach(conteudo => {
-                        if (conteudo.trim() !== '') {
-                            const conteudoItem = document.createElement('li');
-                            conteudoItem.className = 'conteudo-item';
-                            conteudoItem.textContent = conteudo;
-                            lista.appendChild(conteudoItem);
-                        }
-                    });
+                if (materiaConteudos) {
+                    const conteudosArray = materiaConteudos.conteudos || materiaConteudos.conteudo || [];
+                    
+                    if (Array.isArray(conteudosArray) && conteudosArray.length > 0 && conteudosArray.some(c => c.trim() !== '')) {
+                        conteudosArray.forEach(conteudo => {
+                            if (conteudo.trim() !== '') {
+                                const conteudoItem = document.createElement('li');
+                                conteudoItem.className = 'conteudo-item';
+                                conteudoItem.textContent = conteudo;
+                                lista.appendChild(conteudoItem);
+                            }
+                        });
+                    } else if (typeof conteudosArray === 'string' && conteudosArray.trim() !== '') {
+                        const conteudoItem = document.createElement('li');
+                        conteudoItem.className = 'conteudo-item';
+                        conteudoItem.textContent = conteudosArray;
+                        lista.appendChild(conteudoItem);
+                    } else {
+                        const vazio = document.createElement('div');
+                        vazio.className = 'conteudo-vazio';
+                        vazio.textContent = 'Nenhum conteúdo adicionado ainda';
+                        lista.appendChild(vazio);
+                    }
                 } else {
                     const vazio = document.createElement('div');
                     vazio.className = 'conteudo-vazio';
@@ -966,13 +970,13 @@
                 ]);
                 
                 if (tarefasData) {
-                    tarefas = tarefasData.map((tarefa, index) => ({ ...tarefa, id: index }));
+                    tarefas = tarefasData.map((t, i) => ({...t, id: i}));
                 }
                 if (estudosData) estudos = estudosData;
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
                 
-                filtrarTarefas();
+                renderizarTarefas();
                 renderizarEstudos();
                 renderizarHorario();
                 renderizarConteudos();
