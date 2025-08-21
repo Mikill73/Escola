@@ -199,6 +199,14 @@
             background: #339933;
         }
         
+        .btn-concluida {
+            background: #2a7d7d;
+        }
+        
+        .btn-concluida:hover {
+            background: #339999;
+        }
+        
         .vazio {
             text-align: center;
             padding: 40px;
@@ -407,6 +415,37 @@
             margin-top: 5px;
         }
         
+        .concluida {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        
+        .sub-aba {
+            display: inline-block;
+            padding: 8px 15px;
+            margin-right: 10px;
+            background: transparent;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .sub-aba.ativa {
+            background: #555;
+            color: #fff;
+        }
+        
+        .sub-aba:hover {
+            background: #3a3a3a;
+            color: #fff;
+        }
+        
+        .sub-abas-container {
+            margin-bottom: 15px;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -439,6 +478,11 @@
         </div>
         
         <div id="tarefas" class="conteudo-aba ativa">
+            <div class="sub-abas-container">
+                <button class="sub-aba ativa" data-subaba="pendentes">Pendentes</button>
+                <button class="sub-aba" data-subaba="concluidas">Concluídas</button>
+            </div>
+            
             <div class="pesquisa-container">
                 <input type="text" class="pesquisa" id="pesquisa-tarefas" placeholder="Pesquisar tarefas...">
             </div>
@@ -481,6 +525,8 @@
         let horario = {};
         let conteudos = [];
         let todasMaterias = [];
+        let tarefasConcluidas = JSON.parse(localStorage.getItem('tarefasConcluidas')) || [];
+        let subAbaAtiva = 'pendentes';
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -492,10 +538,18 @@
             });
         });
         
+        document.querySelectorAll('.sub-aba').forEach(subAba => {
+            subAba.addEventListener('click', () => {
+                document.querySelectorAll('.sub-aba').forEach(s => s.classList.remove('ativa'));
+                subAba.classList.add('ativa');
+                subAbaAtiva = subAba.dataset.subaba;
+                filtrarTarefas();
+            });
+        });
+        
         document.getElementById('pesquisa-tarefas').addEventListener('input', filtrarTarefas);
         document.getElementById('pesquisa-estudos').addEventListener('input', filtrarEstudos);
         
-        // Fechar modal
         document.getElementById('modal-fechar').addEventListener('click', fecharModal);
         document.getElementById('modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('modal')) {
@@ -503,7 +557,6 @@
             }
         });
         
-        // Fechar modal com ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 fecharModal();
@@ -515,13 +568,27 @@
             const container = document.getElementById('lista-tarefas');
             container.innerHTML = '';
             
-            const tarefasFiltradas = tarefas.filter(tarefa => 
-                tarefa.materia.toLowerCase().includes(termo) || 
-                tarefa.descricao.toLowerCase().includes(termo) ||
-                tarefa.data.toLowerCase().includes(termo)
-            );
+            let tarefasParaExibir = [];
             
-            renderizarTarefas(tarefasFiltradas);
+            if (subAbaAtiva === 'pendentes') {
+                tarefasParaExibir = tarefas.filter(tarefa => 
+                    !tarefasConcluidas.includes(tarefa.id) && 
+                    (tarefa.materia.toLowerCase().includes(termo) || 
+                     tarefa.descricao.toLowerCase().includes(termo) ||
+                     tarefa.data.toLowerCase().includes(termo))
+                );
+            } else {
+                const tarefasConcluidasFiltradas = tarefas.filter(tarefa => 
+                    tarefasConcluidas.includes(tarefa.id) && 
+                    (tarefa.materia.toLowerCase().includes(termo) || 
+                     tarefa.descricao.toLowerCase().includes(termo) ||
+                     tarefa.data.toLowerCase().includes(termo))
+                );
+                
+                tarefasParaExibir = tarefasConcluidasFiltradas;
+            }
+            
+            renderizarTarefas(tarefasParaExibir);
         }
         
         function filtrarEstudos() {
@@ -537,19 +604,22 @@
             renderizarEstudos(estudosFiltrados);
         }
         
-        function renderizarTarefas(listaTarefas = tarefas) {
+        function renderizarTarefas(listaTarefas) {
             const container = document.getElementById('lista-tarefas');
             
             if (listaTarefas.length === 0) {
-                container.innerHTML = '<div class="vazio">Nenhuma tarefa encontrada</div>';
+                const mensagem = subAbaAtiva === 'pendentes' 
+                    ? 'Nenhuma tarefa pendente' 
+                    : 'Nenhuma tarefa concluída';
+                container.innerHTML = `<div class="vazio">${mensagem}</div>`;
                 return;
             }
             
             listaTarefas.forEach((tarefa, index) => {
+                const estaConcluida = tarefasConcluidas.includes(tarefa.id);
                 const card = document.createElement('div');
-                card.className = 'card';
+                card.className = `card ${estaConcluida ? 'concluida' : ''}`;
                 
-                // Formatar data - se for indefinida, mostrar próxima aula
                 let dataFormatada = tarefa.data;
                 let proximaAulaInfo = '';
                 
@@ -561,7 +631,6 @@
                     }
                 }
                 
-                // Limitar descrição para caber no card
                 const descricaoResumida = tarefa.descricao.length > 150 
                     ? tarefa.descricao.substring(0, 150) + '...' 
                     : tarefa.descricao;
@@ -572,6 +641,7 @@
                     ${proximaAulaInfo}
                     <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
+                        ${!estaConcluida ? `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id})">Concluir</button>` : ''}
                         <button class="btn btn-visualizar" onclick="visualizarTarefa(${index})">Visualizar</button>
                         <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar</button>
                     </div>
@@ -593,7 +663,6 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 
-                // Limitar descrição para caber no card
                 const descricaoResumida = estudo.descricao.length > 150 
                     ? estudo.descricao.substring(0, 150) + '...' 
                     : estudo.descricao;
@@ -615,7 +684,6 @@
         function visualizarTarefa(index) {
             const tarefa = tarefas[index];
             
-            // Formatar data - se for indefinida, mostrar próxima aula
             let dataFormatada = tarefa.data;
             let proximaAulaInfo = '';
             
@@ -631,8 +699,10 @@
             document.getElementById('modal-data').innerHTML = dataFormatada + proximaAulaInfo;
             document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
             
-            // Botões de ação no modal
+            const estaConcluida = tarefasConcluidas.includes(tarefa.id);
+            
             document.getElementById('modal-acoes').innerHTML = `
+                ${!estaConcluida ? `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id}); fecharModal();">Concluir</button>` : ''}
                 <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar Tarefa</button>
             `;
             
@@ -646,7 +716,6 @@
             document.getElementById('modal-data').innerHTML = '';
             document.getElementById('modal-descricao').innerHTML = estudo.descricao;
             
-            // Botões de ação no modal
             document.getElementById('modal-acoes').innerHTML = `
                 <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
                 ${estudo.arquivo ? '<button class="btn btn-download" onclick="baixarEstudoPDF(' + index + ')">Baixar PDF</button>' : ''}
@@ -657,12 +726,20 @@
         
         function abrirModal() {
             document.getElementById('modal').classList.add('ativo');
-            document.body.style.overflow = 'hidden'; // Impede scroll da página principal
+            document.body.style.overflow = 'hidden';
         }
         
         function fecharModal() {
             document.getElementById('modal').classList.remove('ativo');
-            document.body.style.overflow = 'auto'; // Restaura scroll da página principal
+            document.body.style.overflow = 'auto';
+        }
+        
+        function marcarTarefaConcluida(id) {
+            if (!tarefasConcluidas.includes(id)) {
+                tarefasConcluidas.push(id);
+                localStorage.setItem('tarefasConcluidas', JSON.stringify(tarefasConcluidas));
+                filtrarTarefas();
+            }
         }
         
         function encontrarProximaAula(materia) {
@@ -670,15 +747,13 @@
             
             const diasSemana = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
             const hoje = new Date();
-            const diaAtual = hoje.getDay(); // 0=Domingo, 1=Segunda, ..., 6=Sábado
+            const diaAtual = hoje.getDay();
             
-            // Converter para nosso formato (1=Segunda, 2=Terça, etc.)
             let diaIndex = diaAtual === 0 ? 6 : diaAtual - 1;
             
-            // Verificar a partir de hoje
             for (let i = 0; i < 7; i++) {
                 const diaVerificar = (diaIndex + i) % 7;
-                if (diaVerificar >= 5) continue; // Pular fim de semana
+                if (diaVerificar >= 5) continue;
                 
                 const diaSemana = diasSemana[diaVerificar];
                 if (horario[diaSemana]) {
@@ -890,12 +965,14 @@
                     fetchDados('Conteúdos')
                 ]);
                 
-                if (tarefasData) tarefas = tarefasData;
+                if (tarefasData) {
+                    tarefas = tarefasData.map((tarefa, index) => ({ ...tarefa, id: index }));
+                }
                 if (estudosData) estudos = estudosData;
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
                 
-                renderizarTarefas();
+                filtrarTarefas();
                 renderizarEstudos();
                 renderizarHorario();
                 renderizarConteudos();
