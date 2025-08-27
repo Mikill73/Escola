@@ -567,23 +567,69 @@
             }
         });
         
-        function filtrarTarefas() {
-            const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
-            const container = document.getElementById('lista-tarefas');
-            container.innerHTML = '';
-            
-            let tarefasFiltradas = subtabAtiva === 'pendentes' 
-                ? tarefas.filter(tarefa => !tarefasConcluidas.includes(tarefa.id))
-                : tarefas.filter(tarefa => tarefasConcluidas.includes(tarefa.id));
-            
-            tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
-                tarefa.materia.toLowerCase().includes(termo) || 
-                tarefa.descricao.toLowerCase().includes(termo) ||
-                tarefa.data.toLowerCase().includes(termo)
-            );
-            
-            renderizarTarefas(tarefasFiltradas);
+function filtrarTarefas() {
+    const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
+    const container = document.getElementById('lista-tarefas');
+    container.innerHTML = '';
+    
+    let tarefasFiltradas = subtabAtiva === 'pendentes' 
+        ? tarefas.filter(tarefa => !tarefasConcluidas.includes(tarefa.id))
+        : tarefas.filter(tarefa => tarefasConcluidas.includes(tarefa.id));
+    
+    tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
+        tarefa.materia.toLowerCase().includes(termo) || 
+        tarefa.descricao.toLowerCase().includes(termo) ||
+        tarefa.data.toLowerCase().includes(termo)
+    );
+    
+    renderizarTarefas(tarefasFiltradas);
+}
+
+function renderizarTarefas(listaTarefas = tarefas) {
+    const container = document.getElementById('lista-tarefas');
+    
+    if (listaTarefas.length === 0) {
+        container.innerHTML = '<div class="vazio">Nenhuma tarefa encontrada</div>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    listaTarefas.forEach((tarefa, index) => {
+        const concluida = tarefasConcluidas.includes(tarefa.id);
+        const card = document.createElement('div');
+        card.className = 'card';
+        
+        let dataFormatada = tarefa.data;
+        let proximaAulaInfo = '';
+        
+        if (tarefa.data.toLowerCase() === 'indefinido' || !tarefa.data) {
+            dataFormatada = 'Data indefinida';
+            const proximaAula = encontrarProximaAula(tarefa.materia);
+            if (proximaAula) {
+                proximaAulaInfo = `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>`;
+            }
         }
+        
+        const descricaoResumida = tarefa.descricao.length > 150 
+            ? tarefa.descricao.substring(0, 150) + '...' 
+            : tarefa.descricao;
+        
+        card.innerHTML = `
+            <div class="card-titulo">${tarefa.materia}</div>
+            <div class="card-data">${dataFormatada}</div>
+            ${proximaAulaInfo}
+            <div class="card-descricao">${descricaoResumida}</div>
+            <div class="card-acoes">
+                <button class="btn btn-visualizar" onclick="visualizarTarefa(${index})">Visualizar</button>
+                ${!concluida ? `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id})">Concluir</button>` : ''}
+                <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar</button>
+            </div>
+        `;
+        
+        container.appendChild(card);
+    });
+}
         
         function filtrarEstudos() {
             const termo = document.getElementById('pesquisa-estudos').value.toLowerCase();
