@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escola - Organizador de Tarefas e Estudos</title>
+    <meta name="description" content="Organize suas tarefas escolares, estudos, horários e conteúdos em um único lugar">
     <style>
         * {
             margin: 0;
@@ -632,7 +634,7 @@
             
             listaTarefas.forEach((tarefa, index) => {
                 const concluida = tarefasConcluidas.includes(tarefa.id);
-                const nova = !tarefasVistas.includes(tarefa.id);
+                const nova = !tarefasVistas.includes(tarefa.id) && !concluida;
                 const card = document.createElement('div');
                 card.className = `card ${concluida ? 'tarefa-concluida' : ''} ${nova ? 'nova-tarefa' : ''}`;
                 
@@ -718,6 +720,7 @@
                 tarefasVistas.push(tarefa.id);
                 localStorage.setItem('tarefasVistas', JSON.stringify(tarefasVistas));
                 atualizarContadorNotificacoes();
+                renderizarTarefas();
             }
             
             let dataFormatada = tarefa.data;
