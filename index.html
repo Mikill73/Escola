@@ -43,6 +43,23 @@
             border-radius: 8px;
             transition: all 0.3s;
             font-weight: 500;
+            position: relative;
+        }
+        
+        .notificacao-contador {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
         }
         
         .aba.ativa {
@@ -112,6 +129,17 @@
             transition: transform 0.3s, box-shadow 0.3s;
             position: relative;
             overflow: hidden;
+        }
+        
+        .card.nova-tarefa {
+            border: 2px solid #4CAF50;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
         }
         
         .card:hover {
@@ -475,7 +503,7 @@
     <div class="container">
         
         <div class="abas">
-            <button class="aba ativa" data-aba="tarefas">Tarefas</button>
+            <button class="aba ativa" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
             <button class="aba" data-aba="estudos">Estudos</button>
             <button class="aba" data-aba="horario">Horário</button>
             <button class="aba" data-aba="conteudos">Conteúdos</button>
@@ -530,6 +558,8 @@
         let conteudos = [];
         let todasMaterias = [];
         let tarefasConcluidas = JSON.parse(localStorage.getItem('tarefasConcluidas')) || [];
+        let tarefasVistas = JSON.parse(localStorage.getItem('tarefasVistas')) || [];
+        let ultimasTarefas = JSON.parse(localStorage.getItem('ultimasTarefas')) || [];
         let subtabAtiva = 'pendentes';
         
         document.querySelectorAll('.aba').forEach(aba => {
@@ -539,6 +569,11 @@
                 
                 aba.classList.add('ativa');
                 document.getElementById(aba.dataset.aba).classList.add('ativa');
+                
+                if (aba.dataset.aba === 'tarefas') {
+                    marcarTarefasComoVistas();
+                    atualizarContadorNotificacoes();
+                }
             });
         });
         
@@ -567,81 +602,22 @@
             }
         });
         
-function filtrarTarefas() {
-    const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
-    const container = document.getElementById('lista-tarefas');
-    container.innerHTML = '';
-    
-    let tarefasFiltradas = subtabAtiva === 'pendentes' 
-        ? tarefas.filter(tarefa => !tarefasConcluidas.includes(tarefa.id))
-        : tarefas.filter(tarefa => tarefasConcluidas.includes(tarefa.id));
-    
-    tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
-        tarefa.materia.toLowerCase().includes(termo) || 
-        tarefa.descricao.toLowerCase().includes(termo) ||
-        tarefa.data.toLowerCase().includes(termo)
-    );
-    
-    renderizarTarefas(tarefasFiltradas);
-}
-
-function renderizarTarefas(listaTarefas = tarefas) {
-    const container = document.getElementById('lista-tarefas');
-    
-    if (listaTarefas.length === 0) {
-        container.innerHTML = '<div class="vazio">Nenhuma tarefa encontrada</div>';
-        return;
-    }
-    
-    container.innerHTML = '';
-    
-    listaTarefas.forEach((tarefa, index) => {
-        const concluida = tarefasConcluidas.includes(tarefa.id);
-        const card = document.createElement('div');
-        card.className = 'card';
-        
-        let dataFormatada = tarefa.data;
-        let proximaAulaInfo = '';
-        
-        if (tarefa.data.toLowerCase() === 'indefinido' || !tarefa.data) {
-            dataFormatada = 'Data indefinida';
-            const proximaAula = encontrarProximaAula(tarefa.materia);
-            if (proximaAula) {
-                proximaAulaInfo = `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>`;
-            }
-        }
-        
-        const descricaoResumida = tarefa.descricao.length > 150 
-            ? tarefa.descricao.substring(0, 150) + '...' 
-            : tarefa.descricao;
-        
-        card.innerHTML = `
-            <div class="card-titulo">${tarefa.materia}</div>
-            <div class="card-data">${dataFormatada}</div>
-            ${proximaAulaInfo}
-            <div class="card-descricao">${descricaoResumida}</div>
-            <div class="card-acoes">
-                <button class="btn btn-visualizar" onclick="visualizarTarefa(${index})">Visualizar</button>
-                ${!concluida ? `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id})">Concluir</button>` : ''}
-                <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar</button>
-            </div>
-        `;
-        
-        container.appendChild(card);
-    });
-}
-        
-        function filtrarEstudos() {
-            const termo = document.getElementById('pesquisa-estudos').value.toLowerCase();
-            const container = document.getElementById('lista-estudos');
+        function filtrarTarefas() {
+            const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
+            const container = document.getElementById('lista-tarefas');
             container.innerHTML = '';
             
-            const estudosFiltrados = estudos.filter(estudo => 
-                estudo.materia.toLowerCase().includes(termo) || 
-                estudo.descricao.toLowerCase().includes(termo)
+            let tarefasFiltradas = subtabAtiva === 'pendentes' 
+                ? tarefas.filter(tarefa => !tarefasConcluidas.includes(tarefa.id))
+                : tarefas.filter(tarefa => tarefasConcluidas.includes(tarefa.id));
+            
+            tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
+                tarefa.materia.toLowerCase().includes(termo) || 
+                tarefa.descricao.toLowerCase().includes(termo) ||
+                tarefa.data.toLowerCase().includes(termo)
             );
             
-            renderizarEstudos(estudosFiltrados);
+            renderizarTarefas(tarefasFiltradas);
         }
         
         function renderizarTarefas(listaTarefas = tarefas) {
@@ -652,10 +628,13 @@ function renderizarTarefas(listaTarefas = tarefas) {
                 return;
             }
             
+            container.innerHTML = '';
+            
             listaTarefas.forEach((tarefa, index) => {
                 const concluida = tarefasConcluidas.includes(tarefa.id);
+                const nova = !tarefasVistas.includes(tarefa.id);
                 const card = document.createElement('div');
-                card.className = `card ${concluida ? 'tarefa-concluida' : ''}`;
+                card.className = `card ${concluida ? 'tarefa-concluida' : ''} ${nova ? 'nova-tarefa' : ''}`;
                 
                 let dataFormatada = tarefa.data;
                 let proximaAulaInfo = '';
@@ -673,7 +652,7 @@ function renderizarTarefas(listaTarefas = tarefas) {
                     : tarefa.descricao;
                 
                 card.innerHTML = `
-                    <div class="card-titulo">${tarefa.materia}</div>
+                    <div class="card-titulo">${tarefa.materia} ${nova ? '<span style="color:#4CAF50;font-size:12px">(Nova)</span>' : ''}</div>
                     <div class="card-data">${dataFormatada}</div>
                     ${proximaAulaInfo}
                     <div class="card-descricao">${descricaoResumida}</div>
@@ -686,6 +665,19 @@ function renderizarTarefas(listaTarefas = tarefas) {
                 
                 container.appendChild(card);
             });
+        }
+        
+        function filtrarEstudos() {
+            const termo = document.getElementById('pesquisa-estudos').value.toLowerCase();
+            const container = document.getElementById('lista-estudos');
+            container.innerHTML = '';
+            
+            const estudosFiltrados = estudos.filter(estudo => 
+                estudo.materia.toLowerCase().includes(termo) || 
+                estudo.descricao.toLowerCase().includes(termo)
+            );
+            
+            renderizarEstudos(estudosFiltrados);
         }
         
         function renderizarEstudos(listaEstudos = estudos) {
@@ -721,6 +713,12 @@ function renderizarTarefas(listaTarefas = tarefas) {
         function visualizarTarefa(index) {
             const tarefa = tarefas[index];
             const concluida = tarefasConcluidas.includes(tarefa.id);
+            
+            if (!tarefasVistas.includes(tarefa.id)) {
+                tarefasVistas.push(tarefa.id);
+                localStorage.setItem('tarefasVistas', JSON.stringify(tarefasVistas));
+                atualizarContadorNotificacoes();
+            }
             
             let dataFormatada = tarefa.data;
             let proximaAulaInfo = '';
@@ -1006,6 +1004,53 @@ function renderizarTarefas(listaTarefas = tarefas) {
             }
         }
         
+        function detectarNovasTarefas() {
+            const idsAtuais = tarefas.map(t => t.id);
+            const novasTarefas = idsAtuais.filter(id => !ultimasTarefas.includes(id));
+            
+            novasTarefas.forEach(id => {
+                if (!tarefasVistas.includes(id)) {
+                    tarefasVistas = tarefasVistas.filter(vistaId => vistaId !== id);
+                }
+            });
+            
+            localStorage.setItem('ultimasTarefas', JSON.stringify(idsAtuais));
+            localStorage.setItem('tarefasVistas', JSON.stringify(tarefasVistas));
+            
+            return novasTarefas.length;
+        }
+        
+        function atualizarContadorNotificacoes() {
+            const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
+            const novasTarefas = tarefas.filter(t => !tarefasVistas.includes(t.id) && !tarefasConcluidas.includes(t.id)).length;
+            
+            if (novasTarefas > 0) {
+                if (!contador) {
+                    const novoContador = document.createElement('div');
+                    novoContador.className = 'notificacao-contador';
+                    novoContador.textContent = novasTarefas;
+                    document.getElementById('aba-tarefas').appendChild(novoContador);
+                } else {
+                    contador.textContent = novasTarefas;
+                }
+            } else if (contador) {
+                contador.remove();
+            }
+        }
+        
+        function marcarTarefasComoVistas() {
+            const novasTarefasVistas = tarefas
+                .filter(t => !tarefasVistas.includes(t.id) && !tarefasConcluidas.includes(t.id))
+                .map(t => t.id);
+            
+            if (novasTarefasVistas.length > 0) {
+                tarefasVistas = [...tarefasVistas, ...novasTarefasVistas];
+                localStorage.setItem('tarefasVistas', JSON.stringify(tarefasVistas));
+                atualizarContadorNotificacoes();
+                renderizarTarefas();
+            }
+        }
+        
         async function carregarDados() {
             try {
                 const [tarefasData, estudosData, horarioData, conteudosData] = await Promise.all([
@@ -1021,6 +1066,9 @@ function renderizarTarefas(listaTarefas = tarefas) {
                 if (estudosData) estudos = estudosData;
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
+                
+                const numeroNovasTarefas = detectarNovasTarefas();
+                atualizarContadorNotificacoes();
                 
                 renderizarTarefas();
                 renderizarEstudos();
