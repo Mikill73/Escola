@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escola</title>
-    <meta name="description" content="Organize suas tarefas escolares, estudos, horários e conteúdos em um único lugar">
+    <meta name="description" content="Sistema de gerenciamento escolar com tarefas, horários, estudos e conteúdos">
     <style>
         * {
             margin: 0;
@@ -505,13 +505,17 @@
     <div class="container">
         
         <div class="abas">
-            <button class="aba ativa" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
+            <button class="aba ativa" data-aba="horario">Horário</button>
+            <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
             <button class="aba" data-aba="estudos">Estudos</button>
-            <button class="aba" data-aba="horario">Horário</button>
             <button class="aba" data-aba="conteudos">Conteúdos</button>
         </div>
         
-        <div id="tarefas" class="conteudo-aba ativa">
+        <div id="horario" class="conteudo-aba ativa">
+            <div id="horario-aulas"></div>
+        </div>
+        
+        <div id="tarefas" class="conteudo-aba">
             <div class="subtabs">
                 <button class="subtab ativa" data-subtab="pendentes">Pendentes</button>
                 <button class="subtab" data-subtab="concluidas">Concluídas</button>
@@ -530,10 +534,6 @@
             </div>
             
             <div class="grid-container" id="lista-estudos"></div>
-        </div>
-        
-        <div id="horario" class="conteudo-aba">
-            <div id="horario-aulas"></div>
         </div>
         
         <div id="conteudos" class="conteudo-aba">
@@ -575,6 +575,7 @@
                 if (aba.dataset.aba === 'tarefas') {
                     marcarTarefasComoVistas();
                     atualizarContadorNotificacoes();
+                    filtrarTarefas();
                 }
             });
         });
@@ -622,7 +623,7 @@
             renderizarTarefas(tarefasFiltradas);
         }
         
-        function renderizarTarefas(listaTarefas = tarefas) {
+        function renderizarTarefas(listaTarefas) {
             const container = document.getElementById('lista-tarefas');
             
             if (listaTarefas.length === 0) {
@@ -716,11 +717,10 @@
             const tarefa = tarefas[index];
             const concluida = tarefasConcluidas.includes(tarefa.id);
             
-            if (!tarefasVistas.includes(tarefa.id)) {
+            if (!tarefasVistas.includes(tarefa.id) && !concluida) {
                 tarefasVistas.push(tarefa.id);
                 localStorage.setItem('tarefasVistas', JSON.stringify(tarefasVistas));
                 atualizarContadorNotificacoes();
-                renderizarTarefas();
             }
             
             let dataFormatada = tarefa.data;
@@ -766,6 +766,7 @@
                 tarefasConcluidas.push(id);
                 localStorage.setItem('tarefasConcluidas', JSON.stringify(tarefasConcluidas));
                 filtrarTarefas();
+                atualizarContadorNotificacoes();
             }
         }
         
@@ -1050,7 +1051,7 @@
                 tarefasVistas = [...tarefasVistas, ...novasTarefasVistas];
                 localStorage.setItem('tarefasVistas', JSON.stringify(tarefasVistas));
                 atualizarContadorNotificacoes();
-                renderizarTarefas();
+                filtrarTarefas();
             }
         }
         
@@ -1073,9 +1074,9 @@
                 const numeroNovasTarefas = detectarNovasTarefas();
                 atualizarContadorNotificacoes();
                 
-                renderizarTarefas();
-                renderizarEstudos();
                 renderizarHorario();
+                filtrarTarefas();
+                renderizarEstudos();
                 renderizarConteudos();
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
