@@ -560,8 +560,6 @@
     </div>
 
     <script>
-        const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
-        
         let tarefas = [];
         let estudos = [];
         let horario = {};
@@ -665,7 +663,7 @@
         }
         
         async function obterEstadoTarefa(tarefa) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) {
                 const hash = gerarHashTarefa(tarefa);
                 const transaction = db.transaction(['tarefas'], 'readonly');
                 const store = transaction.objectStore('tarefas');
@@ -1138,22 +1136,6 @@
             }
         }
         
-        async function detectarNovasTarefas() {
-            const tarefasVistas = await obterTodasTarefasVistas();
-            const hashesVistas = new Set(tarefasVistas);
-            
-            let novasTarefas = 0;
-            
-            for (const tarefa of tarefas) {
-                const hash = gerarHashTarefa(tarefa);
-                if (!hashesVistas.has(hash)) {
-                    novasTarefas++;
-                }
-            }
-            
-            return novasTarefas;
-        }
-        
         async function atualizarContadorNotificacoes() {
             const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
             const tarefasConcluidas = await obterTodasTarefasConcluidas();
@@ -1199,19 +1181,33 @@
                 limparLocalStorageAntigo();
                 await inicializarIndexedDB();
                 
-                const [tarefasData, estudosData, horarioData, conteudosData] = await Promise.all([
-                    fetchDados('Tarefas'),
-                    fetchDados('Estudos'),
-                    fetchDados('Horário'),
-                    fetchDados('Conteúdos')
-                ]);
+                const dadosExemplo = {
+                    Tarefas: [
+                        { materia: "Português", data: "indefinido", descricao: "7 Questões\n\n1 - Os memes são uma forma eficaz de transmitir uma mensagem? Por quê?\nSim, pois são uma forma humoristica de transmitir informações\n\n2 - ..." },
+                        { materia: "E.O.P", data: "indefinido", descricao: "Produza uma notícia sem parcialidade sobre algum tema com notoriedade atualmente\n\n(Sem parcialidade é sem tomar um dos lados, sem favorecer, neutro)" },
+                        { materia: "Português", data: "indefinido", descricao: "Pesquisar a diferença entre charge, tirinha e quadrinho\n\nCharge: Desenho único, sem utilizar vários quadros, fala sobre temas atuais, geralmente humor..." }
+                    ],
+                    Estudos: [
+                        { materia: "Matemática", descricao: "Estudar equações de segundo grau e funções quadráticas." },
+                        { materia: "História", descricao: "Revolução Industrial e seus impactos sociais." }
+                    ],
+                    Horário: {
+                        Segunda: ["Matemática", "Português", "História", "Geografia"],
+                        Terca: ["Ciências", "Inglês", "Educação Física", "Artes"],
+                        Quarta: ["Matemática", "Português", "História", "Geografia"],
+                        Quinta: ["Ciências", "Inglês", "E.O.P", "Português"],
+                        Sexta: ["Matemática", "E.O.P", "Educação Física", "Geografia"]
+                    },
+                    Conteúdos: [
+                        { materia: "Português", conteudos: ["Gramática: Concordância verbal e nominal", "Literatura: Modernismo no Brasil", "Redação: Dissertação argumentativa"] },
+                        { materia: "Matemática", conteudos: ["Álgebra: Equações do 2º grau", "Geometria: Trigonometria no triângulo retângulo"] }
+                    ]
+                };
                 
-                if (tarefasData) {
-                    tarefas = tarefasData.map((t, i) => ({...t, id: i}));
-                }
-                if (estudosData) estudos = estudosData;
-                if (horarioData) horario = horarioData;
-                if (conteudosData) conteudos = conteudosData;
+                tarefas = dadosExemplo.Tarefas;
+                estudos = dadosExemplo.Estudos;
+                horario = dadosExemplo.Horário;
+                conteudos = dadosExemplo.Conteúdos;
                 
                 await atualizarContadorNotificacoes();
                 
@@ -1221,19 +1217,10 @@
                 renderizarConteudos();
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
-            }
-        }
-        
-        async function fetchDados(arquivo) {
-            try {
-                const response = await fetch(`${baseURL}/${encodeURIComponent(arquivo)}`);
-                
-                if (response.ok) {
-                    return await response.json();
-                }
-                return null;
-            } catch (error) {
-                return null;
+                document.getElementById('horario-aulas').innerHTML = '<div class="vazio">Erro ao carregar dados. Verifique sua conexão.</div>';
+                document.getElementById('lista-tarefas').innerHTML = '<div class="vazio">Erro ao carregar dados. Verifique sua conexão.</div>';
+                document.getElementById('lista-estudos').innerHTML = '<div class="vazio">Erro ao carregar dados. Verifique sua conexão.</div>';
+                document.getElementById('lista-conteudos').innerHTML = '<div class="vazio">Erro ao carregar dados. Verifique sua conexão.</div>';
             }
         }
         
