@@ -568,7 +568,6 @@
         let conteudos = [];
         let todasMaterias = [];
         let tarefasConcluidas = JSON.parse(localStorage.getItem('tarefasConcluidas')) || [];
-        let tarefasVistas = new Set();
         let db = null;
         let subtabAtiva = 'pendentes';
         
@@ -617,9 +616,9 @@
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open('EscolaDB', 1);
                 
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
+                request.onerror = () => reject('Erro ao abrir o banco de dados');
+                request.onsuccess = (event) => {
+                    db = event.target.result;
                     resolve(db);
                 };
                 
@@ -632,37 +631,87 @@
             });
         }
         
-        async function getTarefaVista(hash) {
+        function gerarHashTarefa(tarefa) {
+            return tarefa.materia + '|' + tarefa.data + '|' + tarefa.descricao;
+        }
+        
+        async function verificarTarefaVista(hash) {
             return new Promise((resolve, reject) => {
-                if (!db) resolve(false);
+                if (!db) return resolve(false);
                 
                 const transaction = db.transaction(['tarefasVistas'], 'readonly');
                 const store = transaction.objectStore('tarefasVistas');
                 const request = store.get(hash);
                 
-                request.onerror = () => reject(request.error);
                 request.onsuccess = () => resolve(!!request.result);
+                request.onerror = () => resolve(false);
             });
         }
         
-        async function addTarefaVista(hash) {
+        async function marcarTarefaComoVista(hash) {
             return new Promise((resolve, reject) => {
-                if (!db) resolve();
+                if (!db) return resolve();
                 
                 const transaction = db.transaction(['tarefasVistas'], 'readwrite');
                 const store = transaction.objectStore('tarefasVistas');
-                const request = store.add({ hash, timestamp: Date.now() });
+                const request = store.put({ hash, timestamp: Date.now() });
                 
-                request.onerror = () => reject(request.error);
                 request.onsuccess = () => resolve();
+                request.onerror = () => resolve();
             });
         }
         
-        function hashTarefa(tarefa) {
-            return btoa(unescape(encodeURIComponent(`${tarefa.materia}-${tarefa.descricao}-${tarefa.data}`)));
+        async function detectarNovasTarefas() {
+            if (!db) return 0;
+            
+            let novasTarefas = 0;
+            
+            for (const tarefa of tarefas) {
+                const hash = gerarHashTarefa(tarefa);
+                const jaVista = await verificarTarefaVista(hash);
+                
+                if (!jaVista && !tarefasConcluidas.includes(tarefa.id)) {
+                    novasTarefas++;
+                }
+            }
+            
+            return novasTarefas;
         }
         
-        async function filtrarTarefas() {
+        async function marcarTarefasComoVistas() {
+            if (!db) return;
+            
+            for (const tarefa of tarefas) {
+                const hash = gerarHashTarefa(tarefa);
+                const jaVista = await verificarTarefaVista(hash);
+                
+                if (!jaVista && !tarefasConcluidas.includes(tarefa.id)) {
+                    await marcarTarefaComoVista(hash);
+                }
+            }
+            
+            atualizarContadorNotificacoes();
+        }
+        
+        async function atualizarContadorNotificacoes() {
+            const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
+            const novasTarefas = await detectarNovasTarefas();
+            
+            if (novasTarefas > 0) {
+                if (!contador) {
+                    const novoContador = document.createElement('div');
+                    novoContador.className = 'notificacao-contador';
+                    novoContador.textContent = novasTarefas;
+                    document.getElementById('aba-tarefas').appendChild(novoContador);
+                } else {
+                    contador.textContent = novasTarefas;
+                }
+            } else if (contador) {
+                contador.remove();
+            }
+        }
+        
+        function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
             const container = document.getElementById('lista-tarefas');
             container.innerHTML = '';
@@ -677,7 +726,7 @@
                 tarefa.data.toLowerCase().includes(termo)
             );
             
-            await renderizarTarefas(tarefasFiltradas);
+            renderizarTarefas(tarefasFiltradas);
         }
         
         async function renderizarTarefas(listaTarefas) {
@@ -692,9 +741,9 @@
             
             for (const tarefa of listaTarefas) {
                 const concluida = tarefasConcluidas.includes(tarefa.id);
-                const hash = hashTarefa(tarefa);
-                const vista = await getTarefaVista(hash);
-                const nova = !vista && !concluida;
+                const hash = gerarHashTarefa(tarefa);
+                const jaVista = await verificarTarefaVista(hash);
+                const nova = !jaVista && !concluida;
                 
                 const card = document.createElement('div');
                 card.className = `card ${concluida ? 'tarefa-concluida' : ''} ${nova ? 'nova-tarefa' : ''}`;
@@ -781,10 +830,10 @@
             if (!tarefa) return;
             
             const concluida = tarefasConcluidas.includes(tarefa.id);
-            const hash = hashTarefa(tarefa);
+            const hash = gerarHashTarefa(tarefa);
             
             if (!concluida) {
-                await addTarefaVista(hash);
+                await marcarTarefaComoVista(hash);
                 atualizarContadorNotificacoes();
             }
             
@@ -927,7 +976,7 @@
                     
                     diaDiv.innerHTML = `<h3>${titulo}</h3>`;
                     
-                    horario[dia].forEach((materia, idx) {
+                    horario[dia].forEach((materia, idx) => {
                         const aulaItem = document.createElement('div');
                         aulaItem.className = 'aula-item';
                         aulaItem.innerHTML = `
@@ -1093,46 +1142,6 @@
             }
         }
         
-        async function atualizarContadorNotificacoes() {
-            const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
-            let novasTarefas = 0;
-            
-            for (const tarefa of tarefas) {
-                if (!tarefasConcluidas.includes(tarefa.id)) {
-                    const hash = hashTarefa(tarefa);
-                    const vista = await getTarefaVista(hash);
-                    if (!vista) novasTarefas++;
-                }
-            }
-            
-            if (novasTarefas > 0) {
-                if (!contador) {
-                    const novoContador = document.createElement('div');
-                    novoContador.className = 'notificacao-contador';
-                    novoContador.textContent = novasTarefas;
-                    document.getElementById('aba-tarefas').appendChild(novoContador);
-                } else {
-                    contador.textContent = novasTarefas;
-                }
-            } else if (contador) {
-                contador.remove();
-            }
-        }
-        
-        async function marcarTarefasComoVistas() {
-            for (const tarefa of tarefas) {
-                if (!tarefasConcluidas.includes(tarefa.id)) {
-                    const hash = hashTarefa(tarefa);
-                    const vista = await getTarefaVista(hash);
-                    if (!vista) {
-                        await addTarefaVista(hash);
-                    }
-                }
-            }
-            await atualizarContadorNotificacoes();
-            await filtrarTarefas();
-        }
-        
         async function carregarDados() {
             try {
                 await initIndexedDB();
@@ -1151,10 +1160,10 @@
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
                 
-                await atualizarContadorNotificacoes();
+                atualizarContadorNotificacoes();
                 
                 renderizarHorario();
-                await filtrarTarefas();
+                filtrarTarefas();
                 renderizarEstudos();
                 renderizarConteudos();
             } catch (error) {
