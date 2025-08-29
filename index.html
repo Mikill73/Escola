@@ -621,17 +621,17 @@
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open('EscolaDB', 1);
                 
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
+                request.onerror = () => reject('Erro ao abrir o banco de dados');
+                request.onsuccess = (event) => {
+                    db = event.target.result;
                     resolve();
                 };
                 
                 request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
+                    const database = event.target.result;
                     
-                    if (!db.objectStoreNames.contains('tarefas')) {
-                        const store = db.createObjectStore('tarefas', { keyPath: 'hash' });
+                    if (!database.objectStoreNames.contains('tarefas')) {
+                        const store = database.createObjectStore('tarefas', { keyPath: 'hash' });
                         store.createIndex('concluida', 'concluida', { unique: false });
                         store.createIndex('vista', 'vista', { unique: false });
                     }
@@ -639,121 +639,111 @@
             });
         }
         
+        function gerarHashTarefa(tarefa) {
+            return btoa(encodeURIComponent(JSON.stringify({
+                materia: tarefa.materia,
+                descricao: tarefa.descricao,
+                data: tarefa.data
+            })));
+        }
+        
         async function salvarTarefaNoIndexedDB(tarefa, concluida = false, vista = false) {
-            if (!db) return;
-            
-            const hash = await criarHash(JSON.stringify(tarefa));
-            
             return new Promise((resolve, reject) => {
+                const hash = gerarHashTarefa(tarefa);
                 const transaction = db.transaction(['tarefas'], 'readwrite');
                 const store = transaction.objectStore('tarefas');
                 
                 const request = store.put({
                     hash: hash,
                     concluida: concluida,
-                    vista: vista,
-                    timestamp: Date.now()
+                    vista: vista
                 });
                 
                 request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
+                request.onerror = () => reject('Erro ao salvar tarefa');
             });
         }
         
         async function obterEstadoTarefa(tarefa) {
-            if (!db) return { concluida: false, vista: false };
-            
-            const hash = await criarHash(JSON.stringify(tarefa));
-            
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
+                const hash = gerarHashTarefa(tarefa);
                 const transaction = db.transaction(['tarefas'], 'readonly');
                 const store = transaction.objectStore('tarefas');
                 const request = store.get(hash);
                 
                 request.onsuccess = () => {
                     if (request.result) {
-                        resolve({
-                            concluida: request.result.concluida,
-                            vista: request.result.vista
-                        });
+                        resolve(request.result);
                     } else {
                         resolve({ concluida: false, vista: false });
                     }
                 };
                 
-                request.onerror = () => resolve({ concluida: false, vista: false });
+                request.onerror = () => reject('Erro ao obter estado da tarefa');
             });
         }
         
         async function obterTodasTarefasConcluidas() {
-            if (!db) return [];
-            
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 const transaction = db.transaction(['tarefas'], 'readonly');
                 const store = transaction.objectStore('tarefas');
                 const index = store.index('concluida');
                 const request = index.getAll(true);
                 
                 request.onsuccess = () => resolve(request.result.map(item => item.hash));
-                request.onerror = () => resolve([]);
+                request.onerror = () => reject('Erro ao obter tarefas concluídas');
             });
         }
         
         async function obterTodasTarefasVistas() {
-            if (!db) return [];
-            
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 const transaction = db.transaction(['tarefas'], 'readonly');
                 const store = transaction.objectStore('tarefas');
                 const index = store.index('vista');
                 const request = index.getAll(true);
                 
                 request.onsuccess = () => resolve(request.result.map(item => item.hash));
-                request.onerror = () => resolve([]);
+                request.onerror = () => reject('Erro ao obter tarefas vistas');
             });
         }
         
-        async function criarHash(texto) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(texto);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-        
-        function filtrarTarefas() {
+        async function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
             const container = document.getElementById('lista-tarefas');
             container.innerHTML = '';
             
-            renderizarTarefasComFiltro(termo);
+            const tarefasConcluidas = await obterTodasTarefasConcluidas();
+            const hashesConcluidas = new Set(tarefasConcluidas);
+            
+            let tarefasFiltradas = subtabAtiva === 'pendentes' 
+                ? tarefas.filter(tarefa => !hashesConcluidas.has(gerarHashTarefa(tarefa)))
+                : tarefas.filter(tarefa => hashesConcluidas.has(gerarHashTarefa(tarefa)));
+            
+            tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
+                tarefa.materia.toLowerCase().includes(termo) || 
+                tarefa.descricao.toLowerCase().includes(termo) ||
+                tarefa.data.toLowerCase().includes(termo)
+            );
+            
+            renderizarTarefas(tarefasFiltradas);
         }
         
-        async function renderizarTarefasComFiltro(termo) {
+        async function renderizarTarefas(listaTarefas) {
             const container = document.getElementById('lista-tarefas');
             
-            if (tarefas.length === 0) {
+            if (listaTarefas.length === 0) {
                 container.innerHTML = '<div class="vazio">Nenhuma tarefa encontrada</div>';
                 return;
             }
             
             container.innerHTML = '';
             
-            for (const tarefa of tarefas) {
+            for (const tarefa of listaTarefas) {
                 const estado = await obterEstadoTarefa(tarefa);
-                const tarefaFiltrada = tarefa.materia.toLowerCase().includes(termo) || 
-                    tarefa.descricao.toLowerCase().includes(termo) ||
-                    tarefa.data.toLowerCase().includes(termo);
-                
-                if ((subtabAtiva === 'pendentes' && estado.concluida) || 
-                    (subtabAtiva === 'concluidas' && !estado.concluida) ||
-                    !tarefaFiltrada) {
-                    continue;
-                }
-                
-                const nova = !estado.vista && !estado.concluida;
+                const concluida = estado.concluida;
+                const nova = !estado.vista && !concluida;
                 const card = document.createElement('div');
-                card.className = `card ${estado.concluida ? 'tarefa-concluida' : ''} ${nova ? 'nova-tarefa' : ''}`;
+                card.className = `card ${concluida ? 'tarefa-concluida' : ''} ${nova ? 'nova-tarefa' : ''}`;
                 
                 let dataFormatada = tarefa.data;
                 let proximaAulaInfo = '';
@@ -770,28 +760,22 @@
                     ? tarefa.descricao.substring(0, 150) + '...' 
                     : tarefa.descricao;
                 
-                const hash = await criarHash(JSON.stringify(tarefa));
-                
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia} ${nova ? '<span style="color:#4CAF50;font-size:12px">(Nova)</span>' : ''}</div>
                     <div class="card-data">${dataFormatada}</div>
                     ${proximaAulaInfo}
                     <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarTarefa('${hash}')">Visualizar</button>
-                        ${!estado.concluida ? 
-                            `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${hash}')">Concluir</button>` : 
-                            `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${hash}')">Desfazer</button>`
+                        <button class="btn btn-visualizar" onclick="visualizarTarefa(${tarefas.indexOf(tarefa)})">Visualizar</button>
+                        ${!concluida ? 
+                            `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefas.indexOf(tarefa)})">Concluir</button>` : 
+                            `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida(${tarefas.indexOf(tarefa)})">Desfazer</button>`
                         }
-                        <button class="btn btn-download" onclick="baixarTarefa('${hash}')">Baixar</button>
+                        <button class="btn btn-download" onclick="baixarTarefa(${tarefas.indexOf(tarefa)})">Baixar</button>
                     </div>
                 `;
                 
                 container.appendChild(card);
-            }
-            
-            if (container.innerHTML === '') {
-                container.innerHTML = '<div class="vazio">Nenhuma tarefa encontrada</div>';
             }
         }
         
@@ -838,15 +822,14 @@
             });
         }
         
-        async function visualizarTarefa(hash) {
-            const tarefa = tarefas.find(t => criarHash(JSON.stringify(t)).then(h => h === hash));
-            if (!tarefa) return;
-            
+        async function visualizarTarefa(index) {
+            const tarefa = tarefas[index];
             const estado = await obterEstadoTarefa(tarefa);
+            const concluida = estado.concluida;
             
-            if (!estado.vista && !estado.concluida) {
-                await salvarTarefaNoIndexedDB(tarefa, estado.concluida, true);
-                atualizarContadorNotificacoes();
+            if (!estado.vista && !concluida) {
+                await salvarTarefaNoIndexedDB(tarefa, concluida, true);
+                await atualizarContadorNotificacoes();
             }
             
             let dataFormatada = tarefa.data;
@@ -860,16 +843,16 @@
                 }
             }
             
-            document.getElementById('modal-titulo').innerHTML = `${tarefa.materia} ${estado.concluida ? '(Concluída)' : ''}`;
+            document.getElementById('modal-titulo').innerHTML = `${tarefa.materia} ${concluida ? '(Concluída)' : ''}`;
             document.getElementById('modal-data').innerHTML = dataFormatada + proximaAulaInfo;
             document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
             
             document.getElementById('modal-acoes').innerHTML = `
-                ${!estado.concluida ? 
-                    `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${hash}');fecharModal();">Marcar como Concluída</button>` : 
-                    `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${hash}');fecharModal();">Desfazer Conclusão</button>`
+                ${!concluida ? 
+                    `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${index});fecharModal();">Marcar como Concluída</button>` : 
+                    `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida(${index});fecharModal();">Desfazer Conclusão</button>`
                 }
-                <button class="btn btn-download" onclick="baixarTarefaPorHash('${hash}')">Baixar Tarefa</button>
+                <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar Tarefa</button>
             `;
             
             abrirModal();
@@ -890,44 +873,26 @@
             abrirModal();
         }
         
-        async function marcarTarefaConcluida(hash) {
-            if (!db) return;
+        async function marcarTarefaConcluida(index) {
+            const tarefa = tarefas[index];
+            const estado = await obterEstadoTarefa(tarefa);
             
-            const transaction = db.transaction(['tarefas'], 'readwrite');
-            const store = transaction.objectStore('tarefas');
-            const request = store.get(hash);
-            
-            request.onsuccess = async () => {
-                if (request.result) {
-                    const tarefaAtualizada = { ...request.result, concluida: true };
-                    store.put(tarefaAtualizada);
-                    
-                    transaction.oncomplete = () => {
-                        filtrarTarefas();
-                        atualizarContadorNotificacoes();
-                    };
-                }
-            };
+            if (!estado.concluida) {
+                await salvarTarefaNoIndexedDB(tarefa, true, estado.vista);
+                await filtrarTarefas();
+                await atualizarContadorNotificacoes();
+            }
         }
         
-        async function desmarcarTarefaConcluida(hash) {
-            if (!db) return;
+        async function desmarcarTarefaConcluida(index) {
+            const tarefa = tarefas[index];
+            const estado = await obterEstadoTarefa(tarefa);
             
-            const transaction = db.transaction(['tarefas'], 'readwrite');
-            const store = transaction.objectStore('tarefas');
-            const request = store.get(hash);
-            
-            request.onsuccess = async () => {
-                if (request.result) {
-                    const tarefaAtualizada = { ...request.result, concluida: false };
-                    store.put(tarefaAtualizada);
-                    
-                    transaction.oncomplete = () => {
-                        filtrarTarefas();
-                        atualizarContadorNotificacoes();
-                    };
-                }
-            };
+            if (estado.concluida) {
+                await salvarTarefaNoIndexedDB(tarefa, false, estado.vista);
+                await filtrarTarefas();
+                await atualizarContadorNotificacoes();
+            }
         }
         
         function abrirModal() {
@@ -1110,10 +1075,8 @@
             });
         }
         
-        async function baixarTarefaPorHash(hash) {
-            const tarefa = tarefas.find(t => criarHash(JSON.stringify(t)).then(h => h === hash));
-            if (!tarefa) return;
-            
+        function baixarTarefa(index) {
+            const tarefa = tarefas[index];
             const texto = `Matéria: ${tarefa.materia}\nData de entrega: ${tarefa.data}\nDescrição: ${tarefa.descricao}`;
             
             const blob = new Blob([texto], { type: 'text/plain' });
@@ -1175,19 +1138,32 @@
             }
         }
         
-        async function atualizarContadorNotificacoes() {
-            const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
+        async function detectarNovasTarefas() {
             const tarefasVistas = await obterTodasTarefasVistas();
-            const tarefasConcluidas = await obterTodasTarefasConcluidas();
+            const hashesVistas = new Set(tarefasVistas);
             
             let novasTarefas = 0;
             
             for (const tarefa of tarefas) {
-                const hash = await criarHash(JSON.stringify(tarefa));
-                if (!tarefasVistas.includes(hash) && !tarefasConcluidas.includes(hash)) {
+                const hash = gerarHashTarefa(tarefa);
+                if (!hashesVistas.has(hash)) {
                     novasTarefas++;
                 }
             }
+            
+            return novasTarefas;
+        }
+        
+        async function atualizarContadorNotificacoes() {
+            const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
+            const tarefasConcluidas = await obterTodasTarefasConcluidas();
+            const hashesConcluidas = new Set(tarefasConcluidas);
+            const tarefasVistas = await obterTodasTarefasVistas();
+            const hashesVistas = new Set(tarefasVistas);
+            
+            const novasTarefas = tarefas.filter(t => 
+                !hashesVistas.has(gerarHashTarefa(t)) && !hashesConcluidas.has(gerarHashTarefa(t))
+            ).length;
             
             if (novasTarefas > 0) {
                 if (!contador) {
@@ -1204,18 +1180,18 @@
         }
         
         async function marcarTarefasComoVistas() {
-            const tarefasVistas = await obterTodasTarefasVistas();
             const tarefasConcluidas = await obterTodasTarefasConcluidas();
+            const hashesConcluidas = new Set(tarefasConcluidas);
             
             for (const tarefa of tarefas) {
-                const hash = await criarHash(JSON.stringify(tarefa));
-                if (!tarefasVistas.includes(hash) && !tarefasConcluidas.includes(hash)) {
+                const hash = gerarHashTarefa(tarefa);
+                if (!hashesConcluidas.has(hash)) {
                     await salvarTarefaNoIndexedDB(tarefa, false, true);
                 }
             }
             
-            atualizarContadorNotificacoes();
-            filtrarTarefas();
+            await atualizarContadorNotificacoes();
+            await filtrarTarefas();
         }
         
         async function carregarDados() {
@@ -1231,16 +1207,16 @@
                 ]);
                 
                 if (tarefasData) {
-                    tarefas = tarefasData;
+                    tarefas = tarefasData.map((t, i) => ({...t, id: i}));
                 }
                 if (estudosData) estudos = estudosData;
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
                 
-                atualizarContadorNotificacoes();
+                await atualizarContadorNotificacoes();
                 
                 renderizarHorario();
-                filtrarTarefas();
+                await filtrarTarefas();
                 renderizarEstudos();
                 renderizarConteudos();
             } catch (error) {
