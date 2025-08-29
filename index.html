@@ -568,8 +568,8 @@
         let conteudos = [];
         let todasMaterias = [];
         let tarefasConcluidas = JSON.parse(localStorage.getItem('tarefasConcluidas')) || [];
-        let tarefasVistas = JSON.parse(localStorage.getItem('tarefasVistas')) || [];
-        let ultimasTarefas = JSON.parse(localStorage.getItem('ultimasTarefas')) || [];
+        let tarefasVistas = new Set();
+        let db = null;
         let subtabAtiva = 'pendentes';
         
         document.querySelectorAll('.aba').forEach(aba => {
@@ -613,7 +613,56 @@
             }
         });
         
-        function filtrarTarefas() {
+        function initIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('EscolaDB', 1);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('tarefasVistas')) {
+                        db.createObjectStore('tarefasVistas', { keyPath: 'hash' });
+                    }
+                };
+            });
+        }
+        
+        async function getTarefaVista(hash) {
+            return new Promise((resolve, reject) => {
+                if (!db) resolve(false);
+                
+                const transaction = db.transaction(['tarefasVistas'], 'readonly');
+                const store = transaction.objectStore('tarefasVistas');
+                const request = store.get(hash);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(!!request.result);
+            });
+        }
+        
+        async function addTarefaVista(hash) {
+            return new Promise((resolve, reject) => {
+                if (!db) resolve();
+                
+                const transaction = db.transaction(['tarefasVistas'], 'readwrite');
+                const store = transaction.objectStore('tarefasVistas');
+                const request = store.add({ hash, timestamp: Date.now() });
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve();
+            });
+        }
+        
+        function hashTarefa(tarefa) {
+            return btoa(unescape(encodeURIComponent(`${tarefa.materia}-${tarefa.descricao}-${tarefa.data}`)));
+        }
+        
+        async function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
             const container = document.getElementById('lista-tarefas');
             container.innerHTML = '';
@@ -628,10 +677,10 @@
                 tarefa.data.toLowerCase().includes(termo)
             );
             
-            renderizarTarefas(tarefasFiltradas);
+            await renderizarTarefas(tarefasFiltradas);
         }
         
-        function renderizarTarefas(listaTarefas) {
+        async function renderizarTarefas(listaTarefas) {
             const container = document.getElementById('lista-tarefas');
             
             if (listaTarefas.length === 0) {
@@ -641,9 +690,12 @@
             
             container.innerHTML = '';
             
-            listaTarefas.forEach((tarefa, index) => {
+            for (const tarefa of listaTarefas) {
                 const concluida = tarefasConcluidas.includes(tarefa.id);
-                const nova = !tarefasVistas.includes(tarefa.id) && !concluida;
+                const hash = hashTarefa(tarefa);
+                const vista = await getTarefaVista(hash);
+                const nova = !vista && !concluida;
+                
                 const card = document.createElement('div');
                 card.className = `card ${concluida ? 'tarefa-concluida' : ''} ${nova ? 'nova-tarefa' : ''}`;
                 
@@ -668,17 +720,17 @@
                     ${proximaAulaInfo}
                     <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarTarefa(${index})">Visualizar</button>
+                        <button class="btn btn-visualizar" onclick="visualizarTarefa(${tarefa.id})">Visualizar</button>
                         ${!concluida ? 
                             `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id})">Concluir</button>` : 
                             `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida(${tarefa.id})">Desfazer</button>`
                         }
-                        <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar</button>
+                        <button class="btn btn-download" onclick="baixarTarefa(${tarefa.id})">Baixar</button>
                     </div>
                 `;
                 
                 container.appendChild(card);
-            });
+            }
         }
         
         function filtrarEstudos() {
@@ -724,13 +776,15 @@
             });
         }
         
-        function visualizarTarefa(index) {
-            const tarefa = tarefas[index];
-            const concluida = tarefasConcluidas.includes(tarefa.id);
+        async function visualizarTarefa(id) {
+            const tarefa = tarefas.find(t => t.id === id);
+            if (!tarefa) return;
             
-            if (!tarefasVistas.includes(tarefa.id) && !concluida) {
-                tarefasVistas.push(tarefa.id);
-                localStorage.setItem('tarefasVistas', JSON.stringify(tarefasVistas));
+            const concluida = tarefasConcluidas.includes(tarefa.id);
+            const hash = hashTarefa(tarefa);
+            
+            if (!concluida) {
+                await addTarefaVista(hash);
                 atualizarContadorNotificacoes();
             }
             
@@ -754,7 +808,7 @@
                     `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id});fecharModal();">Marcar como Concluída</button>` : 
                     `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida(${tarefa.id});fecharModal();">Desfazer Conclusão</button>`
                 }
-                <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar Tarefa</button>
+                <button class="btn btn-download" onclick="baixarTarefa(${tarefa.id})">Baixar Tarefa</button>
             `;
             
             abrirModal();
@@ -873,7 +927,7 @@
                     
                     diaDiv.innerHTML = `<h3>${titulo}</h3>`;
                     
-                    horario[dia].forEach((materia, idx) => {
+                    horario[dia].forEach((materia, idx) {
                         const aulaItem = document.createElement('div');
                         aulaItem.className = 'aula-item';
                         aulaItem.innerHTML = `
@@ -974,8 +1028,10 @@
             });
         }
         
-        function baixarTarefa(index) {
-            const tarefa = tarefas[index];
+        function baixarTarefa(id) {
+            const tarefa = tarefas.find(t => t.id === id);
+            if (!tarefa) return;
+            
             const texto = `Matéria: ${tarefa.materia}\nData de entrega: ${tarefa.data}\nDescrição: ${tarefa.descricao}`;
             
             const blob = new Blob([texto], { type: 'text/plain' });
@@ -1037,25 +1093,17 @@
             }
         }
         
-        function detectarNovasTarefas() {
-            const idsAtuais = tarefas.map(t => t.id);
-            const novasTarefas = idsAtuais.filter(id => !ultimasTarefas.includes(id));
-            
-            novasTarefas.forEach(id => {
-                if (!tarefasVistas.includes(id)) {
-                    tarefasVistas = tarefasVistas.filter(vistaId => vistaId !== id);
-                }
-            });
-            
-            localStorage.setItem('ultimasTarefas', JSON.stringify(idsAtuais));
-            localStorage.setItem('tarefasVistas', JSON.stringify(tarefasVistas));
-            
-            return novasTarefas.length;
-        }
-        
-        function atualizarContadorNotificacoes() {
+        async function atualizarContadorNotificacoes() {
             const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
-            const novasTarefas = tarefas.filter(t => !tarefasVistas.includes(t.id) && !tarefasConcluidas.includes(t.id)).length;
+            let novasTarefas = 0;
+            
+            for (const tarefa of tarefas) {
+                if (!tarefasConcluidas.includes(tarefa.id)) {
+                    const hash = hashTarefa(tarefa);
+                    const vista = await getTarefaVista(hash);
+                    if (!vista) novasTarefas++;
+                }
+            }
             
             if (novasTarefas > 0) {
                 if (!contador) {
@@ -1071,21 +1119,24 @@
             }
         }
         
-        function marcarTarefasComoVistas() {
-            const novasTarefasVistas = tarefas
-                .filter(t => !tarefasVistas.includes(t.id) && !tarefasConcluidas.includes(t.id))
-                .map(t => t.id);
-            
-            if (novasTarefasVistas.length > 0) {
-                tarefasVistas = [...tarefasVistas, ...novasTarefasVistas];
-                localStorage.setItem('tarefasVistas', JSON.stringify(tarefasVistas));
-                atualizarContadorNotificacoes();
-                filtrarTarefas();
+        async function marcarTarefasComoVistas() {
+            for (const tarefa of tarefas) {
+                if (!tarefasConcluidas.includes(tarefa.id)) {
+                    const hash = hashTarefa(tarefa);
+                    const vista = await getTarefaVista(hash);
+                    if (!vista) {
+                        await addTarefaVista(hash);
+                    }
+                }
             }
+            await atualizarContadorNotificacoes();
+            await filtrarTarefas();
         }
         
         async function carregarDados() {
             try {
+                await initIndexedDB();
+                
                 const [tarefasData, estudosData, horarioData, conteudosData] = await Promise.all([
                     fetchDados('Tarefas'),
                     fetchDados('Estudos'),
@@ -1100,11 +1151,10 @@
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
                 
-                const numeroNovasTarefas = detectarNovasTarefas();
-                atualizarContadorNotificacoes();
+                await atualizarContadorNotificacoes();
                 
                 renderizarHorario();
-                filtrarTarefas();
+                await filtrarTarefas();
                 renderizarEstudos();
                 renderizarConteudos();
             } catch (error) {
