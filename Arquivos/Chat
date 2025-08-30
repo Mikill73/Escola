@@ -1,3 +1,18 @@
+<div class="nome-container">
+    <input type="text" class="nome-input" id="chat-nome" placeholder="Seu nome" maxlength="50" value="">
+</div>
+
+<div class="chat-container">
+    <div class="chat-mensagens" id="chat-mensagens">
+        <div class="vazio">Carregando mensagens...</div>
+    </div>
+    
+    <div class="chat-form">
+        <textarea class="chat-input" id="chat-input" placeholder="Digite sua mensagem (máx. 300 caracteres)" maxlength="300"></textarea>
+        <button class="chat-enviar" id="chat-enviar" disabled>Enviar</button>
+    </div>
+</div>
+
 <script>
     const supabaseUrl = 'https://hzslgydylfheyzurkotd.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhbmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
@@ -10,113 +25,6 @@
     
     let usuario = localStorage.getItem('chatUsuario') || '';
     let carregando = true;
-    
-    const estilo = document.createElement('style');
-    estilo.textContent = `
-        .nome-container {
-            margin-bottom: 15px;
-        }
-        
-        .nome-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        .chat-container {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .chat-mensagens {
-            height: 400px;
-            overflow-y: auto;
-            padding: 15px;
-            background: #f9f9f9;
-        }
-        
-        .vazio {
-            text-align: center;
-            color: #888;
-            padding: 20px;
-        }
-        
-        .erro {
-            text-align: center;
-            color: #e74c3c;
-            padding: 20px;
-        }
-        
-        .mensagem {
-            margin-bottom: 15px;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .mensagem-cabecalho {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        
-        .mensagem-usuario {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .mensagem-hora {
-            font-size: 12px;
-            color: #95a5a6;
-        }
-        
-        .mensagem-conteudo {
-            color: #34495e;
-            line-height: 1.4;
-        }
-        
-        .chat-form {
-            display: flex;
-            border-top: 1px solid #ddd;
-            background: white;
-        }
-        
-        .chat-input {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            resize: none;
-            min-height: 60px;
-            font-size: 16px;
-        }
-        
-        .chat-input:focus {
-            outline: none;
-        }
-        
-        .chat-enviar {
-            padding: 0 20px;
-            background: #3498db;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        
-        .chat-enviar:hover:not(:disabled) {
-            background: #2980b9;
-        }
-        
-        .chat-enviar:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-    `;
-    document.head.appendChild(estilo);
     
     function inicializarChat() {
         if (usuario) {
@@ -141,7 +49,7 @@
                 { 
                     event: 'INSERT', 
                     schema: 'public', 
-                    table: 'mensagens' 
+                    table: 'messages' 
                 }, 
                 (payload) => {
                     adicionarMensagemNaTela(payload.new);
@@ -165,12 +73,12 @@
     async function carregarMensagens() {
         try {
             const { data, error } = await supabase
-                .from('mensagens')
+                .from('messages')
                 .select('*')
-                .order('created_at', { ascending: true });
+                .order('id', { ascending: true });
             
             if (error) {
-                mensagensContainer.innerHTML = '<div class="erro">Erro ao carregar mensagens</div>';
+                mensagensContainer.innerHTML = '<div class="vazio">Erro ao carregar mensagens</div>';
                 return;
             }
             
@@ -178,13 +86,13 @@
             carregando = false;
             
             if (data.length === 0) {
-                mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda. Seja o primeiro a enviar!</div>';
+                mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
                 return;
             }
             
             data.forEach(adicionarMensagemNaTela);
         } catch (erro) {
-            mensagensContainer.innerHTML = '<div class="erro">Erro inesperado ao carregar mensagens</div>';
+            mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
         }
     }
     
@@ -197,17 +105,8 @@
         const elementoMensagem = document.createElement('div');
         elementoMensagem.className = 'mensagem';
         
-        const data = new Date(mensagem.created_at);
-        const dataFormatada = data.toLocaleTimeString('pt-BR', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-        
         elementoMensagem.innerHTML = `
-            <div class="mensagem-cabecalho">
-                <span class="mensagem-usuario">${mensagem.username}</span>
-                <span class="mensagem-hora">${dataFormatada}</span>
-            </div>
+            <div class="mensagem-usuario">${mensagem.username}:</div>
             <div class="mensagem-conteudo">${mensagem.content}</div>
         `;
         
@@ -226,7 +125,7 @@
             enviarBtn.textContent = 'Enviando...';
             
             const { error } = await supabase
-                .from('mensagens')
+                .from('messages')
                 .insert([
                     { 
                         username: usuarioAtual, 
