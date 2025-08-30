@@ -4,7 +4,7 @@
 
 <div class="chat-container">
     <div class="chat-mensagens" id="chat-mensagens">
-        <div class="vazio">Carregando mensagens</div>
+        <div class="vazio">Carregando mensagens...</div>
     </div>
     
     <div class="chat-form">
@@ -51,7 +51,8 @@
                 headers: {
                     'apikey': supabaseKey,
                     'Authorization': `Bearer ${supabaseKey}`,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache'
                 }
             });
             
@@ -111,6 +112,10 @@
         }
     }
     
-    carregarMensagens();
-    atualizarEstadoBotaoEnviar();
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(reg => reg.unregister());
+        console.log("Todos os service workers foram removidos");
+        carregarMensagens();
+        atualizarEstadoBotaoEnviar();
+    });
 </script>
