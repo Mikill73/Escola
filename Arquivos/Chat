@@ -4,7 +4,7 @@
 
 <div class="chat-container">
     <div class="chat-mensagens" id="chat-mensagens">
-        <div class="vazio">Carregando mensagens...</div>
+        <div class="vazio">Carregando mensagens</div>
     </div>
     
     <div class="chat-form">
@@ -117,7 +117,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             carregarMensagens();
             atualizarEstadoBotaoEnviar();
-            setInterval(carregarMensagens, 2000);
+            setInterval(carregarMensagens, 20000);
         });
     })();
 </script>
