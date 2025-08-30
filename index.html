@@ -184,10 +184,10 @@
         
         .card-descricao::-webkit-scrollbar-thumb {
             background: #777;
-            border-radius: 3px;
+            край: 3px;
         }
         
-        .card-descricado::-webkit-scrollbar-thumb:hover {
+        .card-descricao::-webkit-scrollbar-thumb:hover {
             background: #888;
         }
         
@@ -473,7 +473,7 @@
             border: none;
             color: #ccc;
             cursor: pointer;
-            край: 6px;
+            border-radius: 6px;
             transition: all 0.3s;
             font-size: 14px;
         }
@@ -486,6 +486,82 @@
         .subtab:hover {
             background: #444;
             color: #fff;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+        
+        .chat-mensagens {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #444;
+            border-radius: 8px;
+        }
+        
+        .chat-mensagem {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: #555;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        
+        .chat-mensagem.propria {
+            background: #2c5aa0;
+            margin-left: auto;
+        }
+        
+        .chat-usuario {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #aaddff;
+        }
+        
+        .chat-conteudo {
+            color: #ddd;
+            word-wrap: break-word;
+        }
+        
+        .chat-form {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            background: #444;
+            border: 1px solid #555;
+            border-radius: 8px;
+            color: #eee;
+        }
+        
+        .chat-input-nome {
+            width: 150px;
+            padding: 12px;
+            background: #444;
+            border: 1px solid #555;
+            border-radius: 8px;
+            color: #eee;
+        }
+        
+        .chat-botao {
+            padding: 12px 20px;
+            background: #2c5aa0;
+            color: #eee;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .chat-botao:hover {
+            background: #3a6cc4;
         }
         
         @media (max-width: 768px) {
@@ -506,6 +582,14 @@
                 width: 95%;
                 padding: 20px;
             }
+            
+            .chat-form {
+                flex-direction: column;
+            }
+            
+            .chat-input-nome {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -517,6 +601,7 @@
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
             <button class="aba" data-aba="estudos">Estudos</button>
             <button class="aba" data-aba="conteudos">Conteúdos</button>
+            <button class="aba" data-aba="chat">Chat</button>
         </div>
         
         <div id="horario" class="conteudo-aba ativa">
@@ -548,6 +633,17 @@
             <div id="lista-conteudos"></div>
         </div>
         
+        <div id="chat" class="conteudo-aba">
+            <div class="chat-container">
+                <div class="chat-mensagens" id="chat-mensagens"></div>
+                <div class="chat-form">
+                    <input type="text" class="chat-input-nome" id="chat-nome" placeholder="Seu nome">
+                    <input type="text" class="chat-input" id="chat-mensagem" placeholder="Digite sua mensagem...">
+                    <button class="chat-botao" id="chat-enviar">Enviar</button>
+                </div>
+            </div>
+        </div>
+        
         <div class="modal" id="modal">
             <div class="modal-conteudo">
                 <div class="modal-fechar" id="modal-fechar">X</div>
@@ -561,6 +657,9 @@
 
     <script>
         const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
+        const supabaseUrl = 'https://hzslgydylfheyzurkotd.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         
         let tarefas = [];
         let estudos = [];
@@ -569,6 +668,7 @@
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
+        let mensagensChat = [];
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -582,6 +682,8 @@
                     marcarTarefasComoVistas();
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
+                } else if (aba.dataset.aba === 'chat') {
+                    carregarMensagensChat();
                 }
             });
         });
@@ -605,11 +707,86 @@
             }
         });
         
+        document.getElementById('chat-enviar').addEventListener('click', enviarMensagemChat);
+        document.getElementById('chat-mensagem').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                enviarMensagemChat();
+            }
+        });
+        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 fecharModal();
             }
         });
+        
+        function carregarMensagensChat() {
+            fetchMessages().then(mensagens => {
+                mensagensChat = mensagens || [];
+                renderizarMensagensChat();
+            });
+        }
+        
+        async function fetchMessages() {
+            const { data, error } = await supabaseClient
+                .from('messages')
+                .select('id, username, content')
+                .order('id', { ascending: true });
+            
+            if (error) console.error(error);
+            return data;
+        }
+        
+        async function sendMessage(username, content) {
+            const { data, error } = await supabaseClient
+                .from('messages')
+                .insert([{ username, content }])
+                .select('id, username, content');
+            
+            if (error) console.error(error);
+            return data;
+        }
+        
+        function renderizarMensagensChat() {
+            const container = document.getElementById('chat-mensagens');
+            container.innerHTML = '';
+            
+            const nomeUsuario = localStorage.getItem('chatUsername') || '';
+            
+            mensagensChat.forEach(mensagem => {
+                const mensagemDiv = document.createElement('div');
+                mensagemDiv.className = `chat-mensagem ${mensagem.username === nomeUsuario ? 'propria' : ''}`;
+                
+                mensagemDiv.innerHTML = `
+                    <div class="chat-usuario">${mensagem.username}</div>
+                    <div class="chat-conteudo">${mensagem.content}</div>
+                `;
+                
+                container.appendChild(mensagemDiv);
+            });
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function enviarMensagemChat() {
+            const nomeInput = document.getElementById('chat-nome');
+            const mensagemInput = document.getElementById('chat-mensagem');
+            
+            const nome = nomeInput.value.trim();
+            const mensagem = mensagemInput.value.trim();
+            
+            if (!nome || !mensagem) return;
+            
+            localStorage.setItem('chatUsername', nome);
+            
+            sendMessage(nome, mensagem).then(novaMensagem => {
+                if (novaMensagem && novaMensagem[0]) {
+                    mensagensChat.push(novaMensagem[0]);
+                    renderizarMensagensChat();
+                    mensagemInput.value = '';
+                }
+            });
+        }
         
         function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
@@ -639,7 +816,7 @@
             
             container.innerHTML = '';
             
-            listaTarefas.forEach((tarefa, index) => {
+            listaTarefas.forEach((tarefa) => {
                 const status = tarefasStatus[tarefa.id] || {};
                 const concluida = status.concluida || false;
                 const vista = status.vista || false;
@@ -669,12 +846,12 @@
                     ${proximaAulaInfo}
                     <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarTarefa(${tarefa.id})">Visualizar</button>
+                        <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Visualizar</button>
                         ${!concluida ? 
-                            `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id})">Concluir</button>` : 
-                            `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida(${tarefa.id})">Desfazer</button>`
+                            `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>` : 
+                            `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${tarefa.id}')">Desfazer</button>`
                         }
-                        <button class="btn btn-download" onclick="baixarTarefa(${tarefa.id})">Baixar</button>
+                        <button class="btn btn-download" onclick="baixarTarefa('${tarefa.id}')">Baixar</button>
                     </div>
                 `;
                 
@@ -753,10 +930,10 @@
             
             document.getElementById('modal-acoes').innerHTML = `
                 ${!concluida ? 
-                    `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${id});fecharModal();">Marcar como Concluída</button>` : 
-                    `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida(${id});fecharModal();">Desfazer Conclusão</button>`
+                    `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${id}');fecharModal();">Marcar como Concluída</button>` : 
+                    `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${id}');fecharModal();">Desfazer Conclusão</button>`
                 }
-                <button class="btn btn-download" onclick="baixarTarefa(${id})">Baixar Tarefa</button>
+                <button class="btn btn-download" onclick="baixarTarefa('${id}')">Baixar Tarefa</button>
             `;
             
             abrirModal();
@@ -1112,11 +1289,16 @@
                 ]);
                 
                 if (tarefasData) {
-                    tarefas = tarefasData.map((t, i) => ({...t, id: i}));
+                    tarefas = tarefasData.map(t => ({...t, id: t.id || Date.now().toString() + Math.random().toString(36).substr(2, 9)}));
                 }
                 if (estudosData) estudos = estudosData;
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
+                
+                const nomeUsuario = localStorage.getItem('chatUsername') || '';
+                if (nomeUsuario) {
+                    document.getElementById('chat-nome').value = nomeUsuario;
+                }
                 
                 const numeroNovasTarefas = detectarNovasTarefas();
                 atualizarContadorNotificacoes();
