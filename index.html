@@ -184,10 +184,10 @@
         
         .card-descricao::-webkit-scrollbar-thumb {
             background: #777;
-            край: 3px;
+            border-radius: 3px;
         }
         
-        .card-descricao::-webkit-scrollbar-thumb:hover {
+        .card-descricado::-webkit-scrollbar-thumb:hover {
             background: #888;
         }
         
@@ -282,7 +282,7 @@
             width: 30px;
             height: 30px;
             background: #555;
-            border-radius: 50%;
+            край: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -487,7 +487,7 @@
             background: #444;
             color: #fff;
         }
-        
+
         .chat-container {
             display: flex;
             flex-direction: column;
@@ -497,32 +497,36 @@
         .chat-mensagens {
             flex: 1;
             overflow-y: auto;
-            margin-bottom: 15px;
-            padding: 15px;
             background: #444;
             border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
         }
         
-        .chat-mensagem {
+        .mensagem {
             margin-bottom: 15px;
-            padding: 10px 15px;
+            padding: 10px;
             background: #555;
             border-radius: 8px;
-            max-width: 80%;
         }
         
-        .chat-mensagem.propria {
-            background: #2c5aa0;
-            margin-left: auto;
-        }
-        
-        .chat-usuario {
-            font-weight: bold;
+        .mensagem-header {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 5px;
-            color: #aaddff;
+            font-size: 14px;
         }
         
-        .chat-conteudo {
+        .mensagem-usuario {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .mensagem-hora {
+            color: #aaa;
+        }
+        
+        .mensagem-conteudo {
             color: #ddd;
             word-wrap: break-word;
         }
@@ -539,29 +543,45 @@
             border: 1px solid #555;
             border-radius: 8px;
             color: #eee;
+            resize: none;
+            height: 60px;
         }
         
-        .chat-input-nome {
-            width: 150px;
-            padding: 12px;
-            background: #444;
-            border: 1px solid #555;
-            border-radius: 8px;
-            color: #eee;
+        .chat-input:focus {
+            outline: none;
+            border-color: #666;
         }
         
-        .chat-botao {
-            padding: 12px 20px;
-            background: #2c5aa0;
-            color: #eee;
+        .chat-enviar {
+            padding: 0 20px;
+            background: #4CAF50;
+            color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: background 0.3s;
         }
         
-        .chat-botao:hover {
-            background: #3a6cc4;
+        .chat-enviar:hover {
+            background: #45a049;
+        }
+        
+        .chat-enviar:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        
+        .nome-container {
+            margin-bottom: 15px;
+        }
+        
+        .nome-input {
+            width: 100%;
+            padding: 12px;
+            background: #444;
+            border: 1px solid #555;
+            border-radius: 8px;
+            color: #eee;
         }
         
         @media (max-width: 768px) {
@@ -587,8 +607,8 @@
                 flex-direction: column;
             }
             
-            .chat-input-nome {
-                width: 100%;
+            .chat-enviar {
+                height: 40px;
             }
         }
     </style>
@@ -634,12 +654,16 @@
         </div>
         
         <div id="chat" class="conteudo-aba">
+            <div class="nome-container">
+                <input type="text" class="nome-input" id="chat-nome" placeholder="Seu nome" maxlength="50">
+            </div>
+            
             <div class="chat-container">
                 <div class="chat-mensagens" id="chat-mensagens"></div>
+                
                 <div class="chat-form">
-                    <input type="text" class="chat-input-nome" id="chat-nome" placeholder="Seu nome">
-                    <input type="text" class="chat-input" id="chat-mensagem" placeholder="Digite sua mensagem...">
-                    <button class="chat-botao" id="chat-enviar">Enviar</button>
+                    <textarea class="chat-input" id="chat-input" placeholder="Digite sua mensagem (máx. 300 caracteres)" maxlength="300"></textarea>
+                    <button class="chat-enviar" id="chat-enviar">Enviar</button>
                 </div>
             </div>
         </div>
@@ -656,10 +680,10 @@
     </div>
 
     <script>
-        const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
         const supabaseUrl = 'https://hzslgydylfheyzurkotd.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
         
         let tarefas = [];
         let estudos = [];
@@ -668,7 +692,7 @@
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
-        let mensagensChat = [];
+        let mensagens = [];
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -683,7 +707,7 @@
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
                 } else if (aba.dataset.aba === 'chat') {
-                    carregarMensagensChat();
+                    carregarMensagens();
                 }
             });
         });
@@ -707,10 +731,11 @@
             }
         });
         
-        document.getElementById('chat-enviar').addEventListener('click', enviarMensagemChat);
-        document.getElementById('chat-mensagem').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                enviarMensagemChat();
+        document.getElementById('chat-enviar').addEventListener('click', enviarMensagem);
+        document.getElementById('chat-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                enviarMensagem();
             }
         });
         
@@ -720,72 +745,89 @@
             }
         });
         
-        function carregarMensagensChat() {
-            fetchMessages().then(mensagens => {
-                mensagensChat = mensagens || [];
-                renderizarMensagensChat();
+        function carregarMensagens() {
+            fetchMessages().then(data => {
+                if (data) {
+                    mensagens = data;
+                    renderizarMensagens();
+                }
             });
         }
         
         async function fetchMessages() {
             const { data, error } = await supabaseClient
                 .from('messages')
-                .select('id, username, content')
-                .order('id', { ascending: true });
+                .select('id, username, content, created_at')
+                .order('created_at', { ascending: true });
             
             if (error) console.error(error);
             return data;
         }
         
-        async function sendMessage(username, content) {
+        async function enviarMensagem() {
+            const nomeInput = document.getElementById('chat-nome');
+            const mensagemInput = document.getElementById('chat-input');
+            const nome = nomeInput.value.trim();
+            const mensagem = mensagemInput.value.trim();
+            
+            if (!nome) {
+                alert('Por favor, digite seu nome');
+                return;
+            }
+            
+            if (!mensagem) {
+                alert('Por favor, digite uma mensagem');
+                return;
+            }
+            
+            localStorage.setItem('chatNome', nome);
+            
             const { data, error } = await supabaseClient
                 .from('messages')
-                .insert([{ username, content }])
-                .select('id, username, content');
+                .insert([{ username: nome, content: mensagem }])
+                .select('id, username, content, created_at');
             
-            if (error) console.error(error);
-            return data;
+            if (error) {
+                console.error(error);
+                alert('Erro ao enviar mensagem');
+                return;
+            }
+            
+            if (data && data.length > 0) {
+                mensagens.push(data[0]);
+                renderizarMensagens();
+                mensagemInput.value = '';
+            }
         }
         
-        function renderizarMensagensChat() {
+        function renderizarMensagens() {
             const container = document.getElementById('chat-mensagens');
             container.innerHTML = '';
             
-            const nomeUsuario = localStorage.getItem('chatUsername') || '';
+            if (mensagens.length === 0) {
+                container.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
+                return;
+            }
             
-            mensagensChat.forEach(mensagem => {
+            mensagens.forEach(mensagem => {
                 const mensagemDiv = document.createElement('div');
-                mensagemDiv.className = `chat-mensagem ${mensagem.username === nomeUsuario ? 'propria' : ''}`;
+                mensagemDiv.className = 'mensagem';
+                
+                const data = new Date(mensagem.created_at);
+                const hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 
                 mensagemDiv.innerHTML = `
-                    <div class="chat-usuario">${mensagem.username}</div>
-                    <div class="chat-conteudo">${mensagem.content}</div>
+                    <div class="mensagem-header">
+                        <span class="mensagem-usuario">${mensagem.username}</span>
+                        <span class="mensagem-hora">${hora}</span>
+                    </div>
+                    <div class="mensagem-conteudo">${mensagem.content}</div>
                 `;
                 
                 container.appendChild(mensagemDiv);
             });
             
             container.scrollTop = container.scrollHeight;
-        }
-        
-        function enviarMensagemChat() {
-            const nomeInput = document.getElementById('chat-nome');
-            const mensagemInput = document.getElementById('chat-mensagem');
-            
-            const nome = nomeInput.value.trim();
-            const mensagem = mensagemInput.value.trim();
-            
-            if (!nome || !mensagem) return;
-            
-            localStorage.setItem('chatUsername', nome);
-            
-            sendMessage(nome, mensagem).then(novaMensagem => {
-                if (novaMensagem && novaMensagem[0]) {
-                    mensagensChat.push(novaMensagem[0]);
-                    renderizarMensagensChat();
-                    mensagemInput.value = '';
-                }
-            });
         }
         
         function filtrarTarefas() {
@@ -1289,15 +1331,20 @@
                 ]);
                 
                 if (tarefasData) {
-                    tarefas = tarefasData.map(t => ({...t, id: t.id || Date.now().toString() + Math.random().toString(36).substr(2, 9)}));
+                    tarefas = tarefasData;
+                    tarefas.forEach(tarefa => {
+                        if (!tarefa.id) {
+                            tarefa.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                        }
+                    });
                 }
                 if (estudosData) estudos = estudosData;
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
                 
-                const nomeUsuario = localStorage.getItem('chatUsername') || '';
-                if (nomeUsuario) {
-                    document.getElementById('chat-nome').value = nomeUsuario;
+                const nomeSalvo = localStorage.getItem('chatNome');
+                if (nomeSalvo) {
+                    document.getElementById('chat-nome').value = nomeSalvo;
                 }
                 
                 const numeroNovasTarefas = detectarNovasTarefas();
