@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escola</title>
     <meta name="description" content="Sistema de gerenciamento escolar com tarefas, horários, estudos e conteúdos">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -104,7 +103,7 @@
             width: 100%;
             padding: 12px 15px;
             background: #444;
-            border: 1px solid #555;
+            край: 1px solid #555;
             border-radius: 8px;
             color: #eee;
             font-size: 16px;
@@ -162,7 +161,7 @@
         .card-data {
             color: #bbb;
             font-size: 14px;
-            margin-bottom: 12px;
+            край-bottom: 12px;
         }
         
         .card-descricao {
@@ -188,7 +187,7 @@
             border-radius: 3px;
         }
         
-        .card-descricao::-webkit-scrollbar-thumb:hover {
+        .card-descricado::-webkit-scrollbar-thumb:hover {
             background: #888;
         }
         
@@ -357,6 +356,7 @@
             align-items: center;
             opacity: 0;
             transition: opacity 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .modal.ativo {
@@ -465,6 +465,7 @@
             background: rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             padding: 3px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .subtab {
@@ -472,7 +473,7 @@
             padding: 10px;
             background: transparent;
             border: none;
-            край: #ccc;
+            color: #ccc;
             cursor: pointer;
             border-radius: 6px;
             transition: all 0.3s;
@@ -644,18 +645,7 @@
         </div>
         
         <div id="chat" class="conteudo-aba">
-            <div class="nome-container">
-                <input type="text" class="nome-input" id="chat-nome" placeholder="Seu nome" maxlength="50">
-            </div>
-            
-            <div class="chat-container">
-                <div class="chat-mensagens" id="chat-mensagens"></div>
-                
-                <div class="chat-form">
-                    <textarea class="chat-input" id="chat-input" placeholder="Digite sua mensagem (máx. 300 caracteres)" maxlength="300"></textarea>
-                    <button class="chat-enviar" id="chat-enviar">Enviar</button>
-                </div>
-            </div>
+            <div id="chat-content"></div>
         </div>
         
         <div class="modal" id="modal">
@@ -671,9 +661,6 @@
 
     <script>
         const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
-        const supabaseUrl = 'https://hzslgydylfheyzurkotd.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhbmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
-        const supabase = supabaseClient.createClient(supabaseUrl, supabaseKey);
         
         let tarefas = [];
         let estudos = [];
@@ -682,7 +669,6 @@
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
-        let nomeUsuario = localStorage.getItem('chatNome') || '';
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -697,7 +683,7 @@
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
                 } else if (aba.dataset.aba === 'chat') {
-                    carregarMensagens();
+                    carregarChat();
                 }
             });
         });
@@ -721,30 +707,36 @@
             }
         });
         
-        document.getElementById('chat-nome').addEventListener('input', (e) => {
-            nomeUsuario = e.target.value;
-            localStorage.setItem('chatNome', nomeUsuario);
-        });
-        
-        document.getElementById('chat-input').addEventListener('input', (e) => {
-            const enviarBtn = document.getElementById('chat-enviar');
-            enviarBtn.disabled = !nomeUsuario.trim() || !e.target.value.trim();
-        });
-        
-        document.getElementById('chat-enviar').addEventListener('click', enviarMensagem);
-        
-        document.getElementById('chat-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                enviarMensagem();
-            }
-        });
-        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 fecharModal();
             }
         });
+        
+        async function carregarChat() {
+            try {
+                const response = await fetch(`${baseURL}/Chat`);
+                if (response.ok) {
+                    const chatHTML = await response.text();
+                    document.getElementById('chat-content').innerHTML = chatHTML;
+                    
+                    const chatNome = localStorage.getItem('chatNome') || '';
+                    if (chatNome) {
+                        const nomeInput = document.getElementById('chat-nome');
+                        if (nomeInput) nomeInput.value = chatNome;
+                    }
+                    
+                    const chatContainer = document.querySelector('.chat-container');
+                    if (chatContainer) {
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }
+                } else {
+                    document.getElementById('chat-content').innerHTML = '<div class="vazio">Erro ao carregar o chat</div>';
+                }
+            } catch (error) {
+                document.getElementById('chat-content').innerHTML = '<div class="vazio">Erro ao carregar o chat</div>';
+            }
+        }
         
         function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
@@ -1235,64 +1227,6 @@
             localStorage.removeItem('tarefasVistas');
         }
         
-        async function carregarMensagens() {
-            try {
-                const { data, error } = await supabase
-                    .from('messages')
-                    .select('id, username, content')
-                    .order('id', { ascending: true });
-                
-                if (error) {
-                    return;
-                }
-                
-                const mensagensContainer = document.getElementById('chat-mensagens');
-                mensagensContainer.innerHTML = '';
-                
-                if (data && data.length > 0) {
-                    data.forEach(mensagem => {
-                        const mensagemDiv = document.createElement('div');
-                        mensagemDiv.className = 'mensagem';
-                        mensagemDiv.innerHTML = `
-                            <div class="mensagem-usuario">${mensagem.username}:</div>
-                            <div class="mensagem-conteudo">${mensagem.content}</div>
-                        `;
-                        mensagensContainer.appendChild(mensagemDiv);
-                    });
-                    
-                    mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
-                } else {
-                    mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
-                }
-            } catch (error) {
-                const mensagensContainer = document.getElementById('chat-mensagens');
-                mensagensContainer.innerHTML = '<div class="vazio">Erro ao carregar mensagens</div>';
-            }
-        }
-        
-        async function enviarMensagem() {
-            const input = document.getElementById('chat-input');
-            const conteudo = input.value.trim();
-            
-            if (!nomeUsuario || !conteudo) return;
-            
-            try {
-                const { error } = await supabase
-                    .from('messages')
-                    .insert([{ username: nomeUsuario, content: conteudo }]);
-                
-                if (error) {
-                    return;
-                }
-                
-                input.value = '';
-                document.getElementById('chat-enviar').disabled = true;
-                
-                await carregarMensagens();
-            } catch (error) {
-            }
-        }
-        
         async function carregarDados() {
             try {
                 limparLocalStorageAntigo();
@@ -1323,9 +1257,8 @@
                 filtrarTarefas();
                 renderizarEstudos();
                 renderizarConteudos();
-                
-                document.getElementById('chat-nome').value = nomeUsuario;
             } catch (error) {
+                console.error('Erro ao carregar dados:', error);
             }
         }
         
