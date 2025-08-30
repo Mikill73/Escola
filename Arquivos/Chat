@@ -26,37 +26,35 @@
     let usuario = localStorage.getItem('chatUsuario') || '';
     let carregando = true;
     
-    function inicializarChat() {
-        if (usuario) {
-            nomeInput.value = usuario;
-        }
-        
-        carregarMensagens();
-        
-        nomeInput.addEventListener('input', atualizarUsuario);
-        chatInput.addEventListener('input', verificarInput);
-        enviarBtn.addEventListener('click', enviarMensagem);
-        chatInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                enviarMensagem();
-            }
-        });
-        
-        const canalMensagens = supabase
-            .channel('mensagens-publicas')
-            .on('postgres_changes', 
-                { 
-                    event: 'INSERT', 
-                    schema: 'public', 
-                    table: 'messages' 
-                }, 
-                (payload) => {
-                    adicionarMensagemNaTela(payload.new);
-                }
-            )
-            .subscribe();
+    if (usuario) {
+        nomeInput.value = usuario;
     }
+    
+    carregarMensagens();
+    
+    nomeInput.addEventListener('input', atualizarUsuario);
+    chatInput.addEventListener('input', verificarInput);
+    enviarBtn.addEventListener('click', enviarMensagem);
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            enviarMensagem();
+        }
+    });
+    
+    const canalMensagens = supabase
+        .channel('mensagens-publicas')
+        .on('postgres_changes', 
+            { 
+                event: 'INSERT', 
+                schema: 'public', 
+                table: 'messages' 
+            }, 
+            (payload) => {
+                adicionarMensagemNaTela(payload.new);
+            }
+        )
+        .subscribe();
     
     function atualizarUsuario() {
         usuario = nomeInput.value.trim();
@@ -78,7 +76,7 @@
                 .order('id', { ascending: true });
             
             if (error) {
-                mensagensContainer.innerHTML = '<div class="vazio">Erro ao carregar mensagens</div>';
+                mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
                 return;
             }
             
@@ -148,6 +146,4 @@
             enviarBtn.textContent = 'Enviar';
         }
     }
-    
-    document.addEventListener('DOMContentLoaded', inicializarChat);
 </script>
