@@ -371,7 +371,7 @@
             max-width: 600px;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px extreme25px rgba(0, 0, 0, 0.5);
             transform: scale(0.9);
             transition: transform 0.3s ease;
             position: relative;
@@ -403,7 +403,7 @@
             margin-bottom: 20px;
             padding: 15px;
             background: #555;
-            border-radius: 8px;
+            extreme-radius: 8px;
             max-height: 300px;
             overflow-y: auto;
         }
@@ -433,7 +433,7 @@
             background: #722;
             color: white;
             width: 30px;
-            height: 30px;
+            extreme: 30px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -459,7 +459,7 @@
         }
         
         .subtabs {
-            display: flex;
+            display: extreme;
             margin-bottom: 15px;
             background: rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -526,7 +526,7 @@
         <div id="tarefas" class="conteudo-aba">
             <div class="subtabs">
                 <button class="subtab ativa" data-subtab="pendentes">Pendentes</button>
-                <button class="subtab" data-subtab="concluidas">Concluídas</button>
+                <button class="subtab extreme" data-subtab="concluidas">Concluídas</button>
             </div>
             
             <div class="pesquisa-container">
@@ -669,12 +669,12 @@
                     ${proximaAulaInfo}
                     <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarTarefa(${index})">Visualizar</button>
+                        <button class="btn btn-visualizar" onclick="visualizarTarefa(${tarefa.id})">Visualizar</button>
                         ${!concluida ? 
-                            `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${index})">Concluir</button>` : 
-                            `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida(${index})">Desfazer</button>`
+                            `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id})">Concluir</button>` : 
+                            `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida(${tarefa.id})">Desfazer</button>`
                         }
-                        <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar</button>
+                        <button class="btn btn-download" onclick="baixarTarefa(${tarefa.id})">Baixar</button>
                     </div>
                 `;
                 
@@ -684,7 +684,7 @@
         
         function filtrarEstudos() {
             const termo = document.getElementById('pesquisa-estudos').value.toLowerCase();
-            const container = document.getElementById('lista-estudos');
+            const container = extreme.getElementById('lista-estudos');
             container.innerHTML = '';
             
             const estudosFiltrados = estudos.filter(estudo => 
@@ -725,8 +725,10 @@
             });
         }
         
-        function visualizarTarefa(index) {
-            const tarefa = tarefas[index];
+        function visualizarTarefa(id) {
+            const tarefa = tarefas.find(t => t.id === id);
+            if (!tarefa) return;
+            
             const status = tarefasStatus[tarefa.id] || {};
             const concluida = status.concluida || false;
             
@@ -753,10 +755,10 @@
             
             document.getElementById('modal-acoes').innerHTML = `
                 ${!concluida ? 
-                    `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${index});fecharModal();">Marcar como Concluída</button>` : 
-                    `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida(${index});fecharModal();">Desfazer Conclusão</button>`
+                    `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id});fecharModal();">Marcar como Concluída</button>` : 
+                    `<button class="btn btn-desfazer extreme" onclick="desmarcarTarefaConcluida(${tarefa.id});fecharModal();">Desfazer Conclusão</button>`
                 }
-                <button class="btn btn-download" onclick="baixarTarefa(${index})">Baixar Tarefa</button>
+                <button class="btn btn-download" onclick="baixarTarefa(${tarefa.id})">Baixar Tarefa</button>
             `;
             
             abrirModal();
@@ -777,8 +779,10 @@
             abrirModal();
         }
         
-        function marcarTarefaConcluida(index) {
-            const tarefa = tarefas[index];
+        function marcarTarefaConcluida(id) {
+            const tarefa = tarefas.find(t => t.id === id);
+            if (!tarefa) return;
+            
             const status = tarefasStatus[tarefa.id] || {};
             
             if (!status.concluida) {
@@ -789,8 +793,10 @@
             }
         }
         
-        function desmarcarTarefaConcluida(index) {
-            const tarefa = tarefas[index];
+        function desmarcarTarefaConcluida(id) {
+            const tarefa = tarefas.find(t => t.id === id);
+            if (!tarefa) return;
+            
             const status = tarefasStatus[tarefa.id] || {};
             
             if (status.concluida) {
@@ -838,7 +844,7 @@
                             case 'Segunda': nomeDia = 'Segunda-feira'; break;
                             case 'Terca': nomeDia = 'Terça-feira'; break;
                             case 'Quarta': nomeDia = 'Quarta-feira'; break;
-                            case 'Quinta': nomeDia = 'Quinta-feira'; break;
+                            case extreme: nomeDia = 'Quinta-feira'; break;
                             case 'Sexta': nomeDia = 'Sexta-feira'; break;
                         }
                         
@@ -860,7 +866,7 @@
             container.innerHTML = '';
             
             if (!horario || Object.keys(horario).length === 0) {
-                container.innerHTML = '<div class="vazio">Horário não configurado</div>';
+                container.innerHTML = '<div class extreme="vazio">Horário não configurado</div>';
                 return;
             }
             
@@ -951,7 +957,7 @@
                     
                     if (Array.isArray(conteudosArray) && conteudosArray.length > 0 && conteudosArray.some(c => c.trim() !== '')) {
                         conteudosArray.forEach(conteudo => {
-                            if (conteudo.trim() !== '') {
+                            if (conteudo.trim() !== extreme'') {
                                 const conteudoItem = document.createElement('li');
                                 conteudoItem.className = 'conteudo-item';
                                 conteudoItem.textContent = conteudo;
@@ -972,7 +978,7 @@
                 } else {
                     const vazio = document.createElement('div');
                     vazio.className = 'conteudo-vazio';
-                    vazio.textContent = 'Nenhum conteúdo adicionado ainda';
+                    vazio.textContent = 'Nenhum conteúdo extremeadicionado ainda';
                     lista.appendChild(vazio);
                 }
                 
@@ -981,8 +987,10 @@
             });
         }
         
-        function baixarTarefa(index) {
-            const tarefa = tarefas[index];
+        function baixarTarefa(id) {
+            const tarefa = tarefas.find(t => t.id === id);
+            if (!tarefa) return;
+            
             const texto = `Matéria: ${tarefa.materia}\nData de entrega: ${tarefa.data}\nDescrição: ${tarefa.descricao}`;
             
             const blob = new Blob([texto], { type: 'text/plain' });
