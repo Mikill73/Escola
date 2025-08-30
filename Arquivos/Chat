@@ -1,130 +1,123 @@
-<div id="fd-chat-root"></div>
+<div class="nome-container">
+    <input type="text" class="nome-input" id="chat-nome" placeholder="Seu nome" maxlength="50" value="">
+</div>
+
+<div class="chat-container">
+    <div class="chat-mensagens" id="chat-mensagens">
+        <div class="vazio">Carregando mensagens...</div>
+    </div>
+    
+    <div class="chat-form">
+        <textarea class="chat-input" id="chat-input" placeholder="Digite sua mensagem (máx. 300 caracteres)" maxlength="300"></textarea>
+        <button class="chat-enviar" id="chat-enviar" disabled>Enviar</button>
+    </div>
+</div>
+
 <script>
-(async function(){
-  try{
-    const regs = await navigator.serviceWorker.getRegistrations();
-    for(const r of regs) await r.unregister();
-  }catch(e){}
-  const userDataStr = localStorage.getItem('firedeluxe_chat');
-  if(!userDataStr){ alert("Você precisa estar logado para usar o Chat"); return; }
-  const userData = JSON.parse(userDataStr);
-  const supabaseUrl = 'https://hzslgydylfheyzurkotd.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RrdIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
-  let supabaseClient = null;
-  const root = document.getElementById('fd-chat-root');
-  const chatContainer = document.createElement('div');
-  chatContainer.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;max-width:600px;height:70%;max-height:600px;background:#212529;border:1px solid #444;border-radius:8px;box-shadow:0 0 30px rgba(0,0,0,0.8);display:flex;flex-direction:column;z-index:9999';
-  const header = document.createElement('div'); header.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid #444';
-  const title = document.createElement('h3'); title.textContent='Chat'; title.style.cssText='margin:0;color:#FFA500';
-  const closeBtn = document.createElement('button'); closeBtn.textContent='✕'; closeBtn.style.cssText='background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer';
-  const messagesWrap = document.createElement('div'); messagesWrap.style.cssText='flex:1;overflow-y:auto;padding:12px;color:#e9ecef';
-  const footer = document.createElement('div'); footer.style.cssText='padding:12px;border-top:1px solid #444';
-  const textarea = document.createElement('textarea'); textarea.placeholder='Digite sua mensagem...'; textarea.style.cssText='width:100%;height:70px;padding:10px;background:#333;color:#fff;border:1px solid #444;border-radius:6px;resize:none;margin-bottom:8px';
-  const sendBtn = document.createElement('button'); sendBtn.textContent='Enviar'; sendBtn.style.cssText='width:100%;padding:10px;border-radius:6px;border:1px solid #FFA500;background:#444;color:#fff;cursor:pointer';
-  header.appendChild(title); header.appendChild(closeBtn);
-  footer.appendChild(textarea); footer.appendChild(sendBtn);
-  chatContainer.appendChild(header); chatContainer.appendChild(messagesWrap); chatContainer.appendChild(footer);
-  root.appendChild(chatContainer);
-  closeBtn.addEventListener('click', ()=> chatContainer.remove());
-  function showStatus(text, isErr){
-    messagesWrap.innerHTML = '';
-    const s = document.createElement('div');
-    s.textContent = text;
-    s.style.cssText = (isErr? 'color:#ff6b6b':'color:#999') + ';padding:10px;text-align:center';
-    messagesWrap.appendChild(s);
-  }
-  function createMessageElement(message){
-    const container = document.createElement('div');
-    container.style.cssText='display:flex;gap:10px;margin-bottom:12px;align-items:flex-start';
-    const avatar = document.createElement('img');
-    avatar.style.cssText='width:40px;height:40px;border-radius:50%;object-fit:cover;flex:0 0 40px';
-    avatar.src = message.avatar_url || 'https://via.placeholder.com/40';
-    avatar.onerror = ()=> avatar.src='https://via.placeholder.com/40';
-    const content = document.createElement('div'); content.style.cssText='flex:1';
-    const head = document.createElement('div'); head.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:6px';
-    const userSpan = document.createElement('span'); userSpan.textContent = message.username || 'Anônimo'; userSpan.style.cssText='font-weight:600;color:#FFA500';
-    const timeSpan = document.createElement('span'); timeSpan.textContent = message.created_at ? formatMessageTime(message.created_at) : 'Agora'; timeSpan.style.cssText='color:#6c757d;font-size:12px';
-    const textDiv = document.createElement('div'); textDiv.textContent = message.content || ''; textDiv.style.cssText='color:#e9ecef;line-height:1.4;word-break:break-word';
-    head.appendChild(userSpan); head.appendChild(timeSpan);
-    content.appendChild(head); content.appendChild(textDiv);
-    container.appendChild(avatar); container.appendChild(content);
-    return container;
-  }
-  function formatMessageTime(dateString){
-    try{
-      const d = new Date(dateString);
-      const now = new Date();
-      const yesterday = new Date(now); yesterday.setDate(yesterday.getDate()-1);
-      if(d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      if(d.toDateString() === yesterday.toDateString()) return 'Ontem ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      return d.getDate() + '/' + (d.getMonth()+1) + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    }catch(e){ return '';}
-  }
-  async function loadMessages(){
-    showStatus('Carregando mensagens...');
-    try{
-      let rows = null;
-      if(supabaseClient){
-        const res = await supabaseClient.from('messages').select('*').order('created_at',{ascending:true});
-        if(res.error) throw res.error;
-        rows = res.data || [];
-      }else{
-        const url = `${supabaseUrl}/rest/v1/messages?select=*&order=created_at.asc&_=${Date.now()}`;
-        const resp = await fetch(url, { headers:{ apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, 'Cache-Control':'no-cache' }});
-        if(!resp.ok) throw new Error('HTTP ' + resp.status);
-        rows = await resp.json();
-      }
-      messagesWrap.innerHTML = '';
-      if(!rows || rows.length === 0){
-        messagesWrap.innerHTML = '<div style="color:#999;padding:10px;text-align:center">Nenhuma mensagem ainda</div>';
-        return;
-      }
-      rows.forEach(r => messagesWrap.appendChild(createMessageElement(r)));
-      messagesWrap.scrollTop = messagesWrap.scrollHeight;
-    }catch(err){
-      showStatus('Erro ao carregar mensagens: ' + (err.message || err));
-    }
-  }
-  async function sendMessage(){
-    const content = textarea.value.trim();
-    if(!content) return;
-    const profileUrl = window.location.href;
-    const newMessage = { username: userData.nome || 'Anônimo', content, avatar_url: userData.imagem || null, profile_url: profileUrl, created_at: new Date().toISOString() };
-    const optimistic = createMessageElement(newMessage);
-    messagesWrap.appendChild(optimistic);
-    messagesWrap.scrollTop = messagesWrap.scrollHeight;
-    textarea.value = '';
-    try{
-      if(supabaseClient){
-        const res = await supabaseClient.from('messages').insert([newMessage]);
-        if(res.error) throw res.error;
-      }else{
-        const resp = await fetch(`${supabaseUrl}/rest/v1/messages`, {
-          method:'POST',
-          headers:{ apikey: supabaseKey, Authorization:`Bearer ${supabaseKey}`, 'Content-Type':'application/json','Prefer':'return=minimal' },
-          body: JSON.stringify([newMessage])
+    (async () => {
+        // Carregar Supabase JS
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+        document.head.appendChild(script);
+        await new Promise(r => script.onload = r);
+
+        const { createClient } = window.supabaseJs || window;
+        const supabaseUrl = 'https://hzslgydylfheyzurkotd.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        let nomeUsuario = localStorage.getItem('chatNome') || '';
+        document.getElementById('chat-nome').value = nomeUsuario;
+        
+        document.getElementById('chat-nome').addEventListener('input', (e) => {
+            nomeUsuario = e.target.value;
+            localStorage.setItem('chatNome', nomeUsuario);
+            atualizarEstadoBotaoEnviar();
         });
-        if(!resp.ok) throw new Error('HTTP ' + resp.status);
-      }
-      setTimeout(loadMessages, 400);
-    }catch(err){
-      showStatus('Erro ao enviar mensagem: ' + (err.message || err));
-    }
-  }
-  sendBtn.addEventListener('click', sendMessage);
-  textarea.addEventListener('keydown', (e)=> { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }});
-  function tryInitSupabase(){
-    if(window.supabase && typeof window.supabase.createClient === 'function'){
-      try{ supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey); return true; }catch(e){ supabaseClient = null; return false; }
-    }
-    return false;
-  }
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2?nocache=' + Date.now();
-  script.onload = () => { tryInitSupabase(); loadMessages(); };
-  script.onerror = () => { loadMessages(); };
-  document.head.appendChild(script);
-  loadMessages();
-  const POLL = setInterval(loadMessages, 3000);
-})();
+        
+        document.getElementById('chat-input').addEventListener('input', (e) => {
+            atualizarEstadoBotaoEnviar();
+        });
+        
+        document.getElementById('chat-enviar').addEventListener('click', enviarMensagem);
+        
+        document.getElementById('chat-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                enviarMensagem();
+            }
+        });
+        
+        function atualizarEstadoBotaoEnviar() {
+            const input = document.getElementById('chat-input');
+            const enviarBtn = document.getElementById('chat-enviar');
+            enviarBtn.disabled = !nomeUsuario.trim() || !input.value.trim();
+        }
+        
+        async function carregarMensagens() {
+            try {
+                const { data, error } = await supabase
+                    .from('chat_messages')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                const mensagensContainer = document.getElementById('chat-mensagens');
+                mensagensContainer.innerHTML = '';
+                
+                if (data && data.length > 0) {
+                    data.forEach(mensagem => {
+                        const mensagemDiv = document.createElement('div');
+                        mensagemDiv.className = 'mensagem';
+                        mensagemDiv.innerHTML = `
+                            <div class="mensagem-usuario">${mensagem.username}:</div>
+                            <div class="mensagem-conteudo">${mensagem.content}</div>
+                        `;
+                        mensagensContainer.appendChild(mensagemDiv);
+                    });
+                    
+                    mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
+                } else {
+                    mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('chat-mensagens').innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
+            }
+        }
+        
+        async function enviarMensagem() {
+            const input = document.getElementById('chat-input');
+            const conteudo = input.value.trim();
+            
+            if (!nomeUsuario || !conteudo) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('chat_messages')
+                    .insert([{ username: nomeUsuario, content: conteudo }]);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                input.value = '';
+                atualizarEstadoBotaoEnviar();
+                
+                await carregarMensagens();
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao enviar mensagem');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarMensagens();
+            atualizarEstadoBotaoEnviar();
+            setInterval(carregarMensagens, 2000);
+        });
+    })();
 </script>
