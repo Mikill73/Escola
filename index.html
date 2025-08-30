@@ -479,13 +479,13 @@
         }
         
         .subtab.ativa {
-            background: '3a3a3a';
-            color: '#fff';
+            background: #3a3a3a;
+            color: #fff;
         }
         
         .subtab:hover {
-            background: '#444';
-            color: '#fff';
+            background: #444;
+            color: #fff;
         }
         
         @media (max-width: 768px) {
@@ -617,8 +617,8 @@
             container.innerHTML = '';
             
             let tarefasFiltradas = subtabAtiva === 'pendentes' 
-                ? tarefas.filter(tarefa => !tarefasStatus[gerarHashTarefa(tarefa)]?.concluida)
-                : tarefas.filter(tarefa => tarefasStatus[gerarHashTarefa(tarefa)]?.concluida);
+                ? tarefas.filter(tarefa => !tarefasStatus[tarefa.id]?.concluida)
+                : tarefas.filter(tarefa => tarefasStatus[tarefa.id]?.concluida);
             
             tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
                 tarefa.materia.toLowerCase().includes(termo) || 
@@ -640,8 +640,7 @@
             container.innerHTML = '';
             
             listaTarefas.forEach((tarefa, index) => {
-                const hash = gerarHashTarefa(tarefa);
-                const status = tarefasStatus[hash] || {};
+                const status = tarefasStatus[tarefa.id] || {};
                 const concluida = status.concluida || false;
                 const vista = status.vista || false;
                 const nova = !vista && !concluida;
@@ -728,12 +727,11 @@
         
         function visualizarTarefa(index) {
             const tarefa = tarefas[index];
-            const hash = gerarHashTarefa(tarefa);
-            const status = tarefasStatus[hash] || {};
+            const status = tarefasStatus[tarefa.id] || {};
             const concluida = status.concluida || false;
             
             if (!status.vista && !concluida) {
-                tarefasStatus[hash] = {...status, vista: true};
+                tarefasStatus[tarefa.id] = {...status, vista: true};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 atualizarContadorNotificacoes();
             }
@@ -781,10 +779,10 @@
         
         function marcarTarefaConcluida(index) {
             const tarefa = tarefas[index];
-            const hash = gerarHashTarefa(tarefa);
+            const status = tarefasStatus[tarefa.id] || {};
             
-            if (!tarefasStatus[hash]?.concluida) {
-                tarefasStatus[hash] = {concluida: true, vista: true};
+            if (!status.concluida) {
+                tarefasStatus[tarefa.id] = {...status, concluida: true, vista: true};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 filtrarTarefas();
                 atualizarContadorNotificacoes();
@@ -793,10 +791,10 @@
         
         function desmarcarTarefaConcluida(index) {
             const tarefa = tarefas[index];
-            const hash = gerarHashTarefa(tarefa);
+            const status = tarefasStatus[tarefa.id] || {};
             
-            if (tarefasStatus[hash]?.concluida) {
-                tarefasStatus[hash] = {concluida: false, vista: true};
+            if (status.concluida) {
+                tarefasStatus[tarefa.id] = {...status, concluida: false};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 filtrarTarefas();
                 atualizarContadorNotificacoes();
@@ -1046,15 +1044,22 @@
             }
         }
         
-        function gerarHashTarefa(tarefa) {
-            return tarefa.materia + '|' + tarefa.descricao + '|' + tarefa.data;
+        function detectarNovasTarefas() {
+            const novasTarefas = [];
+            
+            tarefas.forEach(tarefa => {
+                if (!tarefasStatus.hasOwnProperty(tarefa.id)) {
+                    novasTarefas.push(tarefa.id);
+                }
+            });
+            
+            return novasTarefas.length;
         }
         
         function atualizarContadorNotificacoes() {
             const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
             const novasTarefas = tarefas.filter(tarefa => {
-                const hash = gerarHashTarefa(tarefa);
-                const status = tarefasStatus[hash] || {};
+                const status = tarefasStatus[tarefa.id] || {};
                 return !status.vista && !status.concluida;
             }).length;
             
@@ -1076,11 +1081,10 @@
             let atualizado = false;
             
             tarefas.forEach(tarefa => {
-                const hash = gerarHashTarefa(tarefa);
-                const status = tarefasStatus[hash] || {};
+                const status = tarefasStatus[tarefa.id] || {};
                 
                 if (!status.vista && !status.concluida) {
-                    tarefasStatus[hash] = {concluida: status.concluida || false, vista: true};
+                    tarefasStatus[tarefa.id] = {...status, vista: true};
                     atualizado = true;
                 }
             });
@@ -1116,6 +1120,7 @@
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
                 
+                const numeroNovasTarefas = detectarNovasTarefas();
                 atualizarContadorNotificacoes();
                 
                 renderizarHorario();
