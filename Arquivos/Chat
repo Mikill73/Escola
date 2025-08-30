@@ -1,30 +1,130 @@
 <script>
-    // Configuração do Supabase
     const supabaseUrl = 'https://hzslgydylfheyzurkotd.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhbmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
     
-    // Elementos do DOM
     const nomeInput = document.getElementById('chat-nome');
     const mensagensContainer = document.getElementById('chat-mensagens');
     const chatInput = document.getElementById('chat-input');
     const enviarBtn = document.getElementById('chat-enviar');
     
-    // Variáveis de estado
     let usuario = localStorage.getItem('chatUsuario') || '';
     let carregando = true;
     
-    // Inicializar chat
+    const estilo = document.createElement('style');
+    estilo.textContent = `
+        .nome-container {
+            margin-bottom: 15px;
+        }
+        
+        .nome-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .chat-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .chat-mensagens {
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+        
+        .vazio {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+        }
+        
+        .erro {
+            text-align: center;
+            color: #e74c3c;
+            padding: 20px;
+        }
+        
+        .mensagem {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .mensagem-cabecalho {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .mensagem-usuario {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .mensagem-hora {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        
+        .mensagem-conteudo {
+            color: #34495e;
+            line-height: 1.4;
+        }
+        
+        .chat-form {
+            display: flex;
+            border-top: 1px solid #ddd;
+            background: white;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            resize: none;
+            min-height: 60px;
+            font-size: 16px;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+        }
+        
+        .chat-enviar {
+            padding: 0 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .chat-enviar:hover:not(:disabled) {
+            background: #2980b9;
+        }
+        
+        .chat-enviar:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+    `;
+    document.head.appendChild(estilo);
+    
     function inicializarChat() {
-        // Configurar nome de usuário se já existir
         if (usuario) {
             nomeInput.value = usuario;
         }
         
-        // Carregar mensagens
         carregarMensagens();
         
-        // Configurar listeners de eventos
         nomeInput.addEventListener('input', atualizarUsuario);
         chatInput.addEventListener('input', verificarInput);
         enviarBtn.addEventListener('click', enviarMensagem);
@@ -35,7 +135,6 @@
             }
         });
         
-        // Configurar subscription para novas mensagens em tempo real
         const canalMensagens = supabase
             .channel('mensagens-publicas')
             .on('postgres_changes', 
@@ -51,21 +150,18 @@
             .subscribe();
     }
     
-    // Atualizar nome de usuário
     function atualizarUsuario() {
         usuario = nomeInput.value.trim();
         localStorage.setItem('chatUsuario', usuario);
         verificarInput();
     }
     
-    // Verificar se pode enviar mensagem
     function verificarInput() {
         const texto = chatInput.value.trim();
         const usuarioPreenchido = nomeInput.value.trim().length > 0;
         enviarBtn.disabled = !(texto.length > 0 && usuarioPreenchido);
     }
     
-    // Carregar mensagens do banco
     async function carregarMensagens() {
         try {
             const { data, error } = await supabase
@@ -74,7 +170,6 @@
                 .order('created_at', { ascending: true });
             
             if (error) {
-                console.error('Erro ao carregar mensagens:', error);
                 mensagensContainer.innerHTML = '<div class="erro">Erro ao carregar mensagens</div>';
                 return;
             }
@@ -89,12 +184,10 @@
             
             data.forEach(adicionarMensagemNaTela);
         } catch (erro) {
-            console.error('Erro inesperado:', erro);
             mensagensContainer.innerHTML = '<div class="erro">Erro inesperado ao carregar mensagens</div>';
         }
     }
     
-    // Adicionar mensagem na interface
     function adicionarMensagemNaTela(mensagem) {
         if (carregando) {
             mensagensContainer.innerHTML = '';
@@ -104,7 +197,6 @@
         const elementoMensagem = document.createElement('div');
         elementoMensagem.className = 'mensagem';
         
-        // Formatar data
         const data = new Date(mensagem.created_at);
         const dataFormatada = data.toLocaleTimeString('pt-BR', { 
             hour: '2-digit', 
@@ -120,12 +212,9 @@
         `;
         
         mensagensContainer.appendChild(elementoMensagem);
-        
-        // Rolagem automática para a última mensagem
         mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
     }
     
-    // Enviar mensagem
     async function enviarMensagem() {
         const texto = chatInput.value.trim();
         const usuarioAtual = nomeInput.value.trim();
@@ -133,32 +222,27 @@
         if (!texto || !usuarioAtual) return;
         
         try {
-            // Desabilitar botão durante o envio
             enviarBtn.disabled = true;
             enviarBtn.textContent = 'Enviando...';
             
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('mensagens')
                 .insert([
                     { 
                         username: usuarioAtual, 
                         content: texto 
                     }
-                ])
-                .select();
+                ]);
             
             if (error) {
-                console.error('Erro ao enviar mensagem:', error);
                 alert('Erro ao enviar mensagem. Tente novamente.');
                 return;
             }
             
-            // Limpar campo de entrada
             chatInput.value = '';
             verificarInput();
             
         } catch (erro) {
-            console.error('Erro inesperado:', erro);
             alert('Erro inesperado ao enviar mensagem.');
         } finally {
             enviarBtn.disabled = false;
@@ -166,6 +250,5 @@
         }
     }
     
-    // Iniciar o chat quando a página carregar
     document.addEventListener('DOMContentLoaded', inicializarChat);
 </script>
