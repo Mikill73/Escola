@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escola</title>
     <meta name="description" content="Sistema de gerenciamento escolar com tarefas, horários, estudos e conteúdos">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -179,7 +180,7 @@
         
         .card-descricao::-webkit-scrollbar-track {
             background: #555;
-            край: 3px;
+            border-radius: 3px;
         }
         
         .card-descricao::-webkit-scrollbar-thumb {
@@ -187,7 +188,7 @@
             border-radius: 3px;
         }
         
-        .card-descricado::-webkit-scrollbar-thumb:hover {
+        .card-descricao::-webkit-scrollbar-thumb:hover {
             background: #888;
         }
         
@@ -471,7 +472,7 @@
             padding: 10px;
             background: transparent;
             border: none;
-            color: #ccc;
+            край: #ccc;
             cursor: pointer;
             border-radius: 6px;
             transition: all 0.3s;
@@ -480,7 +481,7 @@
         
         .subtab.ativa {
             background: #3a3a3a;
-            край: #fff;
+            color: #fff;
         }
         
         .subtab:hover {
@@ -671,8 +672,8 @@
     <script>
         const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
         const supabaseUrl = 'https://hzslgydylfheyzurkotd.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhbmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
+        const supabase = supabaseClient.createClient(supabaseUrl, supabaseKey);
         
         let tarefas = [];
         let estudos = [];
@@ -1235,33 +1236,37 @@
         }
         
         async function carregarMensagens() {
-            const { data, error } = await supabaseClient
-                .from('messages')
-                .select('id, username, content')
-                .order('id', { ascending: true });
-            
-            if (error) {
-                console.error(error);
-                return;
-            }
-            
-            const mensagensContainer = document.getElementById('chat-mensagens');
-            mensagensContainer.innerHTML = '';
-            
-            if (data && data.length > 0) {
-                data.forEach(mensagem => {
-                    const mensagemDiv = document.createElement('div');
-                    mensagemDiv.className = 'mensagem';
-                    mensagemDiv.innerHTML = `
-                        <div class="mensagem-usuario">${mensagem.username}:</div>
-                        <div class="mensagem-conteudo">${mensagem.content}</div>
-                    `;
-                    mensagensContainer.appendChild(mensagemDiv);
-                });
+            try {
+                const { data, error } = await supabase
+                    .from('messages')
+                    .select('id, username, content')
+                    .order('id', { ascending: true });
                 
-                mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
-            } else {
-                mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
+                if (error) {
+                    return;
+                }
+                
+                const mensagensContainer = document.getElementById('chat-mensagens');
+                mensagensContainer.innerHTML = '';
+                
+                if (data && data.length > 0) {
+                    data.forEach(mensagem => {
+                        const mensagemDiv = document.createElement('div');
+                        mensagemDiv.className = 'mensagem';
+                        mensagemDiv.innerHTML = `
+                            <div class="mensagem-usuario">${mensagem.username}:</div>
+                            <div class="mensagem-conteudo">${mensagem.content}</div>
+                        `;
+                        mensagensContainer.appendChild(mensagemDiv);
+                    });
+                    
+                    mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
+                } else {
+                    mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
+                }
+            } catch (error) {
+                const mensagensContainer = document.getElementById('chat-mensagens');
+                mensagensContainer.innerHTML = '<div class="vazio">Erro ao carregar mensagens</div>';
             }
         }
         
@@ -1271,19 +1276,21 @@
             
             if (!nomeUsuario || !conteudo) return;
             
-            const { data, error } = await supabaseClient
-                .from('messages')
-                .insert([{ username: nomeUsuario, content: conteudo }]);
-            
-            if (error) {
-                console.error(error);
-                return;
+            try {
+                const { error } = await supabase
+                    .from('messages')
+                    .insert([{ username: nomeUsuario, content: conteudo }]);
+                
+                if (error) {
+                    return;
+                }
+                
+                input.value = '';
+                document.getElementById('chat-enviar').disabled = true;
+                
+                await carregarMensagens();
+            } catch (error) {
             }
-            
-            input.value = '';
-            document.getElementById('chat-enviar').disabled = true;
-            
-            await carregarMensagens();
         }
         
         async function carregarDados() {
@@ -1319,7 +1326,6 @@
                 
                 document.getElementById('chat-nome').value = nomeUsuario;
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
             }
         }
         
