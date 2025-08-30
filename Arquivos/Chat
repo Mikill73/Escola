@@ -1,1 +1,108 @@
+<div class="nome-container">
+    <input type="text" class="nome-input" id="chat-nome" placeholder="Seu nome" maxlength="50" value="">
+</div>
 
+<div class="chat-container">
+    <div class="chat-mensagens" id="chat-mensagens">
+        <div class="vazio">Carregando mensagens...</div>
+    </div>
+    
+    <div class="chat-form">
+        <textarea class="chat-input" id="chat-input" placeholder="Digite sua mensagem (máx. 300 caracteres)" maxlength="300"></textarea>
+        <button class="chat-enviar" id="chat-enviar" disabled>Enviar</button>
+    </div>
+</div>
+
+<script>
+    const supabaseUrl = 'https://hzslgydylfheyzurkotd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    
+    let nomeUsuario = localStorage.getItem('chatNome') || '';
+    
+    document.getElementById('chat-nome').value = nomeUsuario;
+    
+    document.getElementById('chat-nome').addEventListener('input', (e) => {
+        nomeUsuario = e.target.value;
+        localStorage.setItem('chatNome', nomeUsuario);
+        atualizarEstadoBotaoEnviar();
+    });
+    
+    document.getElementById('chat-input').addEventListener('input', (e) => {
+        atualizarEstadoBotaoEnviar();
+    });
+    
+    document.getElementById('chat-enviar').addEventListener('click', enviarMensagem);
+    
+    document.getElementById('chat-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            enviarMensagem();
+        }
+    });
+    
+    function atualizarEstadoBotaoEnviar() {
+        const input = document.getElementById('chat-input');
+        const enviarBtn = document.getElementById('chat-enviar');
+        enviarBtn.disabled = !nomeUsuario.trim() || !input.value.trim();
+    }
+    
+    async function carregarMensagens() {
+        const { data, error } = await supabaseClient
+            .from('messages')
+            .select('id, username, content')
+            .order('id', { ascending: true });
+        
+        if (error) {
+            console.error(error);
+            document.getElementById('chat-mensagens').innerHTML = '<div class="vazio">Erro ao carregar mensagens</div>';
+            return;
+        }
+        
+        const mensagensContainer = document.getElementById('chat-mensagens');
+        mensagensContainer.innerHTML = '';
+        
+        if (data && data.length > 0) {
+            data.forEach(mensagem => {
+                const mensagemDiv = document.createElement('div');
+                mensagemDiv.className = 'mensagem';
+                mensagemDiv.innerHTML = `
+                    <div class="mensagem-usuario">${mensagem.username}:</div>
+                    <div class="mensagem-conteudo">${mensagem.content}</div>
+                `;
+                mensagensContainer.appendChild(mensagemDiv);
+            });
+            
+            mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
+        } else {
+            mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
+        }
+    }
+    
+    async function enviarMensagem() {
+        const input = document.getElementById('chat-input');
+        const conteudo = input.value.trim();
+        
+        if (!nomeUsuario || !conteudo) return;
+        
+        const { data, error } = await supabaseClient
+            .from('messages')
+            .insert([{ username: nomeUsuario, content: conteudo }]);
+        
+        if (error) {
+            console.error(error);
+            alert('Erro ao enviar mensagem');
+            return;
+        }
+        
+        input.value = '';
+        atualizarEstadoBotaoEnviar();
+        
+        await carregarMensagens();
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        carregarMensagens();
+        atualizarEstadoBotaoEnviar();
+    });
+</script>
