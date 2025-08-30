@@ -15,8 +15,7 @@
 
 <script>
     const supabaseUrl = 'https://hzslgydylfheyzurkotd.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhbmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6c2xneWR5bGZoZXl6dXJrb3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NjY0NDgsImV4cCI6MjA3MTA0MjQ0OH0.G9DIdCvM-M4MqSadw4qpc82z6G479tc9moCvpLU7jDQ';
     
     let nomeUsuario = localStorage.getItem('chatNome') || '';
     
@@ -49,15 +48,18 @@
     
     async function carregarMensagens() {
         try {
-            const { data, error } = await supabaseClient
-                .from('messages')
-                .select('id, username, content')
-                .order('id', { ascending: true });
+            const response = await fetch(`${supabaseUrl}/rest/v1/messages?select=*`, {
+                headers: {
+                    'apikey': supabaseKey,
+                    'Authorization': `Bearer ${supabaseKey}`
+                }
+            });
             
-            if (error) {
-                throw error;
+            if (!response.ok) {
+                throw new Error('Erro ao carregar mensagens');
             }
             
+            const data = await response.json();
             const mensagensContainer = document.getElementById('chat-mensagens');
             mensagensContainer.innerHTML = '';
             
@@ -89,12 +91,22 @@
         if (!nomeUsuario || !conteudo) return;
         
         try {
-            const { error } = await supabaseClient
-                .from('messages')
-                .insert([{ username: nomeUsuario, content: conteudo }]);
+            const response = await fetch(`${supabaseUrl}/rest/v1/messages`, {
+                method: 'POST',
+                headers: {
+                    'apikey': supabaseKey,
+                    'Authorization': `Bearer ${supabaseKey}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    username: nomeUsuario,
+                    content: conteudo
+                })
+            });
             
-            if (error) {
-                throw error;
+            if (!response.ok) {
+                throw new Error('Erro ao enviar mensagem');
             }
             
             input.value = '';
