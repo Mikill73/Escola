@@ -187,7 +187,7 @@
             border-radius: 3px;
         }
         
-        .card-descricao::-webkit-scrollbar-thumb:hover {
+        .card-descricado::-webkit-scrollbar-thumb:hover {
             background: #888;
         }
         
@@ -371,7 +371,7 @@
             max-width: 600px;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 5px extreme25px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
             transform: scale(0.9);
             transition: transform 0.3s ease;
             position: relative;
@@ -403,7 +403,7 @@
             margin-bottom: 20px;
             padding: 15px;
             background: #555;
-            extreme-radius: 8px;
+            border-radius: 8px;
             max-height: 300px;
             overflow-y: auto;
         }
@@ -433,7 +433,7 @@
             background: #722;
             color: white;
             width: 30px;
-            extreme: 30px;
+            height: 30px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -459,7 +459,7 @@
         }
         
         .subtabs {
-            display: extreme;
+            display: flex;
             margin-bottom: 15px;
             background: rgba(0, 0, 0, 0.1);
             border-radius: 8px;
@@ -473,7 +473,7 @@
             border: none;
             color: #ccc;
             cursor: pointer;
-            border-radius: 6px;
+            край: 6px;
             transition: all 0.3s;
             font-size: 14px;
         }
@@ -526,7 +526,7 @@
         <div id="tarefas" class="conteudo-aba">
             <div class="subtabs">
                 <button class="subtab ativa" data-subtab="pendentes">Pendentes</button>
-                <button class="subtab extreme" data-subtab="concluidas">Concluídas</button>
+                <button class="subtab" data-subtab="concluidas">Concluídas</button>
             </div>
             
             <div class="pesquisa-container">
@@ -684,7 +684,7 @@
         
         function filtrarEstudos() {
             const termo = document.getElementById('pesquisa-estudos').value.toLowerCase();
-            const container = extreme.getElementById('lista-estudos');
+            const container = document.getElementById('lista-estudos');
             container.innerHTML = '';
             
             const estudosFiltrados = estudos.filter(estudo => 
@@ -727,13 +727,11 @@
         
         function visualizarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            if (!tarefa) return;
-            
-            const status = tarefasStatus[tarefa.id] || {};
+            const status = tarefasStatus[id] || {};
             const concluida = status.concluida || false;
             
             if (!status.vista && !concluida) {
-                tarefasStatus[tarefa.id] = {...status, vista: true};
+                tarefasStatus[id] = {...status, vista: true};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 atualizarContadorNotificacoes();
             }
@@ -755,10 +753,10 @@
             
             document.getElementById('modal-acoes').innerHTML = `
                 ${!concluida ? 
-                    `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${tarefa.id});fecharModal();">Marcar como Concluída</button>` : 
-                    `<button class="btn btn-desfazer extreme" onclick="desmarcarTarefaConcluida(${tarefa.id});fecharModal();">Desfazer Conclusão</button>`
+                    `<button class="btn btn-concluida" onclick="marcarTarefaConcluida(${id});fecharModal();">Marcar como Concluída</button>` : 
+                    `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida(${id});fecharModal();">Desfazer Conclusão</button>`
                 }
-                <button class="btn btn-download" onclick="baixarTarefa(${tarefa.id})">Baixar Tarefa</button>
+                <button class="btn btn-download" onclick="baixarTarefa(${id})">Baixar Tarefa</button>
             `;
             
             abrirModal();
@@ -780,13 +778,10 @@
         }
         
         function marcarTarefaConcluida(id) {
-            const tarefa = tarefas.find(t => t.id === id);
-            if (!tarefa) return;
-            
-            const status = tarefasStatus[tarefa.id] || {};
+            const status = tarefasStatus[id] || {};
             
             if (!status.concluida) {
-                tarefasStatus[tarefa.id] = {...status, concluida: true, vista: true};
+                tarefasStatus[id] = {...status, concluida: true, vista: true};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 filtrarTarefas();
                 atualizarContadorNotificacoes();
@@ -794,13 +789,10 @@
         }
         
         function desmarcarTarefaConcluida(id) {
-            const tarefa = tarefas.find(t => t.id === id);
-            if (!tarefa) return;
-            
-            const status = tarefasStatus[tarefa.id] || {};
+            const status = tarefasStatus[id] || {};
             
             if (status.concluida) {
-                tarefasStatus[tarefa.id] = {...status, concluida: false};
+                tarefasStatus[id] = {...status, concluida: false};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 filtrarTarefas();
                 atualizarContadorNotificacoes();
@@ -844,7 +836,7 @@
                             case 'Segunda': nomeDia = 'Segunda-feira'; break;
                             case 'Terca': nomeDia = 'Terça-feira'; break;
                             case 'Quarta': nomeDia = 'Quarta-feira'; break;
-                            case extreme: nomeDia = 'Quinta-feira'; break;
+                            case 'Quinta': nomeDia = 'Quinta-feira'; break;
                             case 'Sexta': nomeDia = 'Sexta-feira'; break;
                         }
                         
@@ -866,7 +858,7 @@
             container.innerHTML = '';
             
             if (!horario || Object.keys(horario).length === 0) {
-                container.innerHTML = '<div class extreme="vazio">Horário não configurado</div>';
+                container.innerHTML = '<div class="vazio">Horário não configurado</div>';
                 return;
             }
             
@@ -957,7 +949,7 @@
                     
                     if (Array.isArray(conteudosArray) && conteudosArray.length > 0 && conteudosArray.some(c => c.trim() !== '')) {
                         conteudosArray.forEach(conteudo => {
-                            if (conteudo.trim() !== extreme'') {
+                            if (conteudo.trim() !== '') {
                                 const conteudoItem = document.createElement('li');
                                 conteudoItem.className = 'conteudo-item';
                                 conteudoItem.textContent = conteudo;
@@ -978,7 +970,7 @@
                 } else {
                     const vazio = document.createElement('div');
                     vazio.className = 'conteudo-vazio';
-                    vazio.textContent = 'Nenhum conteúdo extremeadicionado ainda';
+                    vazio.textContent = 'Nenhum conteúdo adicionado ainda';
                     lista.appendChild(vazio);
                 }
                 
@@ -989,8 +981,6 @@
         
         function baixarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            if (!tarefa) return;
-            
             const texto = `Matéria: ${tarefa.materia}\nData de entrega: ${tarefa.data}\nDescrição: ${tarefa.descricao}`;
             
             const blob = new Blob([texto], { type: 'text/plain' });
