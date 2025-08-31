@@ -612,7 +612,7 @@
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
             <button class="aba" data-aba="estudos">Estudos</button>
             <button class="aba" data-aba="conteudos">Conteúdos</button>
-            <button class="aba" data-aba="chat">Chat</button>
+            <button class="aba" data-aba="chat">Pedidos</button>
         </div>
         
         <div id="horario" class="conteudo-aba ativa">
@@ -715,7 +715,7 @@
         
         async function carregarChat() {
             try {
-                const response = await fetch(`${baseURL}/Chat`);
+                const response = await fetch(`${baseURL}/Pedidos`);
                 if (response.ok) {
                     const chatHTML = await response.text();
                     document.getElementById('chat-content').innerHTML = chatHTML;
