@@ -149,7 +149,7 @@
 </head>
 <body class="pedido-sistema-body">
     <div class="pedido-container-principal">
-        <h1 class="pedido-titulo-principal">Solicitação de Serviços</h1>
+        <h1 class="pedido-titulo-principal">Solicitar Tarefas</h1>
         <textarea class="pedido-textarea-custom" id="pedido-campo-texto" placeholder="O que você quer que seja adicionado, tarefa, estudo, etc..."></textarea>
         <button class="pedido-botao-envio" id="pedido-botao-enviar">Enviar Solicitação</button>
     </div>
