@@ -89,7 +89,7 @@
             background: #444;
             border: 1px solid #555;
             border-radius: 6px;
-            color: #eee;
+            край: #eee;
             resize: none;
             height: 60px;
         }
@@ -189,20 +189,6 @@
             }
         });
         
-        const canalMensagens = supabase
-            .channel('mensagens-publicas')
-            .on('postgres_changes', 
-                { 
-                    event: 'INSERT', 
-                    schema: 'public', 
-                    table: 'messages' 
-                }, 
-                (payload) => {
-                    adicionarMensagemNaTela(payload.new);
-                }
-            )
-            .subscribe();
-        
         function atualizarUsuario() {
             usuario = nomeInput.value.trim();
             localStorage.setItem('chatUsuario', usuario);
@@ -217,6 +203,8 @@
         
         async function carregarMensagens() {
             try {
+                console.log('Carregando mensagens...');
+                
                 const { data, error } = await supabase
                     .from('messages')
                     .select('*')
@@ -224,21 +212,24 @@
                 
                 if (error) {
                     console.error('Erro ao carregar mensagens:', error);
-                    mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
+                    mensagensContainer.innerHTML = '<div class="vazio">Erro ao carregar mensagens. Verifique o console.</div>';
                     return;
                 }
                 
+                console.log('Mensagens carregadas:', data);
+                
                 mensagensContainer.innerHTML = '';
                 
-                if (data.length === 0) {
-                    mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
+                if (!data || data.length === 0) {
+                    mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda. Seja o primeiro a enviar!</div>';
                     return;
                 }
                 
                 data.forEach(adicionarMensagemNaTela);
+                
             } catch (erro) {
                 console.error('Erro inesperado:', erro);
-                mensagensContainer.innerHTML = '<div class="vazio">Nenhuma mensagem ainda</div>';
+                mensagensContainer.innerHTML = '<div class="vazio">Erro inesperado. Verifique o console.</div>';
             }
         }
         
@@ -274,32 +265,58 @@
                 enviarBtn.disabled = true;
                 enviarBtn.textContent = 'Enviando...';
                 
-                const { error } = await supabase
+                console.log('Enviando mensagem:', { usuario: usuarioAtual, texto });
+                
+                const { data, error } = await supabase
                     .from('messages')
                     .insert([
                         { 
                             username: usuarioAtual, 
                             content: texto 
                         }
-                    ]);
+                    ])
+                    .select();
                 
                 if (error) {
                     console.error('Erro ao enviar mensagem:', error);
-                    alert('Erro ao enviar mensagem. Tente novamente.');
+                    alert('Erro ao enviar mensagem. Verifique o console para detalhes.');
                     return;
                 }
+                
+                console.log('Mensagem enviada com sucesso:', data);
                 
                 chatInput.value = '';
                 verificarInput();
                 
             } catch (erro) {
                 console.error('Erro inesperado:', erro);
-                alert('Erro inesperado ao enviar mensagem.');
+                alert('Erro inesperado ao enviar mensagem. Verifique o console.');
             } finally {
                 enviarBtn.disabled = false;
                 enviarBtn.textContent = 'Enviar';
             }
         }
+        
+        // Configurar realtime updates
+        try {
+            const canalMensagens = supabase
+                .channel('mensagens-publicas')
+                .on('postgres_changes', 
+                    { 
+                        event: 'INSERT', 
+                        schema: 'public', 
+                        table: 'messages' 
+                    }, 
+                    (payload) => {
+                        console.log('Nova mensagem em tempo real:', payload.new);
+                        adicionarMensagemNaTela(payload.new);
+                    }
+                )
+                .subscribe((status) => {
+                    console.log('Status da inscrição em tempo real:', status);
+                });
+        } catch (erro) {
+            console.error('Erro ao configurar atualizações em tempo real:', erro);
+        }
     </script>
 </body>
-</html>
