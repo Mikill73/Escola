@@ -152,7 +152,6 @@
         <h1 class="pedido-titulo-principal">Solicitação de Serviços</h1>
         <textarea class="pedido-textarea-custom" id="pedido-campo-texto" placeholder="O que você quer que seja adicionado, tarefa, estudo, etc..."></textarea>
         <button class="pedido-botao-envio" id="pedido-botao-enviar">Enviar Solicitação</button>
-        <p class="pedido-rodape">Seu pedido será processado e enviado para nossa equipe</p>
     </div>
 
     <div class="pedido-modal-overlay" id="pedido-modal-container">
