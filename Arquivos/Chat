@@ -149,7 +149,7 @@
         
         <div class="chat-container">
             <div class="chat-mensagens" id="chat-mensagens">
-                <div class="vazio">Carregando mensagens...</div>
+                <div class="vazio">Carregando mensagens</div>
             </div>
             
             <div class="chat-form">
