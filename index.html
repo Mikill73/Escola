@@ -574,7 +574,7 @@
         <div id="pedidos" class="conteudo-aba">
             <div class="pedido-container">
                 <input type="text" class="nome-input" id="pedido-nome" placeholder="Seu nome">
-                <textarea class="pedido-textarea" id="pedido-texto" placeholder="O que você quer que seja adicionado, tarefa, estudo, etc..."></textarea>
+                <textarea class="pedido-textarea" id="pedido-texto" placeholder="O que você quer que seja adicionado, tarefa, estudo, edilçao, etc..."></textarea>
                 <button class="btn-enviar" id="enviar-pedido">Enviar Pedido</button>
             </div>
         </div>
@@ -660,7 +660,7 @@
             }
             
             const payload = {
-                content: `**Novo Pedido de ${nome}:**\n${texto}`
+                content: `**${nome}:**\n${texto}`
             };
             
             fetch(webhookURL, {
