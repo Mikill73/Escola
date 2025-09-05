@@ -510,6 +510,17 @@
             background: #3e8e41;
         }
         
+        .turma-selector {
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #444;
+            border: 1px solid #555;
+            border-radius: 8px;
+            color: #eee;
+            font-size: 16px;
+            width: 100%;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -543,6 +554,7 @@
         </div>
         
         <div id="horario" class="conteudo-aba ativa">
+            <select class="turma-selector" id="turma-selector"></select>
             <div id="horario-aulas"></div>
         </div>
         
@@ -601,6 +613,7 @@
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
+        let turmaSelecionada = '';
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -638,6 +651,10 @@
         });
         
         document.getElementById('enviar-pedido').addEventListener('click', enviarPedido);
+        document.getElementById('turma-selector').addEventListener('change', (e) => {
+            turmaSelecionada = e.target.value;
+            renderizarHorario();
+        });
         
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -881,7 +898,7 @@
         }
         
         function encontrarProximaAula(materia) {
-            if (!horario) return null;
+            if (!horario || !turmaSelecionada || !horario[turmaSelecionada]) return null;
             
             const diasSemana = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
             const hoje = new Date();
@@ -899,8 +916,8 @@
                 if (diaVerificar >= 5) continue;
                 
                 const diaSemana = diasSemana[diaVerificar];
-                if (horario[diaSemana]) {
-                    const aulaIndex = horario[diaSemana].findIndex(aula => aula === materia);
+                if (horario[turmaSelecionada][diaSemana]) {
+                    const aulaIndex = horario[turmaSelecionada][diaSemana].findIndex(aula => aula.materia === materia);
                     if (aulaIndex !== -1) {
                         let nomeDia = '';
                         switch(diaSemana) {
@@ -933,10 +950,20 @@
                 return;
             }
             
+            if (!turmaSelecionada && Object.keys(horario).length > 0) {
+                turmaSelecionada = Object.keys(horario)[0];
+                document.getElementById('turma-selector').value = turmaSelecionada;
+            }
+            
+            if (!turmaSelecionada || !horario[turmaSelecionada]) {
+                container.innerHTML = '<div class="vazio">Selecione uma turma</div>';
+                return;
+            }
+            
             const dias = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
             
             dias.forEach(dia => {
-                if (horario[dia] && horario[dia].length > 0) {
+                if (horario[turmaSelecionada][dia] && horario[turmaSelecionada][dia].length > 0) {
                     const diaDiv = document.createElement('div');
                     diaDiv.className = 'horario-dia';
                     
@@ -949,12 +976,18 @@
                     
                     diaDiv.innerHTML = `<h3>${titulo}</h3>`;
                     
-                    horario[dia].forEach((materia, idx) => {
+                    horario[turmaSelecionada][dia].forEach((aula, idx) => {
                         const aulaItem = document.createElement('div');
                         aulaItem.className = 'aula-item';
+                        
+                        let horarioTexto = '';
+                        if (aula.horario) {
+                            horarioTexto = `<div style="font-size: 12px; color: #aaa; margin-top: 2px;">${aula.horario}</div>`;
+                        }
+                        
                         aulaItem.innerHTML = `
                             <div class="aula-numero">${idx + 1}</div>
-                            <div class="aula-materia">${materia}</div>
+                            <div class="aula-materia">${aula.materia}${horarioTexto}</div>
                         `;
                         diaDiv.appendChild(aulaItem);
                     });
@@ -964,15 +997,38 @@
             });
         }
         
+        function atualizarSeletorTurmas() {
+            const selector = document.getElementById('turma-selector');
+            selector.innerHTML = '';
+            
+            if (horario && Object.keys(horario).length > 0) {
+                Object.keys(horario).forEach(turma => {
+                    const option = document.createElement('option');
+                    option.value = turma;
+                    option.textContent = turma;
+                    selector.appendChild(option);
+                });
+                
+                if (!turmaSelecionada) {
+                    turmaSelecionada = Object.keys(horario)[0];
+                    selector.value = turmaSelecionada;
+                }
+            } else {
+                selector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
+            }
+        }
+        
         function extrairTodasMaterias() {
             todasMaterias = [];
             
             if (horario) {
-                Object.values(horario).forEach(dia => {
-                    dia.forEach(materia => {
-                        if (materia && !todasMaterias.includes(materia)) {
-                            todasMaterias.push(materia);
-                        }
+                Object.values(horario).forEach(turma => {
+                    Object.values(turma).forEach(dia => {
+                        dia.forEach(aula => {
+                            if (aula.materia && !todasMaterias.includes(aula.materia)) {
+                                todasMaterias.push(aula.materia);
+                            }
+                        });
                     });
                 });
             }
@@ -1194,6 +1250,7 @@
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
                 
+                atualizarSeletorTurmas();
                 atualizarContadorNotificacoes();
                 
                 renderizarHorario();
