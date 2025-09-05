@@ -1,7 +1,3 @@
-# Feito por um aluno, para os alunos
-
----
-
 ## Colaboradores
 
 ### 2A
