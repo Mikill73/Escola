@@ -141,6 +141,12 @@
             padding-bottom: 8px;
         }
         
+        .card-turma {
+            color: #aaccaa;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
         .card-data {
             color: #bbb;
             font-size: 14px;
@@ -364,6 +370,12 @@
             padding-bottom: 10px;
         }
         
+        .modal-turma {
+            color: #aaccaa;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
         .modal-data {
             color: #bbb;
             font-size: 16px;
@@ -463,51 +475,38 @@
             color: #fff;
         }
         
-        .pedido-container {
+        .discord-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            gap: 20px;
+            text-align: center;
+            padding: 30px;
         }
         
-        .nome-input {
-            width: 100%;
-            padding: 12px;
-            background: #444;
-            border: 1px solid #555;
-            border-radius: 6px;
-            color: #eee;
+        .discord-mensagem {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #ddd;
+            max-width: 600px;
         }
         
-        .pedido-textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 12px;
-            background: #444;
-            border: 1px solid #555;
-            border-radius: 6px;
-            color: #eee;
-            resize: vertical;
-        }
-        
-        .pedido-textarea::placeholder {
-            color: #999;
-        }
-        
-        .btn-enviar {
-            padding: 12px 25px;
-            background: #4CAF50;
+        .btn-discord {
+            padding: 15px 30px;
+            background: #5865F2;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
-            font-size: 16px;
-            font-weight: 500;
-            align-self: flex-start;
+            text-decoration: none;
+            display: inline-block;
         }
         
-        .btn-enviar:hover {
-            background: #3e8e41;
+        .btn-discord:hover {
+            background: #4752c4;
         }
         
         .turma-selector {
@@ -550,7 +549,7 @@
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
             <button class="aba" data-aba="estudos">Estudos</button>
             <button class="aba" data-aba="conteudos">Conteúdos</button>
-            <button class="aba" data-aba="pedidos">Pedidos</button>
+            <button class="aba" data-aba="discord">Discord</button>
         </div>
         
         <div id="horario" class="conteudo-aba ativa">
@@ -580,14 +579,16 @@
         </div>
         
         <div id="conteudos" class="conteudo-aba">
+            <select class="turma-selector" id="conteudo-turma-selector"></select>
             <div id="lista-conteudos"></div>
         </div>
         
-        <div id="pedidos" class="conteudo-aba">
-            <div class="pedido-container">
-                <input type="text" class="nome-input" id="pedido-nome" placeholder="Seu nome">
-                <textarea class="pedido-textarea" id="pedido-texto" placeholder="Peça tarefas, estudos, edições, sugestões... Ou me adicione no Discord: Mikill#9150 / mikill9150"></textarea>
-                <button class="btn-enviar" id="enviar-pedido">Enviar Pedido</button>
+        <div id="discord" class="conteudo-aba">
+            <div class="discord-container">
+                <div class="discord-mensagem">
+                    Entre no nosso Discord para dar sugestões, reclamações, conversar com outros estudantes e pedir para se tornar um colaborador
+                </div>
+                <a href="https://discord.gg/XpqbH3T7qS" target="_blank" class="btn-discord">Entrar no Discord</a>
             </div>
         </div>
         
@@ -595,6 +596,7 @@
             <div class="modal-conteudo">
                 <div class="modal-fechar" id="modal-fechar">X</div>
                 <div class="modal-titulo" id="modal-titulo"></div>
+                <div class="modal-turma" id="modal-turma"></div>
                 <div class="modal-data" id="modal-data"></div>
                 <div class="modal-descricao" id="modal-descricao"></div>
                 <div class="card-acoes" id="modal-acoes"></div>
@@ -604,7 +606,6 @@
 
     <script>
         const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
-        const webhookURL = 'https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-';
         
         let tarefas = [];
         let estudos = [];
@@ -614,6 +615,7 @@
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
         let turmaSelecionada = '';
+        let turmas = [];
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -650,10 +652,13 @@
             }
         });
         
-        document.getElementById('enviar-pedido').addEventListener('click', enviarPedido);
         document.getElementById('turma-selector').addEventListener('change', (e) => {
             turmaSelecionada = e.target.value;
             renderizarHorario();
+        });
+        
+        document.getElementById('conteudo-turma-selector').addEventListener('change', (e) => {
+            renderizarConteudos(e.target.value);
         });
         
         document.addEventListener('keydown', (e) => {
@@ -661,44 +666,6 @@
                 fecharModal();
             }
         });
-        
-        function enviarPedido() {
-            const nome = document.getElementById('pedido-nome').value.trim();
-            const texto = document.getElementById('pedido-texto').value.trim();
-            
-            if (!nome) {
-                alert('Por favor, informe seu nome');
-                return;
-            }
-            
-            if (!texto) {
-                alert('Por favor, digite seu pedido');
-                return;
-            }
-            
-            const payload = {
-                content: `**${nome}:**\n${texto}`
-            };
-            
-            fetch(webhookURL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('Pedido enviado com sucesso!');
-                    document.getElementById('pedido-texto').value = '';
-                } else {
-                    alert('Erro ao enviar pedido. Tente novamente.');
-                }
-            })
-            .catch(error => {
-                alert('Erro ao enviar pedido. Tente novamente.');
-            });
-        }
         
         function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
@@ -712,7 +679,8 @@
             tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
                 tarefa.materia.toLowerCase().includes(termo) || 
                 tarefa.descricao.toLowerCase().includes(termo) ||
-                tarefa.data.toLowerCase().includes(termo)
+                tarefa.data.toLowerCase().includes(termo) ||
+                (tarefa.turma && tarefa.turma.toLowerCase().includes(termo))
             );
             
             renderizarTarefas(tarefasFiltradas);
@@ -753,6 +721,7 @@
                 
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
+                    ${tarefa.turma ? `<div class="card-turma">Turma: ${tarefa.turma}</div>` : ''}
                     <div class="card-data">${dataFormatada}</div>
                     ${proximaAulaInfo}
                     <div class="card-descricao">${descricaoResumida}</div>
@@ -777,7 +746,8 @@
             
             const estudosFiltrados = estudos.filter(estudo => 
                 estudo.materia.toLowerCase().includes(termo) || 
-                estudo.descricao.toLowerCase().includes(termo)
+                estudo.descricao.toLowerCase().includes(termo) ||
+                (estudo.turma && estudo.turma.toLowerCase().includes(termo))
             );
             
             renderizarEstudos(estudosFiltrados);
@@ -801,6 +771,7 @@
                 
                 card.innerHTML = `
                     <div class="card-titulo">${estudo.materia}</div>
+                    ${estudo.turma ? `<div class="card-turma">Turma: ${estudo.turma}</div>` : ''}
                     <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarEstudo(${index})">Visualizar</button>
@@ -836,6 +807,7 @@
             }
             
             document.getElementById('modal-titulo').innerHTML = `${tarefa.materia} ${concluida ? '(Concluída)' : ''}`;
+            document.getElementById('modal-turma').innerHTML = tarefa.turma ? `Turma: ${tarefa.turma}` : '';
             document.getElementById('modal-data').innerHTML = dataFormatada + proximaAulaInfo;
             document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
             
@@ -854,6 +826,7 @@
             const estudo = estudos[index];
             
             document.getElementById('modal-titulo').innerHTML = estudo.materia;
+            document.getElementById('modal-turma').innerHTML = estudo.turma ? `Turma: ${estudo.turma}` : '';
             document.getElementById('modal-data').innerHTML = '';
             document.getElementById('modal-descricao').innerHTML = estudo.descricao;
             
@@ -999,22 +972,31 @@
         
         function atualizarSeletorTurmas() {
             const selector = document.getElementById('turma-selector');
+            const conteudoSelector = document.getElementById('conteudo-turma-selector');
             selector.innerHTML = '';
+            conteudoSelector.innerHTML = '';
             
-            if (horario && Object.keys(horario).length > 0) {
-                Object.keys(horario).forEach(turma => {
+            if (turmas && turmas.length > 0) {
+                turmas.forEach(turma => {
                     const option = document.createElement('option');
                     option.value = turma;
                     option.textContent = turma;
                     selector.appendChild(option);
+                    
+                    const option2 = document.createElement('option');
+                    option2.value = turma;
+                    option2.textContent = turma;
+                    conteudoSelector.appendChild(option2);
                 });
                 
                 if (!turmaSelecionada) {
-                    turmaSelecionada = Object.keys(horario)[0];
+                    turmaSelecionada = turmas[0];
                     selector.value = turmaSelecionada;
+                    conteudoSelector.value = turmaSelecionada;
                 }
             } else {
                 selector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
+                conteudoSelector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
             }
         }
         
@@ -1050,7 +1032,7 @@
             }
         }
         
-        function renderizarConteudos() {
+        function renderizarConteudos(turmaFiltro = '') {
             const container = document.getElementById('lista-conteudos');
             container.innerHTML = '';
             
@@ -1069,26 +1051,30 @@
                 const lista = document.createElement('ul');
                 lista.className = 'conteudo-lista';
                 
-                const materiaConteudos = conteudos.find(c => c.materia === materia);
+                const materiaConteudos = conteudos.filter(c => c.materia === materia && (!turmaFiltro || c.turma === turmaFiltro));
                 
-                if (materiaConteudos) {
-                    const conteudosArray = materiaConteudos.conteudos || materiaConteudos.conteudo || [];
+                if (materiaConteudos.length > 0) {
+                    materiaConteudos.forEach(conteudoObj => {
+                        const conteudosArray = conteudoObj.conteudos || conteudoObj.conteudo || [];
+                        
+                        if (Array.isArray(conteudosArray) && conteudosArray.length > 0 && conteudosArray.some(c => c.trim() !== '')) {
+                            conteudosArray.forEach(conteudo => {
+                                if (conteudo.trim() !== '') {
+                                    const conteudoItem = document.createElement('li');
+                                    conteudoItem.className = 'conteudo-item';
+                                    conteudoItem.innerHTML = `${conteudo}${conteudoObj.turma ? ` <span style="color: #aaccaa;">(Turma: ${conteudoObj.turma})</span>` : ''}`;
+                                    lista.appendChild(conteudoItem);
+                                }
+                            });
+                        } else if (typeof conteudosArray === 'string' && conteudosArray.trim() !== '') {
+                            const conteudoItem = document.createElement('li');
+                            conteudoItem.className = 'conteudo-item';
+                            conteudoItem.innerHTML = `${conteudosArray}${conteudoObj.turma ? ` <span style="color: #aaccaa;">(Turma: ${conteudoObj.turma})</span>` : ''}`;
+                            lista.appendChild(conteudoItem);
+                        }
+                    });
                     
-                    if (Array.isArray(conteudosArray) && conteudosArray.length > 0 && conteudosArray.some(c => c.trim() !== '')) {
-                        conteudosArray.forEach(conteudo => {
-                            if (conteudo.trim() !== '') {
-                                const conteudoItem = document.createElement('li');
-                                conteudoItem.className = 'conteudo-item';
-                                conteudoItem.textContent = conteudo;
-                                lista.appendChild(conteudoItem);
-                            }
-                        });
-                    } else if (typeof conteudosArray === 'string' && conteudosArray.trim() !== '') {
-                        const conteudoItem = document.createElement('li');
-                        conteudoItem.className = 'conteudo-item';
-                        conteudoItem.textContent = conteudosArray;
-                        lista.appendChild(conteudoItem);
-                    } else {
+                    if (lista.children.length === 0) {
                         const vazio = document.createElement('div');
                         vazio.className = 'conteudo-vazio';
                         vazio.textContent = 'Nenhum conteúdo adicionado ainda';
@@ -1108,7 +1094,7 @@
         
         function baixarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            const texto = `Matéria: ${tarefa.materia}\nData de entrega: ${tarefa.data}\nDescrição: ${tarefa.descricao}`;
+            const texto = `Matéria: ${tarefa.materia}\nTurma: ${tarefa.turma || 'Não especificada'}\nData de entrega: ${tarefa.data}\nDescrição: ${tarefa.descricao}`;
             
             const blob = new Blob([texto], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -1127,7 +1113,7 @@
         
         function baixarEstudo(index) {
             const estudo = estudos[index];
-            const texto = `Matéria: ${estudo.materia}\nDescrição: ${estudo.descricao}`;
+            const texto = `Matéria: ${estudo.materia}\nTurma: ${estudo.turma || 'Não especificada'}\nDescrição: ${estudo.descricao}`;
             
             const blob = new Blob([texto], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -1231,11 +1217,12 @@
             try {
                 limparLocalStorageAntigo();
                 
-                const [tarefasData, estudosData, horarioData, conteudosData] = await Promise.all([
+                const [tarefasData, estudosData, horarioData, conteudosData, turmasData] = await Promise.all([
                     fetchDados('Tarefas'),
                     fetchDados('Estudos'),
                     fetchDados('Horário'),
-                    fetchDados('Conteúdos')
+                    fetchDados('Conteúdos'),
+                    fetchDados('Turmas')
                 ]);
                 
                 if (tarefasData) {
@@ -1249,6 +1236,7 @@
                 if (estudosData) estudos = estudosData;
                 if (horarioData) horario = horarioData;
                 if (conteudosData) conteudos = conteudosData;
+                if (turmasData) turmas = turmasData;
                 
                 atualizarSeletorTurmas();
                 atualizarContadorNotificacoes();
