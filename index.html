@@ -977,7 +977,9 @@
             conteudoSelector.innerHTML = '';
             
             if (turmas && turmas.length > 0) {
-                turmas.forEach(turma => {
+                const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
+                
+                turmasNumericas.forEach(turma => {
                     const option = document.createElement('option');
                     option.value = turma;
                     option.textContent = turma;
@@ -989,8 +991,8 @@
                     conteudoSelector.appendChild(option2);
                 });
                 
-                if (!turmaSelecionada) {
-                    turmaSelecionada = turmas[0];
+                if (!turmaSelecionada && turmasNumericas.length > 0) {
+                    turmaSelecionada = turmasNumericas[0];
                     selector.value = turmaSelecionada;
                     conteudoSelector.value = turmaSelecionada;
                 }
