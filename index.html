@@ -520,6 +520,12 @@
             width: 100%;
         }
         
+        .info-criador {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -599,6 +605,7 @@
                 <div class="modal-turma" id="modal-turma"></div>
                 <div class="modal-data" id="modal-data"></div>
                 <div class="modal-descricao" id="modal-descricao"></div>
+                <div class="info-criador" id="modal-info-criador"></div>
                 <div class="card-acoes" id="modal-acoes"></div>
             </div>
         </div>
@@ -719,12 +726,17 @@
                     ? tarefa.descricao.substring(0, 150) + '...' 
                     : tarefa.descricao;
                 
+                const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
+                const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}</div>` : '';
+                
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
                     ${tarefa.turma ? `<div class="card-turma">Turma: ${tarefa.turma}</div>` : ''}
                     <div class="card-data">${dataFormatada}</div>
                     ${proximaAulaInfo}
                     <div class="card-descricao">${descricaoResumida}</div>
+                    ${infoCriador}
+                    ${infoEditor}
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Visualizar</button>
                         ${!concluida ? 
@@ -769,10 +781,15 @@
                     ? estudo.descricao.substring(0, 150) + '...' 
                     : estudo.descricao;
                 
+                const infoCriador = estudo.criador ? `<div class="info-criador">Criado por: ${estudo.criador}${estudo.turmaCriador ? ` (${estudo.turmaCriador})` : ''}</div>` : '';
+                const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''}</div>` : '';
+                
                 card.innerHTML = `
                     <div class="card-titulo">${estudo.materia}</div>
                     ${estudo.turma ? `<div class="card-turma">Turma: ${estudo.turma}</div>` : ''}
                     <div class="card-descricao">${descricaoResumida}</div>
+                    ${infoCriador}
+                    ${infoEditor}
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarEstudo(${index})">Visualizar</button>
                         <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
@@ -806,10 +823,14 @@
                 }
             }
             
+            const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
+            const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}</div>` : '';
+            
             document.getElementById('modal-titulo').innerHTML = `${tarefa.materia} ${concluida ? '(Concluída)' : ''}`;
             document.getElementById('modal-turma').innerHTML = tarefa.turma ? `Turma: ${tarefa.turma}` : '';
             document.getElementById('modal-data').innerHTML = dataFormatada + proximaAulaInfo;
             document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
+            document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor;
             
             document.getElementById('modal-acoes').innerHTML = `
                 ${!concluida ? 
@@ -825,10 +846,14 @@
         function visualizarEstudo(index) {
             const estudo = estudos[index];
             
+            const infoCriador = estudo.criador ? `<div class="info-criador">Criado por: ${estudo.criador}${estudo.turmaCriador ? ` (${estudo.turmaCriador})` : ''}</div>` : '';
+            const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''}</div>` : '';
+            
             document.getElementById('modal-titulo').innerHTML = estudo.materia;
             document.getElementById('modal-turma').innerHTML = estudo.turma ? `Turma: ${estudo.turma}` : '';
             document.getElementById('modal-data').innerHTML = '';
             document.getElementById('modal-descricao').innerHTML = estudo.descricao;
+            document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor;
             
             document.getElementById('modal-acoes').innerHTML = `
                 <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
@@ -1096,7 +1121,7 @@
         
         function baixarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            const texto = `Matéria: ${tarefa.materia}\nTurma: ${tarefa.turma || 'Não especificada'}\nData de entrega: ${tarefa.data}\nDescrição: ${tarefa.descricao}`;
+            const texto = `Matéria: ${tarefa.materia}\nTurma: ${tarefa.turma || 'Não especificada'}\nData de entrega: ${tarefa.data}\nDescrição: ${tarefa.descricao}\nCriado por: ${tarefa.criador || 'Desconhecido'}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}${tarefa.editor ? `\nEditado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}` : ''}`;
             
             const blob = new Blob([texto], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -1115,7 +1140,7 @@
         
         function baixarEstudo(index) {
             const estudo = estudos[index];
-            const texto = `Matéria: ${estudo.materia}\nTurma: ${estudo.turma || 'Não especificada'}\nDescrição: ${estudo.descricao}`;
+            const texto = `Matéria: ${estudo.materia}\nTurma: ${estudo.turma || 'Não especificada'}\nDescrição: ${estudo.descricao}\nCriado por: ${estudo.criador || 'Desconhecido'}${estudo.turmaCriador ? ` (${estudo.turmaCriador})` : ''}${estudo.editor ? `\nEditado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''}` : ''}`;
             
             const blob = new Blob([texto], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
