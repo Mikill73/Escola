@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escola</title>
-    <meta name="description" content="Tarefas, horários, estudos e conteúdos">
+    <meta name="description" content="Tarefas, horários, estudos e flashcards">
     <style>
         * {
             margin: 0;
@@ -234,6 +234,14 @@
             background: #993333;
         }
         
+        .btn-resposta {
+            background: #5a2a7d;
+        }
+        
+        .btn-resposta:hover {
+            background: #6b3399;
+        }
+        
         .vazio {
             text-align: center;
             padding: 40px;
@@ -282,54 +290,6 @@
         .aula-materia {
             flex: 1;
             color: #ddd;
-        }
-        
-        .conteudo-materia {
-            margin-bottom: 25px;
-            padding: 20px;
-            background: #444;
-            border-radius: 10px;
-        }
-        
-        .conteudo-materia h3 {
-            margin-bottom: 15px;
-            color: #fff;
-            border-bottom: 1px solid #666;
-            padding-bottom: 10px;
-        }
-        
-        .conteudo-lista {
-            list-style-type: none;
-        }
-        
-        .conteudo-item {
-            background: #555;
-            padding: 12px 12px 12px 35px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            color: #ddd;
-            position: relative;
-            white-space: pre-wrap;
-        }
-        
-        .conteudo-item:before {
-            content: "•";
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-            color: #aaa;
-        }
-        
-        .conteudo-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .conteudo-vazio {
-            color: #999;
-            font-style: italic;
-            padding: 10px;
         }
         
         .modal {
@@ -439,11 +399,6 @@
             margin-top: 5px;
         }
         
-        .tarefa-concluida {
-            text-decoration: line-through;
-            opacity: 0.7;
-        }
-        
         .subtabs {
             display: flex;
             margin-bottom: 15px;
@@ -526,6 +481,150 @@
             margin-top: 5px;
         }
         
+        .flashcard-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .flashcard {
+            width: 400px;
+            height: 250px;
+            background: #444;
+            border-radius: 15px;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+            position: relative;
+            perspective: 1000px;
+        }
+        
+        .flashcard:hover {
+            transform: translateY(-5px);
+        }
+        
+        .flashcard-conteudo {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        
+        .flashcard.virado .flashcard-conteudo {
+            transform: rotateY(180deg);
+        }
+        
+        .flashcard-frente, .flashcard-verso {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .flashcard-verso {
+            transform: rotateY(180deg);
+        }
+        
+        .flashcard-texto {
+            font-size: 20px;
+            line-height: 1.5;
+            color: #ddd;
+        }
+        
+        .flashcard-navegacao {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .btn-flashcard {
+            padding: 12px 20px;
+            background: #555;
+            color: #eee;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 16px;
+        }
+        
+        .btn-flashcard:hover {
+            background: #666;
+        }
+        
+        .btn-flashcard:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .flashcard-info {
+            color: #999;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .tarefa-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #555;
+            border-radius: 8px;
+        }
+        
+        .tarefa-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tarefa-info-label {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 3px;
+        }
+        
+        .tarefa-info-valor {
+            font-size: 14px;
+            color: #ddd;
+        }
+        
+        .resposta-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #555;
+            border-radius: 8px;
+        }
+        
+        .resposta-titulo {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .resposta-conteudo {
+            color: #ddd;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            padding: 10px;
+            background: #444;
+            border-radius: 6px;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -544,6 +643,15 @@
                 width: 95%;
                 padding: 20px;
             }
+            
+            .flashcard {
+                width: 300px;
+                height: 200px;
+            }
+            
+            .flashcard-texto {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
@@ -554,7 +662,7 @@
             <button class="aba ativa" data-aba="horario">Horário</button>
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
             <button class="aba" data-aba="estudos">Estudos</button>
-            <button class="aba" data-aba="conteudos">Conteúdos</button>
+            <button class="aba" data-aba="flashcards">Flashcards</button>
             <button class="aba" data-aba="discord">Discord</button>
         </div>
         
@@ -584,9 +692,26 @@
             <div class="grid-container" id="lista-estudos"></div>
         </div>
         
-        <div id="conteudos" class="conteudo-aba">
-            <select class="turma-selector" id="conteudo-turma-selector"></select>
-            <div id="lista-conteudos"></div>
+        <div id="flashcards" class="conteudo-aba">
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard">
+                    <div class="flashcard-conteudo">
+                        <div class="flashcard-frente">
+                            <div class="flashcard-texto" id="flashcard-frente"></div>
+                        </div>
+                        <div class="flashcard-verso">
+                            <div class="flashcard-texto" id="flashcard-verso"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flashcard-navegacao">
+                    <button class="btn-flashcard" id="flashcard-anterior" disabled>← Anterior</button>
+                    <button class="btn-flashcard" id="flashcard-proximo">Próximo →</button>
+                </div>
+                
+                <div class="flashcard-info" id="flashcard-info"></div>
+            </div>
         </div>
         
         <div id="discord" class="conteudo-aba">
@@ -602,9 +727,9 @@
             <div class="modal-conteudo">
                 <div class="modal-fechar" id="modal-fechar">X</div>
                 <div class="modal-titulo" id="modal-titulo"></div>
-                <div class="modal-turma" id="modal-turma"></div>
-                <div class="modal-data" id="modal-data"></div>
+                <div id="modal-info-grid"></div>
                 <div class="modal-descricao" id="modal-descricao"></div>
+                <div id="modal-resposta-container"></div>
                 <div class="info-criador" id="modal-info-criador"></div>
                 <div class="card-acoes" id="modal-acoes"></div>
             </div>
@@ -617,12 +742,14 @@
         let tarefas = [];
         let estudos = [];
         let horario = {};
-        let conteudos = [];
+        let flashcards = [];
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
         let turmaSelecionada = '';
         let turmas = [];
+        let flashcardIndex = 0;
+        let flashcardsVistos = new Set();
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -636,6 +763,12 @@
                     marcarTarefasComoVistas();
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
+                }
+                
+                if (aba.dataset.aba === 'flashcards') {
+                    if (flashcards.length > 0) {
+                        selecionarFlashcardAleatorio();
+                    }
                 }
             });
         });
@@ -664,13 +797,45 @@
             renderizarHorario();
         });
         
-        document.getElementById('conteudo-turma-selector').addEventListener('change', (e) => {
-            renderizarConteudos(e.target.value);
+        document.getElementById('flashcard').addEventListener('click', () => {
+            document.getElementById('flashcard').classList.toggle('virado');
+        });
+        
+        document.getElementById('flashcard-anterior').addEventListener('click', () => {
+            if (flashcardIndex > 0) {
+                flashcardIndex--;
+                atualizarFlashcard();
+            }
+        });
+        
+        document.getElementById('flashcard-proximo').addEventListener('click', () => {
+            if (flashcardIndex < flashcards.length - 1) {
+                flashcardIndex++;
+                atualizarFlashcard();
+            } else {
+                selecionarFlashcardAleatorio();
+            }
         });
         
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 fecharModal();
+            }
+            
+            if (document.getElementById('flashcards').classList.contains('ativa')) {
+                if (e.key === 'ArrowLeft' && flashcardIndex > 0) {
+                    flashcardIndex--;
+                    atualizarFlashcard();
+                } else if (e.key === 'ArrowRight') {
+                    if (flashcardIndex < flashcards.length - 1) {
+                        flashcardIndex++;
+                        atualizarFlashcard();
+                    } else {
+                        selecionarFlashcardAleatorio();
+                    }
+                } else if (e.key === ' ' || e.key === 'Enter') {
+                    document.getElementById('flashcard').classList.toggle('virado');
+                }
             }
         });
         
@@ -686,7 +851,6 @@
             tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
                 tarefa.materia.toLowerCase().includes(termo) || 
                 tarefa.descricao.toLowerCase().includes(termo) ||
-                tarefa.data.toLowerCase().includes(termo) ||
                 (tarefa.turma && tarefa.turma.toLowerCase().includes(termo))
             );
             
@@ -705,22 +869,6 @@
             
             listaTarefas.forEach((tarefa) => {
                 const status = tarefasStatus[tarefa.id] || {};
-                const concluida = status.concluida || false;
-                const vista = status.vista || false;
-                
-                const card = document.createElement('div');
-                card.className = `card ${concluida ? 'tarefa-concluida' : ''}`;
-                
-                let dataFormatada = tarefa.data;
-                let proximaAulaInfo = '';
-                
-                if (tarefa.data.toLowerCase() === 'indefinido' || !tarefa.data) {
-                    dataFormatada = 'Data indefinida';
-                    const proximaAula = encontrarProximaAula(tarefa.materia);
-                    if (proximaAula) {
-                        proximaAulaInfo = `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>`;
-                    }
-                }
                 
                 const descricaoResumida = tarefa.descricao.length > 150 
                     ? tarefa.descricao.substring(0, 150) + '...' 
@@ -732,14 +880,13 @@
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
                     ${tarefa.turma ? `<div class="card-turma">Turma: ${tarefa.turma}</div>` : ''}
-                    <div class="card-data">${dataFormatada}</div>
-                    ${proximaAulaInfo}
+                    ${tarefa.data && tarefa.data !== 'Indefinido' ? `<div class="card-data">Entrega: ${tarefa.data}</div>` : ''}
                     <div class="card-descricao">${descricaoResumida}</div>
                     ${infoCriador}
                     ${infoEditor}
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Visualizar</button>
-                        ${!concluida ? 
+                        ${!status.concluida ? 
                             `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>` : 
                             `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${tarefa.id}')">Desfazer</button>`
                         }
@@ -804,41 +951,79 @@
         function visualizarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
             const status = tarefasStatus[id] || {};
-            const concluida = status.concluida || false;
             
-            if (!status.vista && !concluida) {
+            if (!status.vista && !status.concluida) {
                 tarefasStatus[id] = {...status, vista: true};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 atualizarContadorNotificacoes();
             }
             
-            let dataFormatada = tarefa.data;
-            let proximaAulaInfo = '';
+            const proximaAula = encontrarProximaAula(tarefa.materia);
             
-            if (tarefa.data.toLowerCase() === 'indefinido' || !tarefa.data) {
-                dataFormatada = 'Data indefinida';
-                const proximaAula = encontrarProximaAula(tarefa.materia);
-                if (proximaAula) {
-                    proximaAulaInfo = `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>`;
-                }
+            const infoCriador = tarefa.criador ? `Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}` : '';
+            const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}` : '';
+            
+            document.getElementById('modal-titulo').innerHTML = `${tarefa.materia} ${status.concluida ? '(Concluída)' : ''}`;
+            
+            let infoHTML = `
+                <div class="tarefa-info-grid">
+                    ${tarefa.turma ? `
+                        <div class="tarefa-info-item">
+                            <div class="tarefa-info-label">Turma</div>
+                            <div class="tarefa-info-valor">${tarefa.turma}</div>
+                        </div>
+                    ` : ''}
+                    ${tarefa.data && tarefa.data !== 'Indefinido' ? `
+                        <div class="tarefa-info-item">
+                            <div class="tarefa-info-label">Data de Entrega</div>
+                            <div class="tarefa-info-valor">${tarefa.data}</div>
+                        </div>
+                    ` : ''}
+                    ${proximaAula ? `
+                        <div class="tarefa-info-item">
+                            <div class="tarefa-info-label">Próxima Aula</div>
+                            <div class="tarefa-info-valor">${proximaAula.dia} (${proximaAula.periodo})</div>
+                        </div>
+                    ` : ''}
+                    ${tarefa.dataAdicao ? `
+                        <div class="tarefa-info-item">
+                            <div class="tarefa-info-label">Data de Adição</div>
+                            <div class="tarefa-info-valor">${new Date(tarefa.dataAdicao).toLocaleDateString()}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            document.getElementById('modal-info-grid').innerHTML = infoHTML;
+            document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
+            
+            let respostaHTML = '';
+            if (tarefa.resposta && tarefa.resposta.trim() !== '') {
+                respostaHTML = `
+                    <div class="resposta-container">
+                        <div class="resposta-titulo">Resposta</div>
+                        <div class="resposta-conteudo">${tarefa.resposta}</div>
+                        ${tarefa.respostaCriador ? `<div class="info-criador">Resposta adicionada por: ${tarefa.respostaCriador}${tarefa.respostaTurmaCriador ? ` (${tarefa.respostaTurmaCriador})` : ''}</div>` : ''}
+                    </div>
+                `;
             }
             
-            const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
-            const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}</div>` : '';
+            document.getElementById('modal-resposta-container').innerHTML = respostaHTML;
+            document.getElementById('modal-info-criador').innerHTML = infoCriador + (infoEditor ? '<br>' + infoEditor : '');
             
-            document.getElementById('modal-titulo').innerHTML = `${tarefa.materia} ${concluida ? '(Concluída)' : ''}`;
-            document.getElementById('modal-turma').innerHTML = tarefa.turma ? `Turma: ${tarefa.turma}` : '';
-            document.getElementById('modal-data').innerHTML = dataFormatada + proximaAulaInfo;
-            document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
-            document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor;
-            
-            document.getElementById('modal-acoes').innerHTML = `
-                ${!concluida ? 
+            let acoesHTML = `
+                ${!status.concluida ? 
                     `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${id}');fecharModal();">Marcar como Concluída</button>` : 
                     `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${id}');fecharModal();">Desfazer Conclusão</button>`
                 }
                 <button class="btn btn-download" onclick="baixarTarefa('${id}')">Baixar Tarefa</button>
             `;
+            
+            if (tarefa.resposta && tarefa.resposta.trim() !== '') {
+                acoesHTML = `<button class="btn btn-resposta" onclick="document.getElementById('modal-resposta-container').style.display = document.getElementById('modal-resposta-container').style.display === 'none' ? 'block' : 'none';">Ver Resposta</button>` + acoesHTML;
+            }
+            
+            document.getElementById('modal-acoes').innerHTML = acoesHTML;
             
             abrirModal();
         }
@@ -850,9 +1035,21 @@
             const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''}</div>` : '';
             
             document.getElementById('modal-titulo').innerHTML = estudo.materia;
-            document.getElementById('modal-turma').innerHTML = estudo.turma ? `Turma: ${estudo.turma}` : '';
-            document.getElementById('modal-data').innerHTML = '';
+            
+            let infoHTML = `
+                <div class="tarefa-info-grid">
+                    ${estudo.turma ? `
+                        <div class="tarefa-info-item">
+                            <div class="tarefa-info-label">Turma</div>
+                            <div class="tarefa-info-valor">${estudo.turma}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            document.getElementById('modal-info-grid').innerHTML = infoHTML;
             document.getElementById('modal-descricao').innerHTML = estudo.descricao;
+            document.getElementById('modal-resposta-container').innerHTML = '';
             document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor;
             
             document.getElementById('modal-acoes').innerHTML = `
@@ -997,9 +1194,7 @@
         
         function atualizarSeletorTurmas() {
             const selector = document.getElementById('turma-selector');
-            const conteudoSelector = document.getElementById('conteudo-turma-selector');
             selector.innerHTML = '';
-            conteudoSelector.innerHTML = '';
             
             if (turmas && turmas.length > 0) {
                 const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
@@ -1009,114 +1204,15 @@
                     option.value = turma;
                     option.textContent = turma;
                     selector.appendChild(option);
-                    
-                    const option2 = document.createElement('option');
-                    option2.value = turma;
-                    option2.textContent = turma;
-                    conteudoSelector.appendChild(option2);
                 });
                 
                 if (!turmaSelecionada && turmasNumericas.length > 0) {
                     turmaSelecionada = turmasNumericas[0];
                     selector.value = turmaSelecionada;
-                    conteudoSelector.value = turmaSelecionada;
                 }
             } else {
                 selector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
-                conteudoSelector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
             }
-        }
-        
-        function extrairTodasMaterias() {
-            todasMaterias = [];
-            
-            if (horario) {
-                Object.values(horario).forEach(turma => {
-                    Object.values(turma).forEach(dia => {
-                        dia.forEach(aula => {
-                            if (aula.materia && !todasMaterias.includes(aula.materia)) {
-                                todasMaterias.push(aula.materia);
-                            }
-                        });
-                    });
-                });
-            }
-            
-            if (tarefas && tarefas.length > 0) {
-                tarefas.forEach(tarefa => {
-                    if (tarefa.materia && !todasMaterias.includes(tarefa.materia)) {
-                        todasMaterias.push(tarefa.materia);
-                    }
-                });
-            }
-            
-            if (estudos && estudos.length > 0) {
-                estudos.forEach(estudo => {
-                    if (estudo.materia && !todasMaterias.includes(estudo.materia)) {
-                        todasMaterias.push(estudo.materia);
-                    }
-                });
-            }
-        }
-        
-        function renderizarConteudos(turmaFiltro = '') {
-            const container = document.getElementById('lista-conteudos');
-            container.innerHTML = '';
-            
-            extrairTodasMaterias();
-            
-            if (todasMaterias.length === 0) {
-                container.innerHTML = '<div class="vazio">Nenhuma matéria encontrada</div>';
-                return;
-            }
-            
-            todasMaterias.forEach(materia => {
-                const materiaDiv = document.createElement('div');
-                materiaDiv.className = 'conteudo-materia';
-                materiaDiv.innerHTML = `<h3>${materia}</h3>`;
-                
-                const lista = document.createElement('ul');
-                lista.className = 'conteudo-lista';
-                
-                const materiaConteudos = conteudos.filter(c => c.materia === materia && (!turmaFiltro || c.turma === turmaFiltro));
-                
-                if (materiaConteudos.length > 0) {
-                    materiaConteudos.forEach(conteudoObj => {
-                        const conteudosArray = conteudoObj.conteudos || conteudoObj.conteudo || [];
-                        
-                        if (Array.isArray(conteudosArray) && conteudosArray.length > 0 && conteudosArray.some(c => c.trim() !== '')) {
-                            conteudosArray.forEach(conteudo => {
-                                if (conteudo.trim() !== '') {
-                                    const conteudoItem = document.createElement('li');
-                                    conteudoItem.className = 'conteudo-item';
-                                    conteudoItem.innerHTML = `${conteudo}${conteudoObj.turma ? ` <span style="color: #aaccaa;">(Turma: ${conteudoObj.turma})</span>` : ''}`;
-                                    lista.appendChild(conteudoItem);
-                                }
-                            });
-                        } else if (typeof conteudosArray === 'string' && conteudosArray.trim() !== '') {
-                            const conteudoItem = document.createElement('li');
-                            conteudoItem.className = 'conteudo-item';
-                            conteudoItem.innerHTML = `${conteudosArray}${conteudoObj.turma ? ` <span style="color: #aaccaa;">(Turma: ${conteudoObj.turma})</span>` : ''}`;
-                            lista.appendChild(conteudoItem);
-                        }
-                    });
-                    
-                    if (lista.children.length === 0) {
-                        const vazio = document.createElement('div');
-                        vazio.className = 'conteudo-vazio';
-                        vazio.textContent = 'Nenhum conteúdo adicionado ainda';
-                        lista.appendChild(vazio);
-                    }
-                } else {
-                    const vazio = document.createElement('div');
-                    vazio.className = 'conteudo-vazio';
-                    vazio.textContent = 'Nenhum conteúdo adicionado ainda';
-                    lista.appendChild(vazio);
-                }
-                
-                materiaDiv.appendChild(lista);
-                container.appendChild(materiaDiv);
-            });
         }
         
         function baixarTarefa(id) {
@@ -1182,18 +1278,6 @@
             }
         }
         
-        function detectarNovasTarefas() {
-            const novasTarefas = [];
-            
-            tarefas.forEach(tarefa => {
-                if (!tarefasStatus.hasOwnProperty(tarefa.id)) {
-                    novasTarefas.push(tarefa.id);
-                }
-            });
-            
-            return novasTarefas.length;
-        }
-        
         function atualizarContadorNotificacoes() {
             const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
             const novasTarefas = tarefas.filter(tarefa => {
@@ -1240,15 +1324,48 @@
             localStorage.removeItem('tarefasVistas');
         }
         
+        function selecionarFlashcardAleatorio() {
+            if (flashcards.length === 0) return;
+            
+            if (flashcardsVistos.size >= flashcards.length) {
+                flashcardsVistos.clear();
+            }
+            
+            let novoIndex;
+            do {
+                novoIndex = Math.floor(Math.random() * flashcards.length);
+            } while (flashcardsVistos.has(novoIndex) && flashcardsVistos.size < flashcards.length);
+            
+            flashcardsVistos.add(novoIndex);
+            flashcardIndex = novoIndex;
+            atualizarFlashcard();
+        }
+        
+        function atualizarFlashcard() {
+            if (flashcards.length === 0) return;
+            
+            const flashcard = flashcards[flashcardIndex];
+            document.getElementById('flashcard-frente').textContent = flashcard.frente;
+            document.getElementById('flashcard-verso').textContent = flashcard.verso;
+            
+            document.getElementById('flashcard').classList.remove('virado');
+            
+            document.getElementById('flashcard-anterior').disabled = flashcardIndex === 0;
+            document.getElementById('flashcard-proximo').disabled = flashcardIndex === flashcards.length - 1;
+            
+            const infoCriador = flashcard.criador ? `Criado por: ${flashcard.criador}${flashcard.turmaCriador ? ` (${flashcard.turmaCriador})` : ''}` : '';
+            document.getElementById('flashcard-info').textContent = `${flashcardIndex + 1}/${flashcards.length} • ${infoCriador}`;
+        }
+        
         async function carregarDados() {
             try {
                 limparLocalStorageAntigo();
                 
-                const [tarefasData, estudosData, horarioData, conteudosData, turmasData] = await Promise.all([
+                const [tarefasData, estudosData, horarioData, flashcardsData, turmasData] = await Promise.all([
                     fetchDados('Tarefas'),
                     fetchDados('Estudos'),
                     fetchDados('Horário'),
-                    fetchDados('Conteúdos'),
+                    fetchDados('Flashcards'),
                     fetchDados('Turmas')
                 ]);
                 
@@ -1262,7 +1379,7 @@
                 }
                 if (estudosData) estudos = estudosData;
                 if (horarioData) horario = horarioData;
-                if (conteudosData) conteudos = conteudosData;
+                if (flashcardsData) flashcards = flashcardsData;
                 if (turmasData) turmas = turmasData;
                 
                 atualizarSeletorTurmas();
@@ -1271,7 +1388,10 @@
                 renderizarHorario();
                 filtrarTarefas();
                 renderizarEstudos();
-                renderizarConteudos();
+                
+                if (flashcards.length > 0) {
+                    selecionarFlashcardAleatorio();
+                }
             } catch (error) {
             }
         }
