@@ -715,7 +715,7 @@
     </style>
 </head>
 <body>
-    <div class="selecao-turma-overlay" id="selecao-turma-overlay">
+    <div class="selecao-turma-overlay" id="selecao-turma-overlay" style="display: none;">
         <div class="selecao-turma-container">
             <h2 class="selecao-turma-titulo">Selecione sua turma</h2>
             <select class="selecao-turma-select" id="selecao-turma-select"></select>
@@ -859,6 +859,7 @@
             turmaSelecionada = e.target.value;
             localStorage.setItem('turmaSelecionada', turmaSelecionada);
             renderizarHorario();
+            filtrarTarefas();
         });
         
         document.getElementById('flashcard-anterior').addEventListener('click', () => {
@@ -881,6 +882,7 @@
             document.getElementById('selecao-turma-overlay').style.display = 'none';
             atualizarSeletorTurmas();
             renderizarHorario();
+            filtrarTarefas();
         });
         
         document.addEventListener('keydown', (e) => {
@@ -906,12 +908,26 @@
                 : tarefas.filter(tarefa => tarefasStatus[tarefa.id]?.concluida);
             
             tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
-                tarefa.materia.toLowerCase().includes(termo) || 
+                (tarefa.materia.toLowerCase().includes(termo) || 
                 tarefa.descricao.toLowerCase().includes(termo) ||
-                (tarefa.turma && tarefa.turma.toLowerCase().includes(termo))
+                (tarefa.turma && tarefa.turma.toLowerCase().includes(termo))) &&
+                tarefaAcessivelParaTurma(tarefa)
             );
             
             renderizarTarefas(tarefasFiltradas);
+        }
+        
+        function tarefaAcessivelParaTurma(tarefa) {
+            if (!turmaSelecionada) return true;
+            if (!tarefa.turma) return true;
+            
+            const primeiroDigitoTurmaUsuario = turmaSelecionada.charAt(0);
+            
+            if (primeiroDigitoTurmaUsuario === '1' && tarefa.turma === 'Primeiros Anos') return true;
+            if (primeiroDigitoTurmaUsuario === '2' && tarefa.turma === 'Segundos Anos') return true;
+            if (primeiroDigitoTurmaUsuario === '3' && tarefa.turma === 'Terceiros Anos') return true;
+            
+            return tarefa.turma === turmaSelecionada;
         }
         
         function renderizarTarefas(listaTarefas) {
@@ -1224,7 +1240,12 @@
             selecaoSelector.innerHTML = '';
             
             if (turmas && turmas.length > 0) {
-                const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
+                const turmasNumericas = turmas.filter(turma => /^\d/.test(turma)).sort((a, b) => {
+                    const numA = parseInt(a.charAt(0));
+                    const numB = parseInt(b.charAt(0));
+                    if (numA !== numB) return numA - numB;
+                    return a.localeCompare(b);
+                });
                 
                 turmasNumericas.forEach(turma => {
                     const option = document.createElement('option');
@@ -1238,10 +1259,10 @@
                     selecaoSelector.appendChild(optionSelecao);
                 });
                 
-                if (!turmaSelecionada && turmasNumericas.length > 0) {
-                    turmaSelecionada = turmasNumericas[0];
+                if (turmaSelecionada) {
                     selector.value = turmaSelecionada;
-                } else if (turmaSelecionada) {
+                } else if (turmasNumericas.length > 0) {
+                    turmaSelecionada = turmasNumericas[0];
                     selector.value = turmaSelecionada;
                 }
             } else {
@@ -1361,7 +1382,7 @@
             const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
             const novasTarefas = tarefas.filter(tarefa => {
                 const status = tarefasStatus[tarefa.id] || {};
-                return !status.vista && !status.concluida;
+                return !status.vista && !status.concluida && tarefaAcessivelParaTurma(tarefa);
             }).length;
             
             if (novasTarefas > 0) {
@@ -1384,7 +1405,7 @@
             tarefas.forEach(tarefa => {
                 const status = tarefasStatus[tarefa.id] || {};
                 
-                if (!status.vista && !status.concluida) {
+                if (!status.vista && !status.concluida && tarefaAcessivelParaTurma(tarefa)) {
                     tarefasStatus[tarefa.id] = {...status, vista: true};
                     atualizado = true;
                 }
