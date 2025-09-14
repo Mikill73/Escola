@@ -635,6 +635,60 @@
             color: #ddd;
         }
         
+        .selecao-turma-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .selecao-turma-container {
+            background: #444;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .selecao-turma-titulo {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        .selecao-turma-select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: #555;
+            border: 1px solid #666;
+            border-radius: 8px;
+            color: #eee;
+            font-size: 16px;
+        }
+        
+        .selecao-turma-btn {
+            padding: 12px 25px;
+            background: #2a7d2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .selecao-turma-btn:hover {
+            background: #339933;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -661,6 +715,14 @@
     </style>
 </head>
 <body>
+    <div class="selecao-turma-overlay" id="selecao-turma-overlay">
+        <div class="selecao-turma-container">
+            <h2 class="selecao-turma-titulo">Selecione sua turma</h2>
+            <select class="selecao-turma-select" id="selecao-turma-select"></select>
+            <button class="selecao-turma-btn" id="selecao-turma-btn">Salvar</button>
+        </div>
+    </div>
+
     <div class="container">
         
         <div class="abas">
@@ -797,7 +859,6 @@
             turmaSelecionada = e.target.value;
             localStorage.setItem('turmaSelecionada', turmaSelecionada);
             renderizarHorario();
-            filtrarTarefas();
         });
         
         document.getElementById('flashcard-anterior').addEventListener('click', () => {
@@ -811,6 +872,15 @@
         
         document.getElementById('flashcard').addEventListener('click', () => {
             document.getElementById('flashcard').classList.toggle('virado');
+        });
+        
+        document.getElementById('selecao-turma-btn').addEventListener('click', () => {
+            const select = document.getElementById('selecao-turma-select');
+            turmaSelecionada = select.value;
+            localStorage.setItem('turmaSelecionada', turmaSelecionada);
+            document.getElementById('selecao-turma-overlay').style.display = 'none';
+            atualizarSeletorTurmas();
+            renderizarHorario();
         });
         
         document.addEventListener('keydown', (e) => {
@@ -834,12 +904,6 @@
             let tarefasFiltradas = subtabAtiva === 'pendentes' 
                 ? tarefas.filter(tarefa => !tarefasStatus[tarefa.id]?.concluida)
                 : tarefas.filter(tarefa => tarefasStatus[tarefa.id]?.concluida);
-            
-            if (turmaSelecionada) {
-                tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
-                    !tarefa.turma || tarefa.turma === turmaSelecionada
-                );
-            }
             
             tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
                 tarefa.materia.toLowerCase().includes(termo) || 
@@ -904,15 +968,7 @@
             const container = document.getElementById('lista-estudos');
             container.innerHTML = '';
             
-            let estudosFiltrados = estudos;
-            
-            if (turmaSelecionada) {
-                estudosFiltrados = estudosFiltrados.filter(estudo => 
-                    !estudo.turma || estudo.turma === turmaSelecionada
-                );
-            }
-            
-            estudosFiltrados = estudosFiltrados.filter(estudo => 
+            const estudosFiltrados = estudos.filter(estudo => 
                 estudo.materia.toLowerCase().includes(termo) || 
                 estudo.descricao.toLowerCase().includes(termo) ||
                 (estudo.turma && estudo.turma.toLowerCase().includes(termo))
@@ -1116,7 +1172,6 @@
             
             if (!turmaSelecionada && Object.keys(horario).length > 0) {
                 turmaSelecionada = Object.keys(horario)[0];
-                localStorage.setItem('turmaSelecionada', turmaSelecionada);
                 document.getElementById('turma-selector').value = turmaSelecionada;
             }
             
@@ -1164,7 +1219,9 @@
         
         function atualizarSeletorTurmas() {
             const selector = document.getElementById('turma-selector');
+            const selecaoSelector = document.getElementById('selecao-turma-select');
             selector.innerHTML = '';
+            selecaoSelector.innerHTML = '';
             
             if (turmas && turmas.length > 0) {
                 const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
@@ -1174,17 +1231,22 @@
                     option.value = turma;
                     option.textContent = turma;
                     selector.appendChild(option);
+                    
+                    const optionSelecao = document.createElement('option');
+                    optionSelecao.value = turma;
+                    optionSelecao.textContent = turma;
+                    selecaoSelector.appendChild(optionSelecao);
                 });
                 
-                if (turmaSelecionada && turmasNumericas.includes(turmaSelecionada)) {
-                    selector.value = turmaSelecionada;
-                } else if (turmasNumericas.length > 0) {
+                if (!turmaSelecionada && turmasNumericas.length > 0) {
                     turmaSelecionada = turmasNumericas[0];
-                    localStorage.setItem('turmaSelecionada', turmaSelecionada);
+                    selector.value = turmaSelecionada;
+                } else if (turmaSelecionada) {
                     selector.value = turmaSelecionada;
                 }
             } else {
                 selector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
+                selecaoSelector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
             }
         }
         
@@ -1381,6 +1443,14 @@
             }
         }
         
+        function verificarSelecaoTurma() {
+            if (!turmaSelecionada) {
+                document.getElementById('selecao-turma-overlay').style.display = 'flex';
+            } else {
+                document.getElementById('selecao-turma-overlay').style.display = 'none';
+            }
+        }
+        
         async function carregarDados() {
             try {
                 limparLocalStorageAntigo();
@@ -1407,6 +1477,7 @@
                 if (turmasData) turmas = turmasData;
                 
                 atualizarSeletorTurmas();
+                verificarSelecaoTurma();
                 atualizarContadorNotificacoes();
                 
                 renderizarHorario();
