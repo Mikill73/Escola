@@ -751,7 +751,7 @@
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
-        let turmaSelecionada = '';
+        let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
         let turmas = [];
         let flashcardIndex = 0;
         let flashcardsVistos = new Set();
@@ -795,7 +795,9 @@
         
         document.getElementById('turma-selector').addEventListener('change', (e) => {
             turmaSelecionada = e.target.value;
+            localStorage.setItem('turmaSelecionada', turmaSelecionada);
             renderizarHorario();
+            filtrarTarefas();
         });
         
         document.getElementById('flashcard-anterior').addEventListener('click', () => {
@@ -832,6 +834,12 @@
             let tarefasFiltradas = subtabAtiva === 'pendentes' 
                 ? tarefas.filter(tarefa => !tarefasStatus[tarefa.id]?.concluida)
                 : tarefas.filter(tarefa => tarefasStatus[tarefa.id]?.concluida);
+            
+            if (turmaSelecionada) {
+                tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
+                    !tarefa.turma || tarefa.turma === turmaSelecionada
+                );
+            }
             
             tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
                 tarefa.materia.toLowerCase().includes(termo) || 
@@ -896,7 +904,15 @@
             const container = document.getElementById('lista-estudos');
             container.innerHTML = '';
             
-            const estudosFiltrados = estudos.filter(estudo => 
+            let estudosFiltrados = estudos;
+            
+            if (turmaSelecionada) {
+                estudosFiltrados = estudosFiltrados.filter(estudo => 
+                    !estudo.turma || estudo.turma === turmaSelecionada
+                );
+            }
+            
+            estudosFiltrados = estudosFiltrados.filter(estudo => 
                 estudo.materia.toLowerCase().includes(termo) || 
                 estudo.descricao.toLowerCase().includes(termo) ||
                 (estudo.turma && estudo.turma.toLowerCase().includes(termo))
@@ -1100,6 +1116,7 @@
             
             if (!turmaSelecionada && Object.keys(horario).length > 0) {
                 turmaSelecionada = Object.keys(horario)[0];
+                localStorage.setItem('turmaSelecionada', turmaSelecionada);
                 document.getElementById('turma-selector').value = turmaSelecionada;
             }
             
@@ -1159,8 +1176,11 @@
                     selector.appendChild(option);
                 });
                 
-                if (!turmaSelecionada && turmasNumericas.length > 0) {
+                if (turmaSelecionada && turmasNumericas.includes(turmaSelecionada)) {
+                    selector.value = turmaSelecionada;
+                } else if (turmasNumericas.length > 0) {
                     turmaSelecionada = turmasNumericas[0];
+                    localStorage.setItem('turmaSelecionada', turmaSelecionada);
                     selector.value = turmaSelecionada;
                 }
             } else {
