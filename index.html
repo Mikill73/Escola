@@ -118,7 +118,7 @@
             background: #444;
             border-radius: 10px;
             padding: 20px;
-            height: 280px;
+            height: 250px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -150,7 +150,7 @@
         .card-data {
             color: #bbb;
             font-size: 14px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
         
         .card-descricao {
@@ -160,8 +160,6 @@
             line-height: 1.5;
             padding-right: 5px;
             white-space: pre-wrap;
-            font-size: 15px;
-            max-height: 120px;
         }
         
         .card-descricao::-webkit-scrollbar {
@@ -465,6 +463,7 @@
             border: none;
             color: #ccc;
             cursor: pointer;
+            border-radius: 6px;
             transition: all 0.3s;
             font-size: 14px;
         }
@@ -636,60 +635,6 @@
             color: #ddd;
         }
         
-        .selecao-turma-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-        
-        .selecao-turma-container {
-            background: #444;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
-        }
-        
-        .selecao-turma-titulo {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #fff;
-        }
-        
-        .selecao-turma-select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            background: #555;
-            border: 1px solid #666;
-            border-radius: 8px;
-            color: #eee;
-            font-size: 16px;
-        }
-        
-        .selecao-turma-btn {
-            padding: 12px 25px;
-            background: #2a7d2a;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .selecao-turma-btn:hover {
-            background: #339933;
-        }
-        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -716,14 +661,6 @@
     </style>
 </head>
 <body>
-    <div class="selecao-turma-overlay" id="selecao-turma-overlay">
-        <div class="selecao-turma-container">
-            <h2 class="selecao-turma-titulo">Selecione sua turma</h2>
-            <select class="selecao-turma-select" id="selecao-turma-select"></select>
-            <button class="selecao-turma-btn" id="selecao-turma-btn">Salvar</button>
-        </div>
-    </div>
-
     <div class="container">
         
         <div class="abas">
@@ -814,7 +751,7 @@
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
-        let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
+        let turmaSelecionada = '';
         let turmas = [];
         let flashcardIndex = 0;
         let flashcardsVistos = new Set();
@@ -858,9 +795,7 @@
         
         document.getElementById('turma-selector').addEventListener('change', (e) => {
             turmaSelecionada = e.target.value;
-            localStorage.setItem('turmaSelecionada', turmaSelecionada);
             renderizarHorario();
-            filtrarTarefas();
         });
         
         document.getElementById('flashcard-anterior').addEventListener('click', () => {
@@ -874,16 +809,6 @@
         
         document.getElementById('flashcard').addEventListener('click', () => {
             document.getElementById('flashcard').classList.toggle('virado');
-        });
-        
-        document.getElementById('selecao-turma-btn').addEventListener('click', () => {
-            const select = document.getElementById('selecao-turma-select');
-            turmaSelecionada = select.value;
-            localStorage.setItem('turmaSelecionada', turmaSelecionada);
-            document.getElementById('selecao-turma-overlay').style.display = 'none';
-            atualizarSeletorTurmas();
-            renderizarHorario();
-            filtrarTarefas();
         });
         
         document.addEventListener('keydown', (e) => {
@@ -909,26 +834,12 @@
                 : tarefas.filter(tarefa => tarefasStatus[tarefa.id]?.concluida);
             
             tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
-                (tarefa.materia.toLowerCase().includes(termo) || 
+                tarefa.materia.toLowerCase().includes(termo) || 
                 tarefa.descricao.toLowerCase().includes(termo) ||
-                (tarefa.turma && tarefa.turma.toLowerCase().includes(termo))) &&
-                tarefaAcessivelParaTurma(tarefa)
+                (tarefa.turma && tarefa.turma.toLowerCase().includes(termo))
             );
             
             renderizarTarefas(tarefasFiltradas);
-        }
-        
-        function tarefaAcessivelParaTurma(tarefa) {
-            if (!turmaSelecionada) return true;
-            if (!tarefa.turma) return true;
-            
-            const primeiroDigitoTurmaUsuario = turmaSelecionada.charAt(0);
-            
-            if (primeiroDigitoTurmaUsuario === '1' && tarefa.turma === 'Primeiros Anos') return true;
-            if (primeiroDigitoTurmaUsuario === '2' && tarefa.turma === 'Segundos Anos') return true;
-            if (primeiroDigitoTurmaUsuario === '3' && tarefa.turma === 'Terceiros Anos') return true;
-            
-            return tarefa.turma === turmaSelecionada;
         }
         
         function renderizarTarefas(listaTarefas) {
@@ -950,6 +861,10 @@
                 const proximaAula = encontrarProximaAula(tarefa.materia);
                 const proximaAulaInfo = proximaAula ? `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>` : '';
                 
+                const descricaoResumida = tarefa.descricao.length > 150 
+                    ? tarefa.descricao.substring(0, 150) + '...' 
+                    : tarefa.descricao;
+                
                 const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
                 const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}</div>` : '';
                 const infoDataAdicao = tarefa.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(tarefa.dataAdicao)}</div>` : '';
@@ -958,7 +873,7 @@
                     <div class="card-titulo">${tarefa.materia}</div>
                     ${tarefa.turma ? `<div class="card-turma">Turma: ${tarefa.turma}</div>` : ''}
                     ${proximaAulaInfo}
-                    <div class="card-descricao">${tarefa.descricao}</div>
+                    <div class="card-descricao">${descricaoResumida}</div>
                     ${infoCriador}
                     ${infoEditor}
                     ${infoDataAdicao}
@@ -1002,13 +917,17 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 
+                const descricaoResumida = estudo.descricao.length > 150 
+                    ? estudo.descricao.substring(0, 150) + '...' 
+                    : estudo.descricao;
+                
                 const infoCriador = estudo.criador ? `<div class="info-criador">Criado por: ${estudo.criador}${estudo.turmaCriador ? ` (${estudo.turmaCriador})` : ''}</div>` : '';
                 const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''}</div>` : '';
                 
                 card.innerHTML = `
                     <div class="card-titulo">${estudo.materia}</div>
                     ${estudo.turma ? `<div class="card-turma">Turma: ${estudo.turma}</div>` : ''}
-                    <div class="card-descricao">${estudo.descricao}</div>
+                    <div class="card-descricao">${descricaoResumida}</div>
                     ${infoCriador}
                     ${infoEditor}
                     <div class="card-acoes">
@@ -1228,39 +1147,24 @@
         
         function atualizarSeletorTurmas() {
             const selector = document.getElementById('turma-selector');
-            const selecaoSelector = document.getElementById('selecao-turma-select');
             selector.innerHTML = '';
-            selecaoSelector.innerHTML = '';
             
             if (turmas && turmas.length > 0) {
-                const turmasNumericas = turmas.filter(turma => /^\d/.test(turma)).sort((a, b) => {
-                    const numA = parseInt(a.charAt(0));
-                    const numB = parseInt(b.charAt(0));
-                    if (numA !== numB) return numA - numB;
-                    return a.localeCompare(b);
-                });
+                const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
                 
                 turmasNumericas.forEach(turma => {
                     const option = document.createElement('option');
                     option.value = turma;
                     option.textContent = turma;
                     selector.appendChild(option);
-                    
-                    const optionSelecao = document.createElement('option');
-                    optionSelecao.value = turma;
-                    optionSelecao.textContent = turma;
-                    selecaoSelector.appendChild(optionSelecao);
                 });
                 
-                if (turmaSelecionada) {
-                    selector.value = turmaSelecionada;
-                } else if (turmasNumericas.length > 0) {
+                if (!turmaSelecionada && turmasNumericas.length > 0) {
                     turmaSelecionada = turmasNumericas[0];
                     selector.value = turmaSelecionada;
                 }
             } else {
                 selector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
-                selecaoSelector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
             }
         }
         
@@ -1278,6 +1182,23 @@
                     });
                 });
             }
+            
+            if (tarefas && tarefas.length > 0) {
+                tarefas.forEach(tarefa => {
+                    if (tarefa.materia && !todasMaterias.includes(tarefa.materia)) {
+                        todasMaterias.push(tarefa.materia);
+                    }
+                });
+            }
+            
+            if (estudos && estudos.length > 0) {
+                estudos.forEach(estudo => {
+                    if (estudo.materia && !todasMaterias.includes(estudo.materia)) {
+                        todasMaterias.push(estudo.materia);
+                    }
+                });
+            }
+        }
         
         function baixarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
@@ -1358,7 +1279,7 @@
             const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
             const novasTarefas = tarefas.filter(tarefa => {
                 const status = tarefasStatus[tarefa.id] || {};
-                return !status.vista && !status.concluida && tarefaAcessivelParaTurma(tarefa);
+                return !status.vista && !status.concluida;
             }).length;
             
             if (novasTarefas > 0) {
@@ -1381,7 +1302,7 @@
             tarefas.forEach(tarefa => {
                 const status = tarefasStatus[tarefa.id] || {};
                 
-                if (!status.vista && !status.concluida && tarefaAcessivelParaTurma(tarefa)) {
+                if (!status.vista && !status.concluida) {
                     tarefasStatus[tarefa.id] = {...status, vista: true};
                     atualizado = true;
                 }
@@ -1440,14 +1361,6 @@
             }
         }
         
-        function verificarSelecaoTurma() {
-            if (!turmaSelecionada) {
-                document.getElementById('selecao-turma-overlay').style.display = 'flex';
-            } else {
-                document.getElementById('selecao-turma-overlay').style.display = 'none';
-            }
-        }
-        
         async function carregarDados() {
             try {
                 limparLocalStorageAntigo();
@@ -1474,7 +1387,6 @@
                 if (turmasData) turmas = turmasData;
                 
                 atualizarSeletorTurmas();
-                verificarSelecaoTurma();
                 atualizarContadorNotificacoes();
                 
                 renderizarHorario();
@@ -1485,8 +1397,6 @@
                     selecionarFlashcardAleatorio();
                 }
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                verificarSelecaoTurma();
             }
         }
         
