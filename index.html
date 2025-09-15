@@ -465,7 +465,6 @@
             border: none;
             color: #ccc;
             cursor: pointer;
-            border-radius: 6px;
             transition: all 0.3s;
             font-size: 14px;
         }
@@ -717,7 +716,7 @@
     </style>
 </head>
 <body>
-    <div class="selecao-turma-overlay" id="selecao-turma-overlay" style="display: none;">
+    <div class="selecao-turma-overlay" id="selecao-turma-overlay">
         <div class="selecao-turma-container">
             <h2 class="selecao-turma-titulo">Selecione sua turma</h2>
             <select class="selecao-turma-select" id="selecao-turma-select"></select>
@@ -819,7 +818,6 @@
         let turmas = [];
         let flashcardIndex = 0;
         let flashcardsVistos = new Set();
-        let dadosCarregados = false;
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -1016,7 +1014,7 @@
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarEstudo(${index})">Visualizar</button>
                         <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
-                        ${estudo.arquivo ? '<button class="btn btn-download" onclick="baixarEstusoPDF(' + index + ')">Baixar PDF</button>' : ''}
+                        ${estudo.arquivo ? '<button class="btn btn-download" onclick="baixarEstudoPDF(' + index + ')">Baixar PDF</button>' : ''}
                     </div>
                 `;
                 
@@ -1280,23 +1278,6 @@
                     });
                 });
             }
-            
-            if (tarefas && tarefas.length > 0) {
-                tarefas.forEach(tarefa => {
-                    if (tarefa.materia && !todasMaterias.includes(tarefa.materia)) {
-                        todasMaterias.push(tarefa.materia);
-                    }
-                });
-            }
-            
-            if (estudos && estudos.length > 0) {
-                estudos.forEach(estudo => {
-                    if (estudo.materia && !todasMaterias.includes(estudo.materia)) {
-                        todasMaterias.push(estudo.materia);
-                    }
-                });
-            }
-        }
         
         function baixarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
@@ -1460,8 +1441,6 @@
         }
         
         function verificarSelecaoTurma() {
-            if (!dadosCarregados) return;
-            
             if (!turmaSelecionada) {
                 document.getElementById('selecao-turma-overlay').style.display = 'flex';
             } else {
@@ -1494,8 +1473,6 @@
                 if (flashcardsData) flashcards = flashcardsData;
                 if (turmasData) turmas = turmasData;
                 
-                dadosCarregados = true;
-                
                 atualizarSeletorTurmas();
                 verificarSelecaoTurma();
                 atualizarContadorNotificacoes();
@@ -1509,7 +1486,6 @@
                 }
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
-                dadosCarregados = true;
                 verificarSelecaoTurma();
             }
         }
