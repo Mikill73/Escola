@@ -819,6 +819,7 @@
         let turmas = [];
         let flashcardIndex = 0;
         let flashcardsVistos = new Set();
+        let dadosCarregados = false;
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -1015,7 +1016,7 @@
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarEstudo(${index})">Visualizar</button>
                         <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
-                        ${estudo.arquivo ? '<button class="btn btn-download" onclick="baixarEstudoPDF(' + index + ')">Baixar PDF</button>' : ''}
+                        ${estudo.arquivo ? '<button class="btn btn-download" onclick="baixarEstusoPDF(' + index + ')">Baixar PDF</button>' : ''}
                     </div>
                 `;
                 
@@ -1458,15 +1459,15 @@
             }
         }
         
-function verificarSelecaoTurma() {
-    if (!turmaSelecionada) {
-        setTimeout(() => {
-            document.getElementById('selecao-turma-overlay').style.display = 'flex';
-        }, 3000);
-    } else {
-        document.getElementById('selecao-turma-overlay').style.display = 'none';
-    }
-}
+        function verificarSelecaoTurma() {
+            if (!dadosCarregados) return;
+            
+            if (!turmaSelecionada) {
+                document.getElementById('selecao-turma-overlay').style.display = 'flex';
+            } else {
+                document.getElementById('selecao-turma-overlay').style.display = 'none';
+            }
+        }
         
         async function carregarDados() {
             try {
@@ -1493,6 +1494,8 @@ function verificarSelecaoTurma() {
                 if (flashcardsData) flashcards = flashcardsData;
                 if (turmasData) turmas = turmasData;
                 
+                dadosCarregados = true;
+                
                 atualizarSeletorTurmas();
                 verificarSelecaoTurma();
                 atualizarContadorNotificacoes();
@@ -1505,6 +1508,9 @@ function verificarSelecaoTurma() {
                     selecionarFlashcardAleatorio();
                 }
             } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                dadosCarregados = true;
+                verificarSelecaoTurma();
             }
         }
         
