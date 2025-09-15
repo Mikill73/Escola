@@ -717,7 +717,7 @@
     </style>
 </head>
 <body>
-    <div class="selecao-turma-overlay" id="selecao-turma-overlay">
+    <div class="selecao-turma-overlay" id="selecao-turma-overlay" style="display: none;">
         <div class="selecao-turma-container">
             <h2 class="selecao-turma-titulo">Selecione sua turma</h2>
             <select class="selecao-turma-select" id="selecao-turma-select"></select>
@@ -1458,13 +1458,15 @@
             }
         }
         
-        function verificarSelecaoTurma() {
-            if (!turmaSelecionada) {
-                document.getElementById('selecao-turma-overlay').style.display = 'flex';
-            } else {
-                document.getElementById('selecao-turma-overlay').style.display = 'none';
-            }
-        }
+function verificarSelecaoTurma() {
+    if (!turmaSelecionada) {
+        setTimeout(() => {
+            document.getElementById('selecao-turma-overlay').style.display = 'flex';
+        }, 3000);
+    } else {
+        document.getElementById('selecao-turma-overlay').style.display = 'none';
+    }
+}
         
         async function carregarDados() {
             try {
