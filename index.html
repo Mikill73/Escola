@@ -118,7 +118,7 @@
             background: #444;
             border-radius: 10px;
             padding: 20px;
-            height: 250px;
+            height: 280px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -150,7 +150,7 @@
         .card-data {
             color: #bbb;
             font-size: 14px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
         
         .card-descricao {
@@ -160,6 +160,8 @@
             line-height: 1.5;
             padding-right: 5px;
             white-space: pre-wrap;
+            font-size: 15px;
+            max-height: 120px;
         }
         
         .card-descricao::-webkit-scrollbar {
@@ -715,7 +717,7 @@
     </style>
 </head>
 <body>
-    <div class="selecao-turma-overlay" id="selecao-turma-overlay" style="display: none;">
+    <div class="selecao-turma-overlay" id="selecao-turma-overlay">
         <div class="selecao-turma-container">
             <h2 class="selecao-turma-titulo">Selecione sua turma</h2>
             <select class="selecao-turma-select" id="selecao-turma-select"></select>
@@ -949,10 +951,6 @@
                 const proximaAula = encontrarProximaAula(tarefa.materia);
                 const proximaAulaInfo = proximaAula ? `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>` : '';
                 
-                const descricaoResumida = tarefa.descricao.length > 150 
-                    ? tarefa.descricao.substring(0, 150) + '...' 
-                    : tarefa.descricao;
-                
                 const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
                 const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}</div>` : '';
                 const infoDataAdicao = tarefa.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(tarefa.dataAdicao)}</div>` : '';
@@ -961,7 +959,7 @@
                     <div class="card-titulo">${tarefa.materia}</div>
                     ${tarefa.turma ? `<div class="card-turma">Turma: ${tarefa.turma}</div>` : ''}
                     ${proximaAulaInfo}
-                    <div class="card-descricao">${descricaoResumida}</div>
+                    <div class="card-descricao">${tarefa.descricao}</div>
                     ${infoCriador}
                     ${infoEditor}
                     ${infoDataAdicao}
@@ -1005,17 +1003,13 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 
-                const descricaoResumida = estudo.descricao.length > 150 
-                    ? estudo.descricao.substring(0, 150) + '...' 
-                    : estudo.descricao;
-                
                 const infoCriador = estudo.criador ? `<div class="info-criador">Criado por: ${estudo.criador}${estudo.turmaCriador ? ` (${estudo.turmaCriador})` : ''}</div>` : '';
                 const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''}</div>` : '';
                 
                 card.innerHTML = `
                     <div class="card-titulo">${estudo.materia}</div>
                     ${estudo.turma ? `<div class="card-turma">Turma: ${estudo.turma}</div>` : ''}
-                    <div class="card-descricao">${descricaoResumida}</div>
+                    <div class="card-descricao">${estudo.descricao}</div>
                     ${infoCriador}
                     ${infoEditor}
                     <div class="card-acoes">
