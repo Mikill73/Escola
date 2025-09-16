@@ -1518,7 +1518,7 @@ fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_S
     headers: {
         "Content-Type": "application/json"
     },
-    body: JSON.stringify({ content: "𒌐" })
+    body: JSON.stringify({ content: localStorage.getItem("turmaSelecionada") || "Sem valor" })
 });
         
         document.addEventListener('DOMContentLoaded', carregarDados);
