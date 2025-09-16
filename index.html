@@ -635,6 +635,66 @@
             color: #ddd;
         }
         
+        .selecao-turma-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .selecao-turma-modal.ativo {
+            display: flex;
+        }
+        
+        .selecao-turma-conteudo {
+            background: #444;
+            border-radius: 10px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        .selecao-turma-titulo {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        .selecao-turma-selector {
+            width: 100%;
+            padding: 15px;
+            background: #555;
+            border: 1px solid #666;
+            border-radius: 8px;
+            color: #eee;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+        
+        .btn-confirmar-turma {
+            padding: 15px 30px;
+            background: #2a7d2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-confirmar-turma:hover {
+            background: #339933;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -656,6 +716,10 @@
             
             .tarefa-info-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .selecao-turma-conteudo {
+                padding: 20px;
             }
         }
     </style>
@@ -739,6 +803,14 @@
                 <div class="card-acoes" id="modal-acoes"></div>
             </div>
         </div>
+        
+        <div class="selecao-turma-modal" id="selecao-turma-modal">
+            <div class="selecao-turma-conteudo">
+                <h2 class="selecao-turma-titulo">Selecione sua turma</h2>
+                <select class="selecao-turma-selector" id="selecao-turma-selector"></select>
+                <button class="btn-confirmar-turma" id="btn-confirmar-turma">Confirmar</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -751,7 +823,7 @@
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
-        let turmaSelecionada = '';
+        let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
         let turmas = [];
         let flashcardIndex = 0;
         let flashcardsVistos = new Set();
@@ -795,6 +867,7 @@
         
         document.getElementById('turma-selector').addEventListener('change', (e) => {
             turmaSelecionada = e.target.value;
+            localStorage.setItem('turmaSelecionada', turmaSelecionada);
             renderizarHorario();
         });
         
@@ -809,6 +882,15 @@
         
         document.getElementById('flashcard').addEventListener('click', () => {
             document.getElementById('flashcard').classList.toggle('virado');
+        });
+        
+        document.getElementById('btn-confirmar-turma').addEventListener('click', () => {
+            const selector = document.getElementById('selecao-turma-selector');
+            turmaSelecionada = selector.value;
+            localStorage.setItem('turmaSelecionada', turmaSelecionada);
+            document.getElementById('selecao-turma-modal').classList.remove('ativo');
+            document.getElementById('turma-selector').value = turmaSelecionada;
+            renderizarHorario();
         });
         
         document.addEventListener('keydown', (e) => {
@@ -1147,7 +1229,9 @@
         
         function atualizarSeletorTurmas() {
             const selector = document.getElementById('turma-selector');
+            const modalSelector = document.getElementById('selecao-turma-selector');
             selector.innerHTML = '';
+            modalSelector.innerHTML = '';
             
             if (turmas && turmas.length > 0) {
                 const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
@@ -1157,14 +1241,28 @@
                     option.value = turma;
                     option.textContent = turma;
                     selector.appendChild(option);
+                    
+                    const modalOption = document.createElement('option');
+                    modalOption.value = turma;
+                    modalOption.textContent = turma;
+                    modalSelector.appendChild(modalOption);
                 });
                 
                 if (!turmaSelecionada && turmasNumericas.length > 0) {
                     turmaSelecionada = turmasNumericas[0];
                     selector.value = turmaSelecionada;
+                } else if (turmaSelecionada) {
+                    selector.value = turmaSelecionada;
                 }
             } else {
                 selector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
+                modalSelector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
+            }
+        }
+        
+        function mostrarSelecaoTurma() {
+            if (!localStorage.getItem('turmaSelecionada')) {
+                document.getElementById('selecao-turma-modal').classList.add('ativo');
             }
         }
         
@@ -1396,6 +1494,8 @@
                 if (flashcards.length > 0) {
                     selecionarFlashcardAleatorio();
                 }
+                
+                mostrarSelecaoTurma();
             } catch (error) {
             }
         }
