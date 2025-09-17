@@ -695,6 +695,58 @@
             background: #339933;
         }
         
+        .ranking-item {
+            background: #444;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .ranking-posicao {
+            width: 40px;
+            height: 40px;
+            background: #555;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .ranking-conteudo {
+            flex: 1;
+        }
+        
+        .ranking-materia {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        
+        .ranking-info {
+            color: #bbb;
+            font-size: 14px;
+        }
+        
+        .ranking-acoes {
+            margin-left: 15px;
+        }
+        
+        .aviso-urgente {
+            background: #5a2a7d;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #ddd;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -721,6 +773,21 @@
             .selecao-turma-conteudo {
                 padding: 20px;
             }
+            
+            .ranking-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .ranking-posicao {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .ranking-acoes {
+                margin-left: 0;
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
@@ -743,6 +810,7 @@
         <div id="tarefas" class="conteudo-aba">
             <div class="subtabs">
                 <button class="subtab ativa" data-subtab="pendentes">Pendentes</button>
+                <button class="subtab" data-subtab="urgentes">Urgentes</button>
                 <button class="subtab" data-subtab="concluidas">Concluídas</button>
             </div>
             
@@ -750,7 +818,7 @@
                 <input type="text" class="pesquisa" id="pesquisa-tarefas" placeholder="Pesquisar tarefas...">
             </div>
             
-            <div class="grid-container" id="lista-tarefas"></div>
+            <div id="conteudo-subtab"></div>
         </div>
         
         <div id="estudos" class="conteudo-aba">
@@ -908,8 +976,15 @@
         
         function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
-            const container = document.getElementById('lista-tarefas');
-            container.innerHTML = '';
+            const container = document.getElementById('conteudo-subtab');
+            
+            if (subtabAtiva === 'urgentes') {
+                renderizarTarefasUrgentes(termo);
+                return;
+            }
+            
+            container.innerHTML = '<div class="grid-container" id="lista-tarefas"></div>';
+            const listaContainer = document.getElementById('lista-tarefas');
             
             let tarefasFiltradas = subtabAtiva === 'pendentes' 
                 ? tarefas.filter(tarefa => !tarefasStatus[tarefa.id]?.concluida)
@@ -970,6 +1045,82 @@
                 `;
                 
                 container.appendChild(card);
+            });
+        }
+        
+        function renderizarTarefasUrgentes(termoPesquisa = '') {
+            const container = document.getElementById('conteudo-subtab');
+            container.innerHTML = `
+                <div class="aviso-urgente">Só considera quando é a próxima aula e em qual horário, não a data de entrega</div>
+                <div id="ranking-tarefas"></div>
+            `;
+            
+            const rankingContainer = document.getElementById('ranking-tarefas');
+            
+            const tarefasPendentes = tarefas.filter(tarefa => 
+                !tarefasStatus[tarefa.id]?.concluida && 
+                (tarefa.materia.toLowerCase().includes(termoPesquisa) || 
+                 tarefa.descricao.toLowerCase().includes(termoPesquisa) ||
+                 (tarefa.turma && tarefa.turma.toLowerCase().includes(termoPesquisa)))
+            );
+            
+            if (tarefasPendentes.length === 0) {
+                rankingContainer.innerHTML = '<div class="vazio">Nenhuma tarefa urgente encontrada</div>';
+                return;
+            }
+            
+            const tarefasComUrgencia = tarefasPendentes.map(tarefa => {
+                const proximaAula = encontrarProximaAula(tarefa.materia);
+                return { tarefa, proximaAula };
+            }).filter(item => item.proximaAula !== null);
+            
+            if (tarefasComUrgencia.length === 0) {
+                rankingContainer.innerHTML = '<div class="vazio">Nenhuma tarefa com próxima aula definida</div>';
+                return;
+            }
+            
+            const diasSemana = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
+            const diasOrdem = {
+                'Segunda-feira': 0,
+                'Terça-feira': 1,
+                'Quarta-feira': 2,
+                'Quinta-feira': 3,
+                'Sexta-feira': 4
+            };
+            
+            tarefasComUrgencia.sort((a, b) => {
+                const diaA = diasOrdem[a.proximaAula.dia];
+                const diaB = diasOrdem[b.proximaAula.dia];
+                
+                if (diaA !== diaB) return diaA - diaB;
+                
+                const numAulaA = parseInt(a.proximaAula.periodo);
+                const numAulaB = parseInt(b.proximaAula.periodo);
+                
+                return numAulaA - numAulaB;
+            });
+            
+            rankingContainer.innerHTML = '';
+            
+            tarefasComUrgencia.forEach((item, index) => {
+                const { tarefa, proximaAula } = item;
+                
+                const rankingItem = document.createElement('div');
+                rankingItem.className = 'ranking-item';
+                
+                rankingItem.innerHTML = `
+                    <div class="ranking-posicao">${index + 1}</div>
+                    <div class="ranking-conteudo">
+                        <div class="ranking-materia">${tarefa.materia}</div>
+                        <div class="ranking-info">${proximaAula.dia} - ${proximaAula.periodo}</div>
+                    </div>
+                    <div class="ranking-acoes">
+                        <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Visualizar</button>
+                        <button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>
+                    </div>
+                `;
+                
+                rankingContainer.appendChild(rankingItem);
             });
         }
         
