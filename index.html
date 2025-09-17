@@ -1040,7 +1040,7 @@
                             `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>` : 
                             `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${tarefa.id}')">Desfazer</button>`
                         }
-                        ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Ver Resposta</button>` : ''}
+                        ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
                     </div>
                 `;
                 
@@ -1205,7 +1205,7 @@
             }
             
             if (tarefa.resposta) {
-                acoesHTML += `<button class="btn btn-resposta" onclick="visualizarResposta('${id}')">Ver Resposta</button>`;
+                acoesHTML += `<button class="btn btn-resposta" onclick="visualizarResposta('${id}')">Resposta</button>`;
             }
             
             document.getElementById('modal-acoes').innerHTML = acoesHTML;
