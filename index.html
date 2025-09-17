@@ -411,7 +411,7 @@
             border-radius: 4px;
         }
         
-        .modal-descricao::-webkit-scrollbar-thumb {
+        .modal-descricao::-webkit-sc scrollbar-thumb {
             background: #777;
             border-radius: 4px;
         }
@@ -809,8 +809,8 @@
         
         <div id="tarefas" class="conteudo-aba">
             <div class="subtabs">
-                <button class="subtab ativa" data-subtab="pendentes">Pendentes</button>
-                <button class="subtab" data-subtab="urgentes">Urgentes</button>
+                <button class="subtab ativa" data-subtab="rank">Rank</button>
+                <button class="subtab" data-subtab="pendentes">Pendentes</button>
                 <button class="subtab" data-subtab="concluidas">Concluídas</button>
             </div>
             
@@ -890,7 +890,7 @@
         let flashcards = [];
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
-        let subtabAtiva = 'pendentes';
+        let subtabAtiva = 'rank';
         let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
         let turmas = [];
         let flashcardIndex = 0;
@@ -978,8 +978,8 @@
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
             const container = document.getElementById('conteudo-subtab');
             
-            if (subtabAtiva === 'urgentes') {
-                renderizarTarefasUrgentes(termo);
+            if (subtabAtiva === 'rank') {
+                renderizarTarefasRank(termo);
                 return;
             }
             
@@ -1048,7 +1048,7 @@
             });
         }
         
-        function renderizarTarefasUrgentes(termoPesquisa = '') {
+        function renderizarTarefasRank(termoPesquisa = '') {
             const container = document.getElementById('conteudo-subtab');
             container.innerHTML = `
                 <div class="aviso-urgente">Só considera quando é a próxima aula e em qual horário, não a data de entrega</div>
@@ -1065,7 +1065,7 @@
             );
             
             if (tarefasPendentes.length === 0) {
-                rankingContainer.innerHTML = '<div class="vazio">Nenhuma tarefa urgente encontrada</div>';
+                rankingContainer.innerHTML = '<div class="vazio">Nenhuma tarefa encontrada</div>';
                 return;
             }
             
@@ -1079,7 +1079,6 @@
                 return;
             }
             
-            const diasSemana = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
             const diasOrdem = {
                 'Segunda-feira': 0,
                 'Terça-feira': 1,
@@ -1088,14 +1087,31 @@
                 'Sexta-feira': 4
             };
             
+            const hoje = new Date();
+            const diaAtual = hoje.getDay();
+            const horaAtual = hoje.getHours();
+            
+            const diaAtualIndex = diaAtual === 0 ? 6 : diaAtual - 1;
+            
             tarefasComUrgencia.sort((a, b) => {
                 const diaA = diasOrdem[a.proximaAula.dia];
                 const diaB = diasOrdem[b.proximaAula.dia];
                 
-                if (diaA !== diaB) return diaA - diaB;
+                const diaAIndex = (diaA - diaAtualIndex + 7) % 7;
+                const diaBIndex = (diaB - diaAtualIndex + 7) % 7;
+                
+                if (diaAIndex !== diaBIndex) return diaAIndex - diaBIndex;
                 
                 const numAulaA = parseInt(a.proximaAula.periodo);
                 const numAulaB = parseInt(b.proximaAula.periodo);
+                
+                if (diaAIndex === 0) {
+                    const aulaAtual = horaAtual >= 12 ? 2 : horaAtual >= 7 ? 1 : 0;
+                    const prioridadeA = numAulaA > aulaAtual ? 0 : 1;
+                    const prioridadeB = numAulaB > aulaAtual ? 0 : 1;
+                    
+                    if (prioridadeA !== prioridadeB) return prioridadeA - prioridadeB;
+                }
                 
                 return numAulaA - numAulaB;
             });
@@ -1287,10 +1303,6 @@
             const horaAtual = hoje.getHours();
             
             let diaIndex = diaAtual === 0 ? 6 : diaAtual - 1;
-            
-            if (horaAtual >= 12 && diaIndex < 5) {
-                diaIndex++;
-            }
             
             for (let i = 0; i < 7; i++) {
                 const diaVerificar = (diaIndex + i) % 7;
