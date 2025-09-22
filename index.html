@@ -411,7 +411,7 @@
             border-radius: 4px;
         }
         
-        .modal-descricao::-webkit-sc scrollbar-thumb {
+        .modal-descricao::-webkit-scrollbar-thumb {
             background: #777;
             border-radius: 4px;
         }
@@ -720,6 +720,8 @@
         
         .ranking-conteudo {
             flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .ranking-materia {
@@ -735,6 +737,8 @@
         
         .ranking-acoes {
             margin-left: 15px;
+            display: flex;
+            gap: 10px;
         }
         
         .aviso-urgente {
@@ -745,6 +749,43 @@
             text-align: center;
             font-size: 14px;
             color: #ddd;
+        }
+        
+        .filtro-materia-container {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filtro-materia-label {
+            color: #ddd;
+            font-size: 14px;
+        }
+        
+        .filtro-materia-select {
+            padding: 8px 12px;
+            background: #444;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: #eee;
+            font-size: 14px;
+            flex: 1;
+        }
+        
+        .btn-limpar-filtro {
+            padding: 8px 12px;
+            background: #555;
+            color: #eee;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+        
+        .btn-limpar-filtro:hover {
+            background: #666;
         }
         
         @media (max-width: 768px) {
@@ -788,6 +829,11 @@
                 margin-left: 0;
                 margin-top: 10px;
             }
+            
+            .filtro-materia-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
@@ -812,6 +858,14 @@
                 <button class="subtab ativa" data-subtab="rank">Rank</button>
                 <button class="subtab" data-subtab="pendentes">Pendentes</button>
                 <button class="subtab" data-subtab="concluidas">Concluídas</button>
+            </div>
+            
+            <div class="filtro-materia-container" id="filtro-materia-container">
+                <span class="filtro-materia-label">Filtrar por matéria:</span>
+                <select class="filtro-materia-select" id="filtro-materia">
+                    <option value="">Todas as matérias</option>
+                </select>
+                <button class="btn-limpar-filtro" id="btn-limpar-filtro">Limpar</button>
             </div>
             
             <div class="pesquisa-container">
@@ -895,6 +949,7 @@
         let turmas = [];
         let flashcardIndex = 0;
         let flashcardsVistos = new Set();
+        let materiaFiltro = '';
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -925,6 +980,15 @@
         
         document.getElementById('pesquisa-tarefas').addEventListener('input', filtrarTarefas);
         document.getElementById('pesquisa-estudos').addEventListener('input', filtrarEstudos);
+        document.getElementById('filtro-materia').addEventListener('change', (e) => {
+            materiaFiltro = e.target.value;
+            filtrarTarefas();
+        });
+        document.getElementById('btn-limpar-filtro').addEventListener('click', () => {
+            document.getElementById('filtro-materia').value = '';
+            materiaFiltro = '';
+            filtrarTarefas();
+        });
         
         document.getElementById('modal-fechar').addEventListener('click', fecharModal);
         document.getElementById('modal').addEventListener('click', (e) => {
@@ -991,9 +1055,10 @@
                 : tarefas.filter(tarefa => tarefasStatus[tarefa.id]?.concluida);
             
             tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
-                tarefa.materia.toLowerCase().includes(termo) || 
-                tarefa.descricao.toLowerCase().includes(termo) ||
-                (tarefa.turma && tarefa.turma.toLowerCase().includes(termo))
+                (tarefa.materia.toLowerCase().includes(termo) || 
+                 tarefa.descricao.toLowerCase().includes(termo) ||
+                 (tarefa.turma && tarefa.turma.toLowerCase().includes(termo))) &&
+                (materiaFiltro === '' || tarefa.materia === materiaFiltro)
             );
             
             renderizarTarefas(tarefasFiltradas);
@@ -1061,7 +1126,8 @@
                 !tarefasStatus[tarefa.id]?.concluida && 
                 (tarefa.materia.toLowerCase().includes(termoPesquisa) || 
                  tarefa.descricao.toLowerCase().includes(termoPesquisa) ||
-                 (tarefa.turma && tarefa.turma.toLowerCase().includes(termoPesquisa)))
+                 (tarefa.turma && tarefa.turma.toLowerCase().includes(termoPesquisa))) &&
+                (materiaFiltro === '' || tarefa.materia === materiaFiltro)
             );
             
             if (tarefasPendentes.length === 0) {
@@ -1133,6 +1199,7 @@
                     <div class="ranking-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Visualizar</button>
                         <button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>
+                        ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
                     </div>
                 `;
                 
@@ -1432,18 +1499,6 @@
         function extrairTodasMaterias() {
             todasMaterias = [];
             
-            if (horario) {
-                Object.values(horario).forEach(turma => {
-                    Object.values(turma).forEach(dia => {
-                        dia.forEach(aula => {
-                            if (aula.materia && !todasMaterias.includes(aula.materia)) {
-                                todasMaterias.push(aula.materia);
-                            }
-                        });
-                    });
-                });
-            }
-            
             if (tarefas && tarefas.length > 0) {
                 tarefas.forEach(tarefa => {
                     if (tarefa.materia && !todasMaterias.includes(tarefa.materia)) {
@@ -1452,10 +1507,20 @@
                 });
             }
             
-            if (estudos && estudos.length > 0) {
-                estudos.forEach(estudo => {
-                    if (estudo.materia && !todasMaterias.includes(estudo.materia)) {
-                        todasMaterias.push(estudo.materia);
+            atualizarFiltroMaterias();
+        }
+        
+        function atualizarFiltroMaterias() {
+            const filtroSelect = document.getElementById('filtro-materia');
+            const opcoesExistentes = Array.from(filtroSelect.options).map(opt => opt.value);
+            
+            if (todasMaterias && todasMaterias.length > 0) {
+                todasMaterias.sort().forEach(materia => {
+                    if (!opcoesExistentes.includes(materia)) {
+                        const option = document.createElement('option');
+                        option.value = materia;
+                        option.textContent = materia;
+                        filtroSelect.appendChild(option);
                     }
                 });
             }
@@ -1648,6 +1713,7 @@
                 if (turmasData) turmas = turmasData;
                 
                 atualizarSeletorTurmas();
+                extrairTodasMaterias();
                 atualizarContadorNotificacoes();
                 
                 renderizarHorario();
@@ -1660,6 +1726,7 @@
                 
                 mostrarSelecaoTurma();
             } catch (error) {
+                console.error('Erro ao carregar dados:', error);
             }
         }
         
