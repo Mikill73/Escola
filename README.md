@@ -2,7 +2,9 @@
 
 ### 2A
 - Yuri (Full)
-- Hector (Full)
+- Hector Hiro (Full)
+- Vitor Hugo (Respostas)
+-
 
 ### 2B
 - 
