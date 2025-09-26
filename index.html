@@ -478,40 +478,6 @@
             color: #fff;
         }
         
-        .discord-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            text-align: center;
-            padding: 30px;
-        }
-        
-        .discord-mensagem {
-            font-size: 18px;
-            line-height: 1.6;
-            color: #ddd;
-            max-width: 600px;
-        }
-        
-        .btn-discord {
-            padding: 15px 30px;
-            background: #5865F2;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-discord:hover {
-            background: #4752c4;
-        }
-        
         .turma-selector {
             margin-bottom: 20px;
             padding: 12px;
@@ -788,6 +754,34 @@
             background: #666;
         }
         
+        .flashcard-controle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .flashcard-input {
+            width: 100%;
+            padding: 10px;
+            background: #444;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: #eee;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .flashcard-mensagem {
+            color: #aaccaa;
+            font-size: 14px;
+            text-align: center;
+            min-height: 20px;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -845,7 +839,6 @@
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
             <button class="aba" data-aba="estudos">Estudos</button>
             <button class="aba" data-aba="flashcards">Flashcards</button>
-            <button class="aba" data-aba="discord">Discord</button>
         </div>
         
         <div id="horario" class="conteudo-aba ativa">
@@ -884,6 +877,11 @@
         </div>
         
         <div id="flashcards" class="conteudo-aba">
+            <div class="flashcard-controle">
+                <input type="number" class="flashcard-input" id="flashcard-quantidade" placeholder="Quantidade de flashcards" min="1">
+                <div class="flashcard-mensagem" id="flashcard-mensagem"></div>
+            </div>
+            
             <div class="flashcard-container">
                 <div class="flashcard" id="flashcard">
                     <div class="flashcard-inner">
@@ -902,15 +900,6 @@
                 </div>
                 
                 <div class="flashcard-info" id="flashcard-info"></div>
-            </div>
-        </div>
-        
-        <div id="discord" class="conteudo-aba">
-            <div class="discord-container">
-                <div class="discord-mensagem">
-                    Entre no nosso Discord para dar sugestões, reclamações, conversar com outros estudantes e pedir para se tornar um colaborador
-                </div>
-                <a href="https://discord.gg/XpqbH3T7qS" target="_blank" class="btn-discord">Entrar no Discord</a>
             </div>
         </div>
         
@@ -950,6 +939,8 @@
         let flashcardIndex = 0;
         let flashcardsVistos = new Set();
         let materiaFiltro = '';
+        let quantidadeFlashcards = 0;
+        let flashcardsDisponiveis = [];
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -964,7 +955,7 @@
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
                 } else if (aba.dataset.aba === 'flashcards') {
-                    selecionarFlashcardAleatorio();
+                    atualizarFlashcardsDisponiveis();
                 }
             });
         });
@@ -1004,7 +995,7 @@
         });
         
         document.getElementById('flashcard-anterior').addEventListener('click', () => {
-            flashcardIndex = (flashcardIndex - 1 + flashcards.length) % flashcards.length;
+            flashcardIndex = (flashcardIndex - 1 + flashcardsDisponiveis.length) % flashcardsDisponiveis.length;
             mostrarFlashcard();
         });
         
@@ -1025,11 +1016,16 @@
             renderizarHorario();
         });
         
+        document.getElementById('flashcard-quantidade').addEventListener('change', (e) => {
+            quantidadeFlashcards = parseInt(e.target.value) || 0;
+            atualizarFlashcardsDisponiveis();
+        });
+        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 fecharModal();
             } else if (e.key === 'ArrowLeft') {
-                flashcardIndex = (flashcardIndex - 1 + flashcards.length) % flashcards.length;
+                flashcardIndex = (flashcardIndex - 1 + flashcardsDisponiveis.length) % flashcardsDisponiveis.length;
                 mostrarFlashcard();
             } else if (e.key === 'ArrowRight') {
                 selecionarFlashcardAleatorio();
@@ -1647,17 +1643,44 @@
             localStorage.removeItem('tarefasVistas');
         }
         
-        function selecionarFlashcardAleatorio() {
-            if (flashcards.length === 0) return;
+        function atualizarFlashcardsDisponiveis() {
+            const input = document.getElementById('flashcard-quantidade');
+            const mensagem = document.getElementById('flashcard-mensagem');
             
-            if (flashcardsVistos.size >= flashcards.length) {
-                flashcardsVistos.clear();
+            if (!quantidadeFlashcards || quantidadeFlashcards <= 0) {
+                flashcardsDisponiveis = [...flashcards];
+                mensagem.textContent = `Mostrando todos os ${flashcards.length} flashcards`;
+            } else {
+                const maxFlashcards = Math.min(quantidadeFlashcards, flashcards.length);
+                flashcardsDisponiveis = flashcards.slice(0, maxFlashcards);
+                mensagem.textContent = `Mostrando ${maxFlashcards} de ${flashcards.length} flashcards`;
+            }
+            
+            flashcardsVistos.clear();
+            flashcardIndex = 0;
+            
+            if (flashcardsDisponiveis.length > 0) {
+                selecionarFlashcardAleatorio();
+            } else {
+                document.getElementById('flashcard-frente').textContent = 'Nenhum flashcard';
+                document.getElementById('flashcard-verso').textContent = '';
+                document.getElementById('flashcard-info').textContent = '0/0';
+            }
+        }
+        
+        function selecionarFlashcardAleatorio() {
+            if (flashcardsDisponiveis.length === 0) return;
+            
+            if (flashcardsVistos.size >= flashcardsDisponiveis.length) {
+                const mensagem = document.getElementById('flashcard-mensagem');
+                mensagem.textContent = `Você já viu todos`;
+                return;
             }
             
             let novoIndex;
             do {
-                novoIndex = Math.floor(Math.random() * flashcards.length);
-            } while (flashcardsVistos.has(novoIndex) && flashcardsVistos.size < flashcards.length);
+                novoIndex = Math.floor(Math.random() * flashcardsDisponiveis.length);
+            } while (flashcardsVistos.has(novoIndex) && flashcardsVistos.size < flashcardsDisponiveis.length);
             
             flashcardsVistos.add(novoIndex);
             flashcardIndex = novoIndex;
@@ -1665,15 +1688,15 @@
         }
         
         function mostrarFlashcard() {
-            if (flashcards.length === 0) return;
+            if (flashcardsDisponiveis.length === 0) return;
             
-            const flashcard = flashcards[flashcardIndex];
+            const flashcard = flashcardsDisponiveis[flashcardIndex];
             document.getElementById('flashcard-frente').textContent = flashcard.frente;
             document.getElementById('flashcard-verso').textContent = flashcard.verso;
             document.getElementById('flashcard').classList.remove('virado');
             
             const infoCriador = flashcard.criador ? `Criado por: ${flashcard.criador}${flashcard.turmaCriador ? ` (${flashcard.turmaCriador})` : ''}` : '';
-            document.getElementById('flashcard-info').textContent = `${flashcardIndex + 1}/${flashcards.length} ${infoCriador}`;
+            document.getElementById('flashcard-info').textContent = `${flashcardIndex + 1}/${flashcardsDisponiveis.length} ${infoCriador}`;
         }
         
         function formatarData(dataString) {
@@ -1721,7 +1744,7 @@
                 renderizarEstudos();
                 
                 if (flashcards.length > 0) {
-                    selecionarFlashcardAleatorio();
+                    atualizarFlashcardsDisponiveis();
                 }
                 
                 mostrarSelecaoTurma();
