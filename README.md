@@ -3,8 +3,8 @@
 ### 2A
 - Yuri (Full)
 - Hector Hiro (Full)
-- Vitor Hugo (Respostas)
--
+- Vitor Hugo Luciano (Respostas)
+- Maria Eduarda Ferreira (Respostas)
 
 ### 2B
 - 
