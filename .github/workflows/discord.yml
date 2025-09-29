@@ -14,4 +14,4 @@ jobs:
           COMMIT_MSG="$(git log -1 --pretty=format:'%h %an - %s')"
           curl -H "Content-Type: application/json" \
             -d "{\"content\": \"$COMMIT_MSG\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
+            ${{ secrets.DISCORD_WEBHOOK_MODIFICACOES }}
