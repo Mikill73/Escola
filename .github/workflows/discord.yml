@@ -18,15 +18,18 @@ jobs:
         run: |
           LAST_COMMIT_HASH=$(git log -1 --pretty=format:'%h')
           LAST_COMMIT_MSG=$(git log -1 --pretty=format:'%s')
-          LAST_COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
           REPO_URL="https://github.com/${GITHUB_REPOSITORY}/commit/$LAST_COMMIT_HASH"
 
-          curl -H "Content-Type: application/json" \
-            -d "{
-              \"embeds\": [{
-                \"description\": \"[$LAST_COMMIT_HASH]($REPO_URL) - $LAST_COMMIT_MSG\",
-                \"color\": 3066993,
-                \"footer\": {\"text\": \"Autor: $LAST_COMMIT_AUTHOR\"}
-              }]
-            }" \
-            ${{ secrets.DISCORD_WEBHOOK_MODIFICACOES }}
+          if [[ "$LAST_COMMIT_MSG" =~ ^[A-Za-z0-9_-]+[[:space:]]*-[[:space:]]*.+$ ]]; then
+            NAME=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f1 | xargs)
+            ACTION=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f2- | xargs)
+
+            curl -H "Content-Type: application/json" \
+              -d "{
+                \"embeds\": [{
+                  \"description\": \"$ACTION - [Ver]($REPO_URL)\nAutor: $NAME\",
+                  \"color\": 16777215
+                }]
+              }" \
+              ${{ secrets.DISCORD_WEBHOOK_MODIFICACOES }}
+          fi
