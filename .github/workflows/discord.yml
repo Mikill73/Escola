@@ -1,0 +1,17 @@
+name: Log de modificações pro DC
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enviar última mensagem de pro DC
+        run: |
+          COMMIT_MSG="$(git log -1 --pretty=format:'%h %an - %s')"
+          curl -H "Content-Type: application/json" \
+            -d "{\"content\": \"$COMMIT_MSG\"}" \
+            ${{ secrets.DISCORD_WEBHOOK }}
