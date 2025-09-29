@@ -14,9 +14,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Enviar última mensagem pro DC
+      - name: Enviar embed pro Discord
         run: |
-          COMMIT_MSG="$(git log -1 --pretty=format:'%h %an - %s')"
+          LAST_COMMIT_HASH=$(git log -1 --pretty=format:'%h')
+          LAST_COMMIT_MSG=$(git log -1 --pretty=format:'%s')
+          LAST_COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+          REPO_URL="https://github.com/${GITHUB_REPOSITORY}/commit/$LAST_COMMIT_HASH"
+
           curl -H "Content-Type: application/json" \
-            -d "{\"content\": \"$COMMIT_MSG\"}" \
+            -d "{
+              \"embeds\": [{
+                \"description\": \"[$LAST_COMMIT_HASH]($REPO_URL) - $LAST_COMMIT_MSG\",
+                \"color\": 3066993,
+                \"footer\": {\"text\": \"Autor: $LAST_COMMIT_AUTHOR\"}
+              }]
+            }" \
             ${{ secrets.DISCORD_WEBHOOK_MODIFICACOES }}
