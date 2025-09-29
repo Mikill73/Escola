@@ -9,7 +9,12 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Enviar última mensagem de pro DC
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Enviar última mensagem pro DC
         run: |
           COMMIT_MSG="$(git log -1 --pretty=format:'%h %an - %s')"
           curl -H "Content-Type: application/json" \
