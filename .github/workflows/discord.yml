@@ -28,15 +28,17 @@ jobs:
             SITE_URL=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f5 | xargs)
 
             if [[ "$ACTION" == *"Horário"* ]] || [[ "$ACTION" == *"Flashcard"* ]]; then
-              DESCRIPTION="**Ação:** $ACTION\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n**Autor:** $NAME"
+              DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA"
+            elif [[ "$ACTION" == *"Tarefa"* ]]; then
+              DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n[Ver Tarefa]($SITE_URL)"
             else
-              DESCRIPTION="**Ação:** $ACTION\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n**Autor:** $NAME\n[Ver]($SITE_URL)"
+              DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n[Ver]($SITE_URL)"
             fi
 
             curl -H "Content-Type: application/json" \
               -d "{
                 \"embeds\": [{
-                  \"title\": \"Nova Modificação\",
+                  \"title\": \"$ACTION\",
                   \"description\": \"$DESCRIPTION\",
                   \"color\": 3447003,
                   \"timestamp\": \"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\",
