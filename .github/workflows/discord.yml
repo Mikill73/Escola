@@ -22,12 +22,15 @@ jobs:
 
           if [[ "$LAST_COMMIT_MSG" =~ ^[A-Za-z0-9_-]+[[:space:]]*-[[:space:]]*.+$ ]]; then
             NAME=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f1 | xargs)
-            ACTION=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f2- | xargs)
+            ACTION=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f2 | xargs)
+            MATERIA=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f3 | xargs)
+            TURMA=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f4 | xargs)
+            SITE_URL=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f5 | xargs)
 
             curl -H "Content-Type: application/json" \
               -d "{
                 \"embeds\": [{
-                  \"description\": \"$ACTION - [Ver]($REPO_URL)\nAutor: $NAME\",
+                  \"description\": \"$ACTION - Matéria: $MATERIA - Turma: $TURma - [Ver]($SITE_URL)\nAutor: $NAME\",
                   \"color\": 16777215
                 }]
               }" \
