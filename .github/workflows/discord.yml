@@ -55,6 +55,4 @@ jobs:
               }" \
               ${{ secrets.DISCORD_WEBHOOK_MODIFICACOES }}
           else
-            echo "Commit message format doesn't match expected pattern"
-            echo "Expected format: Name - Action - Materia - Turma - URL"
           fi
