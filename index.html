@@ -761,10 +761,11 @@
             gap: 10px;
             margin-bottom: 20px;
             width: 100%;
+            max-width: 300px;
         }
         
         .flashcard-input {
-            width: 300px;
+            width: 100%;
             padding: 10px;
             background: #444;
             border: 1px solid #555;
@@ -827,73 +828,52 @@
         }
         
         .colaboradores-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
             margin-top: 20px;
         }
         
-        .colaboradores-turma {
-            margin-bottom: 25px;
-            padding: 20px;
+        .colaborador-turma {
             background: #444;
             border-radius: 10px;
+            padding: 20px;
         }
         
-        .colaboradores-turma h3 {
+        .colaborador-turma h3 {
             margin-bottom: 15px;
             color: #fff;
             border-bottom: 1px solid #666;
             padding-bottom: 10px;
         }
         
-        .colaboradores-lista {
-            list-style-type: none;
-        }
-        
         .colaborador-item {
             background: #555;
-            padding: 12px 12px 12px 35px;
+            padding: 10px 15px;
             border-radius: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #ddd;
-            position: relative;
-            white-space: pre-wrap;
         }
         
-        .colaborador-item:before {
-            content: "•";
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-            color: #aaa;
-        }
-        
-        .colaborador-item:last-child {
-            margin-bottom: 0;
+        .colaborador-nome {
+            font-weight: 500;
+            color: #aaccaa;
         }
         
         .colaborador-funcao {
             font-size: 12px;
-            color: #aaccaa;
+            color: #bbb;
             margin-top: 3px;
         }
         
-        .sugestao-colaborador {
+        .colaborador-sugestao {
             background: #5a2a7d;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 30px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
             text-align: center;
-        }
-        
-        .sugestao-colaborador h3 {
-            margin-bottom: 10px;
-            color: #fff;
-        }
-        
-        .sugestao-colaborador p {
+            font-size: 14px;
             color: #ddd;
-            line-height: 1.5;
         }
         
         @media (max-width: 768px) {
@@ -947,9 +927,8 @@
                 grid-template-columns: 1fr;
             }
             
-            .flashcard-input {
-                width: 100%;
-                max-width: 300px;
+            .colaboradores-container {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -960,8 +939,8 @@
         <div class="abas">
             <button class="aba ativa" data-aba="horario">Horário</button>
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
-            <button class="aba" data-aba="estudos">Estudos</button>
             <button class="aba" data-aba="flashcards">Flashcards</button>
+            <button class="aba" data-aba="estudos">Estudos</button>
             <button class="aba" data-aba="colaboradores">Colaboradores</button>
             <button class="aba" data-aba="configuracoes">Configurações</button>
         </div>
@@ -993,14 +972,6 @@
             <div id="conteudo-subtab"></div>
         </div>
         
-        <div id="estudos" class="conteudo-aba">
-            <div class="pesquisa-container">
-                <input type="text" class="pesquisa" id="pesquisa-estudos" placeholder="Pesquisar estudos...">
-            </div>
-            
-            <div class="grid-container" id="lista-estudos"></div>
-        </div>
-        
         <div id="flashcards" class="conteudo-aba">
             <div class="flashcard-controle">
                 <input type="number" class="flashcard-input" id="flashcard-quantidade" placeholder="Quantidade de flashcards" min="1">
@@ -1028,11 +999,19 @@
             </div>
         </div>
         
+        <div id="estudos" class="conteudo-aba">
+            <div class="pesquisa-container">
+                <input type="text" class="pesquisa" id="pesquisa-estudos" placeholder="Pesquisar estudos...">
+            </div>
+            
+            <div class="grid-container" id="lista-estudos"></div>
+        </div>
+        
         <div id="colaboradores" class="conteudo-aba">
-            <div class="colaboradores-container" id="colaboradores-lista"></div>
-            <div class="sugestao-colaborador">
-                <h3>Torne-se um Colaborador</h3>
-                <p>Entre em contato com qualquer um dos colaboradores desta lista (preferencialmente os que têm Acesso Total) para se tornar um colaborador.</p>
+            <div class="colaboradores-container" id="lista-colaboradores"></div>
+            
+            <div class="colaborador-sugestao">
+                Torne-se um colaborador entrando em contato com qualquer um dos colaboradores dessa lista (Preferencialmente os que tem Full-Acess)
             </div>
         </div>
         
@@ -1063,12 +1042,12 @@
                         <span>Tarefas</span>
                     </label>
                     <label class="configuracao-checkbox">
-                        <input type="checkbox" id="config-aba-estudos" checked>
-                        <span>Estudos</span>
-                    </label>
-                    <label class="configuracao-checkbox">
                         <input type="checkbox" id="config-aba-flashcards" checked>
                         <span>Flashcards</span>
+                    </label>
+                    <label class="configuracao-checkbox">
+                        <input type="checkbox" id="config-aba-estudos" checked>
+                        <span>Estudos</span>
                     </label>
                     <label class="configuracao-checkbox">
                         <input type="checkbox" id="config-aba-colaboradores" checked>
@@ -1106,7 +1085,6 @@
         let estudos = [];
         let horario = {};
         let flashcards = [];
-        let colaboradores = {};
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
@@ -1122,8 +1100,8 @@
             abasAtivas: {
                 horario: true,
                 tarefas: true,
-                estudos: true,
                 flashcards: true,
+                estudos: true,
                 colaboradores: true,
                 configuracoes: true
             }
@@ -1940,8 +1918,8 @@
             
             document.getElementById('config-aba-horario').checked = configuracoes.abasAtivas.horario;
             document.getElementById('config-aba-tarefas').checked = configuracoes.abasAtivas.tarefas;
-            document.getElementById('config-aba-estudos').checked = configuracoes.abasAtivas.estudos;
             document.getElementById('config-aba-flashcards').checked = configuracoes.abasAtivas.flashcards;
+            document.getElementById('config-aba-estudos').checked = configuracoes.abasAtivas.estudos;
             document.getElementById('config-aba-colaboradores').checked = configuracoes.abasAtivas.colaboradores;
             
             atualizarVisibilidadeAbas();
@@ -1990,37 +1968,41 @@
         }
         
         function renderizarColaboradores() {
-            const container = document.getElementById('colaboradores-lista');
+            const container = document.getElementById('lista-colaboradores');
             container.innerHTML = '';
             
-            if (!colaboradores || Object.keys(colaboradores).length === 0) {
-                container.innerHTML = '<div class="vazio">Nenhum colaborador encontrado</div>';
-                return;
-            }
+            const colaboradores = {
+                '2A': [
+                    { nome: 'Yuri', funcao: 'Full' },
+                    { nome: 'Hector Hiro', funcao: 'Full' },
+                    { nome: 'Vitor Hugo Luciano', funcao: 'Respostas' },
+                    { nome: 'Maria Eduarda Ferreira', funcao: 'Respostas' }
+                ],
+                '2B': [],
+                '2C': [],
+                '2D': [],
+                '2E': []
+            };
             
             Object.keys(colaboradores).forEach(turma => {
-                if (colaboradores[turma] && colaboradores[turma].length > 0) {
+                if (colaboradores[turma].length > 0) {
                     const turmaDiv = document.createElement('div');
-                    turmaDiv.className = 'colaboradores-turma';
+                    turmaDiv.className = 'colaborador-turma';
                     
                     turmaDiv.innerHTML = `<h3>${turma}</h3>`;
                     
-                    const lista = document.createElement('ul');
-                    lista.className = 'colaboradores-lista';
-                    
                     colaboradores[turma].forEach(colaborador => {
-                        const item = document.createElement('li');
-                        item.className = 'colaborador-item';
+                        const colaboradorItem = document.createElement('div');
+                        colaboradorItem.className = 'colaborador-item';
                         
-                        item.innerHTML = `
-                            ${colaborador.nome}
+                        colaboradorItem.innerHTML = `
+                            <div class="colaborador-nome">${colaborador.nome}</div>
                             <div class="colaborador-funcao">${colaborador.funcao}</div>
                         `;
                         
-                        lista.appendChild(item);
+                        turmaDiv.appendChild(colaboradorItem);
                     });
                     
-                    turmaDiv.appendChild(lista);
                     container.appendChild(turmaDiv);
                 }
             });
@@ -2030,13 +2012,12 @@
             try {
                 limparLocalStorageAntigo();
                 
-                const [tarefasData, estudosData, horarioData, flashcardsData, turmasData, colaboradoresData] = await Promise.all([
+                const [tarefasData, estudosData, horarioData, flashcardsData, turmasData] = await Promise.all([
                     fetchDados('Tarefas'),
                     fetchDados('Estudos'),
                     fetchDados('Horário'),
                     fetchDados('Flashcards'),
-                    fetchDados('Turmas'),
-                    fetchDados('Colaboradores')
+                    fetchDados('Turmas')
                 ]);
                 
                 if (tarefasData) {
@@ -2051,7 +2032,6 @@
                 if (horarioData) horario = horarioData;
                 if (flashcardsData) flashcards = flashcardsData;
                 if (turmasData) turmas = turmasData;
-                if (colaboradoresData) colaboradores = colaboradoresData;
                 
                 atualizarSeletorTurmas();
                 extrairTodasMaterias();
