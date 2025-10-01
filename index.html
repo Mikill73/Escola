@@ -782,6 +782,51 @@
             min-height: 20px;
         }
         
+        .configuracoes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .configuracao-item {
+            background: #444;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .configuracao-titulo {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 1px solid #666;
+            padding-bottom: 8px;
+        }
+        
+        .configuracao-select {
+            padding: 10px;
+            background: #555;
+            border: 1px solid #666;
+            border-radius: 6px;
+            color: #eee;
+            font-size: 14px;
+        }
+        
+        .configuracao-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .configuracao-checkbox input {
+            width: 18px;
+            height: 18px;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -828,6 +873,10 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+            
+            .configuracoes-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -839,6 +888,7 @@
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
             <button class="aba" data-aba="estudos">Estudos</button>
             <button class="aba" data-aba="flashcards">Flashcards</button>
+            <button class="aba" data-aba="configuracoes">Configurações</button>
         </div>
         
         <div id="horario" class="conteudo-aba ativa">
@@ -903,6 +953,44 @@
             </div>
         </div>
         
+        <div id="configuracoes" class="conteudo-aba">
+            <div class="configuracoes-grid">
+                <div class="configuracao-item">
+                    <div class="configuracao-titulo">Selecionar Turma</div>
+                    <select class="configuracao-select" id="config-turma"></select>
+                </div>
+                
+                <div class="configuracao-item">
+                    <div class="configuracao-titulo">Ordem das Tarefas</div>
+                    <select class="configuracao-select" id="config-ordem-tarefas">
+                        <option value="rank">Rank</option>
+                        <option value="pendentes">Pendentes</option>
+                        <option value="concluidas">Concluídas</option>
+                    </select>
+                </div>
+                
+                <div class="configuracao-item">
+                    <div class="configuracao-titulo">Abas Ativas</div>
+                    <label class="configuracao-checkbox">
+                        <input type="checkbox" id="config-aba-horario" checked>
+                        <span>Horário</span>
+                    </label>
+                    <label class="configuracao-checkbox">
+                        <input type="checkbox" id="config-aba-tarefas" checked>
+                        <span>Tarefas</span>
+                    </label>
+                    <label class="configuracao-checkbox">
+                        <input type="checkbox" id="config-aba-estudos" checked>
+                        <span>Estudos</span>
+                    </label>
+                    <label class="configuracao-checkbox">
+                        <input type="checkbox" id="config-aba-flashcards" checked>
+                        <span>Flashcards</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
         <div class="modal" id="modal">
             <div class="modal-conteudo">
                 <div class="modal-fechar" id="modal-fechar">X</div>
@@ -941,6 +1029,16 @@
         let materiaFiltro = '';
         let quantidadeFlashcards = 0;
         let flashcardsDisponiveis = [];
+        let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || {
+            ordemTarefas: 'rank',
+            abasAtivas: {
+                horario: true,
+                tarefas: true,
+                estudos: true,
+                flashcards: true,
+                configuracoes: true
+            }
+        };
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -1019,6 +1117,29 @@
         document.getElementById('flashcard-quantidade').addEventListener('change', (e) => {
             quantidadeFlashcards = parseInt(e.target.value) || 0;
             atualizarFlashcardsDisponiveis();
+        });
+        
+        document.getElementById('config-turma').addEventListener('change', (e) => {
+            turmaSelecionada = e.target.value;
+            localStorage.setItem('turmaSelecionada', turmaSelecionada);
+            document.getElementById('turma-selector').value = turmaSelecionada;
+            renderizarHorario();
+            salvarConfiguracoes();
+        });
+        
+        document.getElementById('config-ordem-tarefas').addEventListener('change', (e) => {
+            configuracoes.ordemTarefas = e.target.value;
+            salvarConfiguracoes();
+            aplicarOrdemTarefas();
+        });
+        
+        document.querySelectorAll('#configuracoes input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const aba = e.target.id.replace('config-aba-', '');
+                configuracoes.abasAtivas[aba] = e.target.checked;
+                salvarConfiguracoes();
+                atualizarVisibilidadeAbas();
+            });
         });
         
         document.addEventListener('keydown', (e) => {
@@ -1456,8 +1577,11 @@
         function atualizarSeletorTurmas() {
             const selector = document.getElementById('turma-selector');
             const modalSelector = document.getElementById('selecao-turma-selector');
+            const configTurma = document.getElementById('config-turma');
+            
             selector.innerHTML = '';
             modalSelector.innerHTML = '';
+            configTurma.innerHTML = '';
             
             if (turmas && turmas.length > 0) {
                 const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
@@ -1472,17 +1596,25 @@
                     modalOption.value = turma;
                     modalOption.textContent = turma;
                     modalSelector.appendChild(modalOption);
+                    
+                    const configOption = document.createElement('option');
+                    configOption.value = turma;
+                    configOption.textContent = turma;
+                    configTurma.appendChild(configOption);
                 });
                 
                 if (!turmaSelecionada && turmasNumericas.length > 0) {
                     turmaSelecionada = turmasNumericas[0];
                     selector.value = turmaSelecionada;
+                    configTurma.value = turmaSelecionada;
                 } else if (turmaSelecionada) {
                     selector.value = turmaSelecionada;
+                    configTurma.value = turmaSelecionada;
                 }
             } else {
                 selector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
                 modalSelector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
+                configTurma.innerHTML = '<option value="">Nenhuma turma disponível</option>';
             }
         }
         
@@ -1710,6 +1842,63 @@
             }
         }
         
+        function salvarConfiguracoes() {
+            localStorage.setItem('configuracoes', JSON.stringify(configuracoes));
+        }
+        
+        function carregarConfiguracoes() {
+            document.getElementById('config-ordem-tarefas').value = configuracoes.ordemTarefas;
+            
+            document.getElementById('config-aba-horario').checked = configuracoes.abasAtivas.horario;
+            document.getElementById('config-aba-tarefas').checked = configuracoes.abasAtivas.tarefas;
+            document.getElementById('config-aba-estudos').checked = configuracoes.abasAtivas.estudos;
+            document.getElementById('config-aba-flashcards').checked = configuracoes.abasAtivas.flashcards;
+            
+            atualizarVisibilidadeAbas();
+            aplicarOrdemTarefas();
+        }
+        
+        function atualizarVisibilidadeAbas() {
+            document.querySelectorAll('.aba').forEach(aba => {
+                const abaId = aba.dataset.aba;
+                if (abaId === 'configuracoes') return;
+                
+                if (!configuracoes.abasAtivas[abaId]) {
+                    aba.style.display = 'none';
+                } else {
+                    aba.style.display = 'block';
+                }
+            });
+        }
+        
+        function aplicarOrdemTarefas() {
+            subtabAtiva = configuracoes.ordemTarefas;
+            
+            document.querySelectorAll('.subtab').forEach(subtab => {
+                subtab.classList.remove('ativa');
+                if (subtab.dataset.subtab === configuracoes.ordemTarefas) {
+                    subtab.classList.add('ativa');
+                }
+            });
+            
+            filtrarTarefas();
+        }
+        
+        function verificarTarefaURL() {
+            const url = new URL(window.location.href);
+            const hash = url.hash;
+            
+            if (hash && hash.startsWith('#tarefa-')) {
+                const tarefaId = hash.replace('#tarefa-', '');
+                const tarefa = tarefas.find(t => t.id === tarefaId);
+                
+                if (tarefa) {
+                    visualizarTarefa(tarefaId);
+                    window.history.replaceState(null, '', url.pathname);
+                }
+            }
+        }
+        
         async function carregarDados() {
             try {
                 limparLocalStorageAntigo();
@@ -1738,6 +1927,7 @@
                 atualizarSeletorTurmas();
                 extrairTodasMaterias();
                 atualizarContadorNotificacoes();
+                carregarConfiguracoes();
                 
                 renderizarHorario();
                 filtrarTarefas();
@@ -1748,8 +1938,8 @@
                 }
                 
                 mostrarSelecaoTurma();
+                verificarTarefaURL();
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
             }
         }
         
