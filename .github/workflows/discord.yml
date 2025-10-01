@@ -27,11 +27,22 @@ jobs:
             TURMA=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f4 | xargs)
             SITE_URL=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f5 | xargs)
 
+            if [[ "$ACTION" == *"Horário"* ]] || [[ "$ACTION" == *"Flashcard"* ]]; then
+              DESCRIPTION="**Ação:** $ACTION\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n**Autor:** $NAME"
+            else
+              DESCRIPTION="**Ação:** $ACTION\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n**Autor:** $NAME\n[Ver]($SITE_URL)"
+            fi
+
             curl -H "Content-Type: application/json" \
               -d "{
                 \"embeds\": [{
-                  \"description\": \"$ACTION - Matéria: $MATERIA - Turma: $TURma - [Ver]($SITE_URL)\nAutor: $NAME\",
-                  \"color\": 16777215
+                  \"title\": \"Nova Modificação\",
+                  \"description\": \"$DESCRIPTION\",
+                  \"color\": 3447003,
+                  \"timestamp\": \"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\",
+                  \"footer\": {
+                    \"text\": \"Commit $LAST_COMMIT_HASH\"
+                  }
                 }]
               }" \
               ${{ secrets.DISCORD_WEBHOOK_MODIFICACOES }}
