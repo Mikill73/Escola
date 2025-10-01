@@ -36,9 +36,8 @@ jobs:
             curl -H "Content-Type: application/json" \
               -d "{
                 \"embeds\": [{
-                  \"title\": \"Nova Modificação\",
                   \"description\": \"$DESCRIPTION\",
-                  \"color\": 3447003,
+                  \"color\": 0,
                   \"timestamp\": \"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\",
                   \"footer\": {
                     \"text\": \"Commit $LAST_COMMIT_HASH\"
