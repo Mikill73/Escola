@@ -20,15 +20,15 @@ jobs:
           LAST_COMMIT_MSG=$(git log -1 --pretty=format:'%s')
           REPO_URL="https://github.com/${GITHUB_REPOSITORY}/commit/$LAST_COMMIT_HASH"
 
-          if [[ "$LAST_COMMIT_MSG" =~ ^[A-Za-z0-9_-]+[[:space:]]*-[[:space:]]*.+$ ]]; then
+          if [[ "$LAST_COMMIT_MSG" =~ ^[A-Za-z0-9\s]+[[:space:]]*-[[:space:]]*.+$ ]]; then
             NAME=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f1 | xargs)
             ACTION=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f2 | xargs)
             MATERIA=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f3 | xargs)
             TURMA=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f4 | xargs)
             SITE_URL=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f5 | xargs)
 
-            if [[ "$ACTION" == *"Horário"* ]] || [[ "$ACTION" == *"Flashcard"* ]]; then
-              DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA"
+            if [[ "$ACTION" == *"Horário"* ]] || [[ "$ACTION" == *"Flashcard"* ]] || [[ "$ACTION" == *"Turma"* ]]; then
+              DESCRIPTION="**Autor:** $NAME\n**Turma:** $TURMA"
             elif [[ "$ACTION" == *"Tarefa"* ]]; then
               DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n[Ver Tarefa]($SITE_URL)"
             else
