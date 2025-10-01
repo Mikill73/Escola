@@ -1931,8 +1931,19 @@
                 const abaId = aba.dataset.aba;
                 if (abaId === 'configuracoes') return;
                 
-                if (!configuracoes.abasAtivas[abaId]) {
+                const estaAtiva = configuracoes.abasAtivas[abaId];
+                if (estaAtiva === false) {
                     aba.style.display = 'none';
+                    if (aba.classList.contains('ativa')) {
+                        aba.classList.remove('ativa');
+                        document.getElementById(abaId).classList.remove('ativa');
+                        
+                        const primeiraAbaAtiva = document.querySelector('.aba[style=""]');
+                        if (primeiraAbaAtiva) {
+                            primeiraAbaAtiva.classList.add('ativa');
+                            document.getElementById(primeiraAbaAtiva.dataset.aba).classList.add('ativa');
+                        }
+                    }
                 } else {
                     aba.style.display = 'block';
                 }
