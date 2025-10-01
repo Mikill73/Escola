@@ -34,6 +34,8 @@ jobs:
 
             if [[ "$ACTION" == *"Horário"* ]] || [[ "$ACTION" == *"Flashcard"* ]] || [[ "$ACTION" == *"Turma"* ]]; then
               DESCRIPTION="**Autor:** $NAME\n**Turma:** $TURMA"
+            elif [[ "$ACTION" == *"Removeu Tarefa"* ]]; then
+              DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA"
             elif [[ "$ACTION" == *"Tarefa"* ]]; then
               DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n[Ver Tarefa]($SITE_URL)"
             else
