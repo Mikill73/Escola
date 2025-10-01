@@ -827,6 +827,58 @@
             height: 18px;
         }
         
+        .colaboradores-container {
+            margin-top: 20px;
+        }
+        
+        .colaboradores-turma {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #444;
+            border-radius: 10px;
+        }
+        
+        .colaboradores-turma h3 {
+            margin-bottom: 15px;
+            color: #fff;
+            border-bottom: 1px solid #666;
+            padding-bottom: 10px;
+        }
+        
+        .colaboradores-lista {
+            list-style-type: none;
+        }
+        
+        .colaborador-item {
+            background: #555;
+            padding: 12px 12px 12px 35px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            color: #ddd;
+            position: relative;
+            white-space: pre-wrap;
+        }
+        
+        .colaborador-item:before {
+            content: "•";
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #aaa;
+        }
+        
+        .colaborador-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .colaborador-funcao {
+            font-size: 12px;
+            color: #aaccaa;
+            margin-top: 3px;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -888,6 +940,7 @@
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
             <button class="aba" data-aba="estudos">Estudos</button>
             <button class="aba" data-aba="flashcards">Flashcards</button>
+            <button class="aba" data-aba="colaboradores">Colaboradores</button>
             <button class="aba" data-aba="configuracoes">Configurações</button>
         </div>
         
@@ -898,8 +951,8 @@
         
         <div id="tarefas" class="conteudo-aba">
             <div class="subtabs">
-                <button class="subtab ativa" data-subtab="rank">Rank</button>
-                <button class="subtab" data-subtab="pendentes">Pendentes</button>
+                <button class="subtab ativa" data-subtab="pendentes">Pendentes</button>
+                <button class="subtab" data-subtab="rank">Rank</button>
                 <button class="subtab" data-subtab="concluidas">Concluídas</button>
             </div>
             
@@ -953,6 +1006,10 @@
             </div>
         </div>
         
+        <div id="colaboradores" class="conteudo-aba">
+            <div class="colaboradores-container" id="colaboradores-lista"></div>
+        </div>
+        
         <div id="configuracoes" class="conteudo-aba">
             <div class="configuracoes-grid">
                 <div class="configuracao-item">
@@ -963,8 +1020,8 @@
                 <div class="configuracao-item">
                     <div class="configuracao-titulo">Ordem das Tarefas</div>
                     <select class="configuracao-select" id="config-ordem-tarefas">
-                        <option value="rank">Rank</option>
                         <option value="pendentes">Pendentes</option>
+                        <option value="rank">Rank</option>
                         <option value="concluidas">Concluídas</option>
                     </select>
                 </div>
@@ -986,6 +1043,10 @@
                     <label class="configuracao-checkbox">
                         <input type="checkbox" id="config-aba-flashcards" checked>
                         <span>Flashcards</span>
+                    </label>
+                    <label class="configuracao-checkbox">
+                        <input type="checkbox" id="config-aba-colaboradores" checked>
+                        <span>Colaboradores</span>
                     </label>
                 </div>
             </div>
@@ -1019,9 +1080,10 @@
         let estudos = [];
         let horario = {};
         let flashcards = [];
+        let colaboradores = {};
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
-        let subtabAtiva = 'rank';
+        let subtabAtiva = 'pendentes';
         let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
         let turmas = [];
         let flashcardIndex = 0;
@@ -1030,12 +1092,13 @@
         let quantidadeFlashcards = 0;
         let flashcardsDisponiveis = [];
         let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || {
-            ordemTarefas: 'rank',
+            ordemTarefas: 'pendentes',
             abasAtivas: {
                 horario: true,
                 tarefas: true,
                 estudos: true,
                 flashcards: true,
+                colaboradores: true,
                 configuracoes: true
             }
         };
@@ -1853,6 +1916,7 @@
             document.getElementById('config-aba-tarefas').checked = configuracoes.abasAtivas.tarefas;
             document.getElementById('config-aba-estudos').checked = configuracoes.abasAtivas.estudos;
             document.getElementById('config-aba-flashcards').checked = configuracoes.abasAtivas.flashcards;
+            document.getElementById('config-aba-colaboradores').checked = configuracoes.abasAtivas.colaboradores;
             
             atualizarVisibilidadeAbas();
             aplicarOrdemTarefas();
@@ -1899,16 +1963,54 @@
             }
         }
         
+        function renderizarColaboradores() {
+            const container = document.getElementById('colaboradores-lista');
+            container.innerHTML = '';
+            
+            if (!colaboradores || Object.keys(colaboradores).length === 0) {
+                container.innerHTML = '<div class="vazio">Nenhum colaborador encontrado</div>';
+                return;
+            }
+            
+            Object.keys(colaboradores).forEach(turma => {
+                if (colaboradores[turma] && colaboradores[turma].length > 0) {
+                    const turmaDiv = document.createElement('div');
+                    turmaDiv.className = 'colaboradores-turma';
+                    
+                    turmaDiv.innerHTML = `<h3>${turma}</h3>`;
+                    
+                    const lista = document.createElement('ul');
+                    lista.className = 'colaboradores-lista';
+                    
+                    colaboradores[turma].forEach(colaborador => {
+                        const item = document.createElement('li');
+                        item.className = 'colaborador-item';
+                        
+                        item.innerHTML = `
+                            ${colaborador.nome}
+                            <div class="colaborador-funcao">${colaborador.funcao}</div>
+                        `;
+                        
+                        lista.appendChild(item);
+                    });
+                    
+                    turmaDiv.appendChild(lista);
+                    container.appendChild(turmaDiv);
+                }
+            });
+        }
+        
         async function carregarDados() {
             try {
                 limparLocalStorageAntigo();
                 
-                const [tarefasData, estudosData, horarioData, flashcardsData, turmasData] = await Promise.all([
+                const [tarefasData, estudosData, horarioData, flashcardsData, turmasData, colaboradoresData] = await Promise.all([
                     fetchDados('Tarefas'),
                     fetchDados('Estudos'),
                     fetchDados('Horário'),
                     fetchDados('Flashcards'),
-                    fetchDados('Turmas')
+                    fetchDados('Turmas'),
+                    fetchDados('Colaboradores')
                 ]);
                 
                 if (tarefasData) {
@@ -1923,6 +2025,7 @@
                 if (horarioData) horario = horarioData;
                 if (flashcardsData) flashcards = flashcardsData;
                 if (turmasData) turmas = turmasData;
+                if (colaboradoresData) colaboradores = colaboradoresData;
                 
                 atualizarSeletorTurmas();
                 extrairTodasMaterias();
@@ -1932,6 +2035,7 @@
                 renderizarHorario();
                 filtrarTarefas();
                 renderizarEstudos();
+                renderizarColaboradores();
                 
                 if (flashcards.length > 0) {
                     atualizarFlashcardsDisponiveis();
