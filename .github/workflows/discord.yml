@@ -18,10 +18,6 @@ jobs:
         run: |
           LAST_COMMIT_HASH=$(git log -1 --pretty=format:'%h')
           LAST_COMMIT_MSG=$(git log -1 --pretty=format:'%s')
-          REPO_URL="https://github.com/${GITHUB_REPOSITORY}/commit/$LAST_COMMIT_HASH"
-
-          echo "Commit Hash: $LAST_COMMIT_HASH"
-          echo "Commit Message: $LAST_COMMIT_MSG"
 
           if [[ "$LAST_COMMIT_MSG" =~ ^.+\ -.+\ -.+\ -.+\ -.+$ ]]; then
             NAME=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f1 | xargs)
@@ -29,8 +25,6 @@ jobs:
             MATERIA=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f3 | xargs)
             TURMA=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f4 | xargs)
             SITE_URL=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f5 | xargs)
-
-            echo "Parsed - Name: $NAME, Action: $ACTION, Materia: $MATERIA, Turma: $TURMA, URL: $SITE_URL"
 
             if [[ "$ACTION" == *"Horário"* ]] || [[ "$ACTION" == *"Flashcard"* ]] || [[ "$ACTION" == *"Turma"* ]]; then
               DESCRIPTION="**Autor:** $NAME\n**Turma:** $TURMA"
@@ -54,5 +48,4 @@ jobs:
                 }]
               }" \
               ${{ secrets.DISCORD_WEBHOOK_MODIFICACOES }}
-          else
           fi
