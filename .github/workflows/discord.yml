@@ -20,12 +20,17 @@ jobs:
           LAST_COMMIT_MSG=$(git log -1 --pretty=format:'%s')
           REPO_URL="https://github.com/${GITHUB_REPOSITORY}/commit/$LAST_COMMIT_HASH"
 
-          if [[ "$LAST_COMMIT_MSG" =~ ^[A-Za-z0-9\s]+[[:space:]]*-[[:space:]]*.+$ ]]; then
+          echo "Commit Hash: $LAST_COMMIT_HASH"
+          echo "Commit Message: $LAST_COMMIT_MSG"
+
+          if [[ "$LAST_COMMIT_MSG" =~ ^.+\ -.+\ -.+\ -.+\ -.+$ ]]; then
             NAME=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f1 | xargs)
             ACTION=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f2 | xargs)
             MATERIA=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f3 | xargs)
             TURMA=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f4 | xargs)
             SITE_URL=$(echo "$LAST_COMMIT_MSG" | cut -d'-' -f5 | xargs)
+
+            echo "Parsed - Name: $NAME, Action: $ACTION, Materia: $MATERIA, Turma: $TURMA, URL: $SITE_URL"
 
             if [[ "$ACTION" == *"Horário"* ]] || [[ "$ACTION" == *"Flashcard"* ]] || [[ "$ACTION" == *"Turma"* ]]; then
               DESCRIPTION="**Autor:** $NAME\n**Turma:** $TURMA"
@@ -47,4 +52,7 @@ jobs:
                 }]
               }" \
               ${{ secrets.DISCORD_WEBHOOK_MODIFICACOES }}
+          else
+            echo "Commit message format doesn't match expected pattern"
+            echo "Expected format: Name - Action - Materia - Turma - URL"
           fi
