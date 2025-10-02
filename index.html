@@ -1272,7 +1272,7 @@
                     : tarefa.descricao;
                 
                 const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
-                const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}</div>` : '';
+                const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
                 const infoDataAdicao = tarefa.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(tarefa.dataAdicao)}</div>` : '';
                 
                 card.innerHTML = `
@@ -1422,7 +1422,7 @@
                     : estudo.descricao;
                 
                 const infoCriador = estudo.criador ? `<div class="info-criador">Criado por: ${estudo.criador}${estudo.turmaCriador ? ` (${estudo.turmaCriador})` : ''}</div>` : '';
-                const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''}</div>` : '';
+                const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''} em ${formatarData(estudo.ultimaEdicao)}</div>` : '';
                 
                 card.innerHTML = `
                     <div class="card-titulo">${estudo.materia}</div>
@@ -1455,7 +1455,7 @@
             const proximaAulaInfo = proximaAula ? `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>` : '';
             
             const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
-            const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}</div>` : '';
+            const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
             const infoDataAdicao = tarefa.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(tarefa.dataAdicao)}</div>` : '';
             
             document.getElementById('modal-titulo').innerHTML = `${tarefa.materia}`;
@@ -1482,12 +1482,13 @@
         
         function visualizarResposta(id) {
             const tarefa = tarefas.find(t => t.id === id);
+            const respostaInfo = tarefa.respostaCriador ? `Resposta adicionada por: ${tarefa.respostaCriador}${tarefa.respostaTurma ? ` (${tarefa.respostaTurma})` : ''}` : '';
             
             document.getElementById('modal-titulo').innerHTML = `Resposta - ${tarefa.materia}`;
             document.getElementById('modal-turma').innerHTML = '';
             document.getElementById('modal-data').innerHTML = '';
             document.getElementById('modal-descricao').innerHTML = tarefa.resposta;
-            document.getElementById('modal-info-criador').innerHTML = '';
+            document.getElementById('modal-info-criador').innerHTML = respostaInfo;
             document.getElementById('modal-acoes').innerHTML = '';
             
             abrirModal();
@@ -1497,7 +1498,7 @@
             const estudo = estudos[index];
             
             const infoCriador = estudo.criador ? `<div class="info-criador">Criado por: ${estudo.criador}${estudo.turmaCriador ? ` (${estudo.turmaCriador})` : ''}</div>` : '';
-            const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''}</div>` : '';
+            const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''} em ${formatarData(estudo.ultimaEdicao)}</div>` : '';
             
             document.getElementById('modal-titulo').innerHTML = estudo.materia;
             document.getElementById('modal-turma').innerHTML = estudo.turma ? `Turma: ${estudo.turma}` : '';
