@@ -109,7 +109,7 @@
         
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
             gap: 25px;
             margin-top: 20px;
         }
@@ -118,7 +118,7 @@
             background: #444;
             border-radius: 12px;
             padding: 25px;
-            height: 350px;
+            height: 420px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
@@ -167,6 +167,7 @@
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
+            max-height: 180px;
         }
         
         .card-descricao::-webkit-scrollbar {
@@ -190,20 +191,22 @@
         .card-acoes {
             display: flex;
             justify-content: flex-end;
-            margin-top: 20px;
-            gap: 12px;
+            margin-top: auto;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
         .btn {
-            padding: 10px 18px;
+            padding: 8px 16px;
             background: #555;
             color: #eee;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             transition: background 0.3s;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
+            white-space: nowrap;
         }
         
         .btn:hover {
@@ -982,7 +985,16 @@
             }
             
             .card {
-                height: 400px;
+                height: 450px;
+            }
+            
+            .card-acoes {
+                justify-content: center;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 14px;
             }
         }
     </style>
