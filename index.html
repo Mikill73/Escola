@@ -21,7 +21,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
@@ -109,71 +109,78 @@
         
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 25px;
             margin-top: 20px;
         }
         
         .card {
             background: #444;
-            border-radius: 10px;
-            padding: 20px;
-            height: 250px;
+            border-radius: 12px;
+            padding: 25px;
+            height: 350px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s, box-shadow 0.3s;
             position: relative;
             overflow: hidden;
+            border: 1px solid #555;
         }
         
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
         }
         
         .card-titulo {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             color: #fff;
-            border-bottom: 1px solid #666;
-            padding-bottom: 8px;
+            border-bottom: 2px solid #666;
+            padding-bottom: 10px;
         }
         
         .card-turma {
             color: #aaccaa;
-            font-size: 14px;
-            margin-bottom: 5px;
+            font-size: 16px;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
         
         .card-data {
             color: #bbb;
-            font-size: 14px;
-            margin-bottom: 12px;
+            font-size: 15px;
+            margin-bottom: 15px;
         }
         
         .card-descricao {
             flex: 1;
             overflow-y: auto;
             color: #ddd;
-            line-height: 1.5;
-            padding-right: 5px;
+            line-height: 1.6;
+            padding-right: 10px;
             white-space: pre-wrap;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
         }
         
         .card-descricao::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
         
         .card-descricao::-webkit-scrollbar-track {
             background: #555;
-            border-radius: 3px;
+            border-radius: 4px;
         }
         
         .card-descricao::-webkit-scrollbar-thumb {
             background: #777;
-            border-radius: 3px;
+            border-radius: 4px;
         }
         
         .card-descricao::-webkit-scrollbar-thumb:hover {
@@ -183,19 +190,20 @@
         .card-acoes {
             display: flex;
             justify-content: flex-end;
-            margin-top: 15px;
-            gap: 10px;
+            margin-top: 20px;
+            gap: 12px;
         }
         
         .btn {
-            padding: 8px 15px;
+            padding: 10px 18px;
             background: #555;
             color: #eee;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             transition: background 0.3s;
             font-size: 14px;
+            font-weight: 500;
         }
         
         .btn:hover {
@@ -244,30 +252,33 @@
         
         .vazio {
             text-align: center;
-            padding: 40px;
+            padding: 50px;
             color: #999;
             font-style: italic;
             grid-column: 1 / -1;
+            font-size: 18px;
         }
         
         .horario-dia {
-            margin-bottom: 25px;
-            padding: 20px;
+            margin-bottom: 30px;
+            padding: 25px;
             background: #444;
-            border-radius: 10px;
+            border-radius: 12px;
+            border: 1px solid #555;
         }
         
         .horario-dia h3 {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             color: #fff;
-            border-bottom: 1px solid #666;
-            padding-bottom: 10px;
+            border-bottom: 2px solid #666;
+            padding-bottom: 12px;
+            font-size: 20px;
         }
         
         .aula-item {
             display: flex;
             align-items: center;
-            padding: 10px 0;
+            padding: 12px 0;
             border-bottom: 1px solid #555;
         }
         
@@ -276,34 +287,38 @@
         }
         
         .aula-numero {
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             background: #555;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
+            margin-right: 18px;
             font-weight: bold;
+            font-size: 16px;
         }
         
         .aula-materia {
             flex: 1;
             color: #ddd;
+            font-size: 16px;
         }
         
         .conteudo-materia {
-            margin-bottom: 25px;
-            padding: 20px;
+            margin-bottom: 30px;
+            padding: 25px;
             background: #444;
-            border-radius: 10px;
+            border-radius: 12px;
+            border: 1px solid #555;
         }
         
         .conteudo-materia h3 {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             color: #fff;
-            border-bottom: 1px solid #666;
-            padding-bottom: 10px;
+            border-bottom: 2px solid #666;
+            padding-bottom: 12px;
+            font-size: 20px;
         }
         
         .conteudo-lista {
@@ -312,21 +327,23 @@
         
         .conteudo-item {
             background: #555;
-            padding: 12px 12px 12px 35px;
-            border-radius: 6px;
-            margin-bottom: 10px;
+            padding: 15px 15px 15px 40px;
+            border-radius: 8px;
+            margin-bottom: 12px;
             color: #ddd;
             position: relative;
             white-space: pre-wrap;
+            font-size: 15px;
+            border: 1px solid #666;
         }
         
         .conteudo-item:before {
             content: "•";
             position: absolute;
-            left: 15px;
+            left: 20px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 20px;
+            font-size: 24px;
             color: #aaa;
         }
         
@@ -337,7 +354,8 @@
         .conteudo-vazio {
             color: #999;
             font-style: italic;
-            padding: 10px;
+            padding: 15px;
+            font-size: 16px;
         }
         
         .modal {
@@ -347,7 +365,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -359,61 +377,65 @@
         
         .modal-conteudo {
             background: #444;
-            border-radius: 10px;
-            padding: 25px;
+            border-radius: 12px;
+            padding: 30px;
             width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
+            max-width: 800px;
+            max-height: 85vh;
             overflow-y: auto;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             position: relative;
+            border: 1px solid #555;
         }
         
         .modal-titulo {
-            font-size: 22px;
+            font-size: 26px;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             color: #fff;
-            border-bottom: 1px solid #666;
-            padding-bottom: 10px;
+            border-bottom: 2px solid #666;
+            padding-bottom: 12px;
         }
         
         .modal-turma {
             color: #aaccaa;
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 18px;
+            margin-bottom: 12px;
+            font-weight: 500;
         }
         
         .modal-data {
             color: #bbb;
-            font-size: 16px;
-            margin-bottom: 15px;
+            font-size: 18px;
+            margin-bottom: 18px;
         }
         
         .modal-descricao {
             color: #ddd;
-            line-height: 1.6;
+            line-height: 1.7;
             white-space: pre-wrap;
-            margin-bottom: 20px;
-            padding: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
             background: #555;
-            border-radius: 8px;
-            max-height: 300px;
+            border-radius: 10px;
+            max-height: 400px;
             overflow-y: auto;
+            font-size: 16px;
+            border: 1px solid #666;
         }
         
         .modal-descricao::-webkit-scrollbar {
-            width: 8px;
+            width: 10px;
         }
         
         .modal-descricao::-webkit-scrollbar-track {
             background: #444;
-            border-radius: 4px;
+            border-radius: 5px;
         }
         
         .modal-descricao::-webkit-scrollbar-thumb {
             background: #777;
-            border-radius: 4px;
+            border-radius: 5px;
         }
         
         .modal-descricao::-webkit-scrollbar-thumb:hover {
@@ -422,12 +444,12 @@
         
         .modal-fechar {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 20px;
+            right: 20px;
             background: #722;
             color: white;
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -435,6 +457,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: background 0.3s;
+            font-size: 16px;
         }
         
         .modal-fechar:hover {
@@ -442,30 +465,32 @@
         }
         
         .proxima-aula {
-            font-size: 12px;
+            font-size: 14px;
             color: #aaccaa;
-            margin-top: 5px;
+            margin-top: 8px;
+            font-style: italic;
         }
         
         .subtabs {
             display: flex;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             background: rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 3px;
+            border-radius: 10px;
+            padding: 4px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .subtab {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             background: transparent;
             border: none;
             color: #ccc;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 8px;
             transition: all 0.3s;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 500;
         }
         
         .subtab.ativa {
@@ -479,34 +504,45 @@
         }
         
         .turma-selector {
-            margin-bottom: 20px;
-            padding: 12px;
+            margin-bottom: 25px;
+            padding: 14px;
             background: #444;
             border: 1px solid #555;
-            border-radius: 8px;
+            border-radius: 10px;
             color: #eee;
-            font-size: 16px;
+            font-size: 17px;
             width: 100%;
         }
         
         .info-criador {
-            font-size: 12px;
-            color: #999;
-            margin-top: 5px;
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 8px;
+            padding: 8px 0;
+            border-top: 1px solid #555;
+        }
+        
+        .info-resposta {
+            font-size: 14px;
+            color: #aaccaa;
+            margin-top: 8px;
+            padding: 8px 0;
+            border-top: 1px solid #555;
+            font-weight: 500;
         }
         
         .flashcard-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
         }
         
         .flashcard {
             width: 100%;
-            max-width: 500px;
-            height: 300px;
-            perspective: 1000px;
+            max-width: 600px;
+            height: 350px;
+            perspective: 1200px;
             cursor: pointer;
         }
         
@@ -528,13 +564,14 @@
             height: 100%;
             backface-visibility: hidden;
             background: #444;
-            border-radius: 10px;
-            padding: 30px;
+            border-radius: 12px;
+            padding: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             overflow-y: auto;
+            border: 1px solid #555;
         }
         
         .flashcard-verso {
@@ -543,24 +580,24 @@
         }
         
         .flashcard-conteudo {
-            font-size: 20px;
-            line-height: 1.5;
+            font-size: 22px;
+            line-height: 1.6;
             text-align: center;
             white-space: pre-wrap;
         }
         
         .flashcard-navegacao {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             align-items: center;
         }
         
         .btn-navegar {
-            padding: 12px 20px;
+            padding: 14px 25px;
             background: #555;
             color: #eee;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: background 0.3s;
             font-size: 16px;
@@ -573,17 +610,17 @@
         
         .flashcard-info {
             color: #999;
-            font-size: 14px;
-            margin-top: 10px;
+            font-size: 16px;
+            margin-top: 15px;
             text-align: center;
         }
         
         .tarefa-info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-            font-size: 14px;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 15px;
         }
         
         .tarefa-info-item {
@@ -594,7 +631,7 @@
         .tarefa-info-label {
             color: #aaccaa;
             font-weight: 500;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
         }
         
         .tarefa-info-valor {
@@ -608,7 +645,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -620,37 +657,38 @@
         
         .selecao-turma-conteudo {
             background: #444;
-            border-radius: 10px;
-            padding: 30px;
+            border-radius: 12px;
+            padding: 35px;
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             text-align: center;
+            border: 1px solid #555;
         }
         
         .selecao-turma-titulo {
-            font-size: 24px;
-            margin-bottom: 20px;
+            font-size: 26px;
+            margin-bottom: 25px;
             color: #fff;
         }
         
         .selecao-turma-selector {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             background: #555;
             border: 1px solid #666;
-            border-radius: 8px;
+            border-radius: 10px;
             color: #eee;
             font-size: 18px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
         
         .btn-confirmar-turma {
-            padding: 15px 30px;
+            padding: 16px 35px;
             background: #2a7d2a;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
@@ -663,25 +701,26 @@
         
         .ranking-item {
             background: #444;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #555;
         }
         
         .ranking-posicao {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             background: #555;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
+            margin-right: 20px;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 20px;
         }
         
         .ranking-conteudo {
@@ -692,62 +731,66 @@
         
         .ranking-materia {
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             color: #fff;
+            font-size: 18px;
         }
         
         .ranking-info {
             color: #bbb;
-            font-size: 14px;
+            font-size: 15px;
         }
         
         .ranking-acoes {
-            margin-left: 15px;
+            margin-left: 20px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
         
         .aviso-urgente {
             background: #5a2a7d;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
             text-align: center;
-            font-size: 14px;
+            font-size: 15px;
             color: #ddd;
+            border: 1px solid #6b3399;
         }
         
         .filtro-materia-container {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
         }
         
         .filtro-materia-label {
             color: #ddd;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 500;
         }
         
         .filtro-materia-select {
-            padding: 8px 12px;
+            padding: 10px 14px;
             background: #444;
             border: 1px solid #555;
-            border-radius: 6px;
+            border-radius: 8px;
             color: #eee;
-            font-size: 14px;
+            font-size: 15px;
             flex: 1;
         }
         
         .btn-limpar-filtro {
-            padding: 8px 12px;
+            padding: 10px 14px;
             background: #555;
             color: #eee;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             transition: background 0.3s;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 500;
         }
         
         .btn-limpar-filtro:hover {
@@ -758,18 +801,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 25px;
             width: 100%;
-            max-width: 300px;
+            max-width: 350px;
         }
         
         .flashcard-input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: #444;
             border: 1px solid #555;
-            border-radius: 6px;
+            border-radius: 8px;
             color: #eee;
             font-size: 16px;
             text-align: center;
@@ -777,103 +820,110 @@
         
         .flashcard-mensagem {
             color: #aaccaa;
-            font-size: 14px;
+            font-size: 15px;
             text-align: center;
             min-height: 20px;
         }
         
         .configuracoes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
         }
         
         .configuracao-item {
             background: #444;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 25px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            border: 1px solid #555;
         }
         
         .configuracao-titulo {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             color: #fff;
-            border-bottom: 1px solid #666;
-            padding-bottom: 8px;
+            border-bottom: 2px solid #666;
+            padding-bottom: 10px;
         }
         
         .configuracao-select {
-            padding: 10px;
+            padding: 12px;
             background: #555;
             border: 1px solid #666;
-            border-radius: 6px;
+            border-radius: 8px;
             color: #eee;
-            font-size: 14px;
+            font-size: 15px;
         }
         
         .configuracao-checkbox {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             cursor: pointer;
+            font-size: 15px;
         }
         
         .configuracao-checkbox input {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
         }
         
         .colaboradores-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
         }
         
         .colaborador-turma {
             background: #444;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #555;
         }
         
         .colaborador-turma h3 {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             color: #fff;
-            border-bottom: 1px solid #666;
-            padding-bottom: 10px;
+            border-bottom: 2px solid #666;
+            padding-bottom: 12px;
+            font-size: 20px;
         }
         
         .colaborador-item {
             background: #555;
-            padding: 10px 15px;
-            border-radius: 6px;
-            margin-bottom: 8px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 10px;
             color: #ddd;
+            border: 1px solid #666;
         }
         
         .colaborador-nome {
             font-weight: 500;
             color: #aaccaa;
+            font-size: 16px;
         }
         
         .colaborador-funcao {
-            font-size: 12px;
+            font-size: 14px;
             color: #bbb;
-            margin-top: 3px;
+            margin-top: 5px;
         }
         
         .colaborador-sugestao {
             background: #5a2a7d;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
             text-align: center;
-            font-size: 14px;
+            font-size: 15px;
             color: #ddd;
+            border: 1px solid #6b3399;
         }
         
         @media (max-width: 768px) {
@@ -892,7 +942,7 @@
             
             .modal-conteudo {
                 width: 95%;
-                padding: 20px;
+                padding: 25px;
             }
             
             .tarefa-info-grid {
@@ -900,7 +950,7 @@
             }
             
             .selecao-turma-conteudo {
-                padding: 20px;
+                padding: 25px;
             }
             
             .ranking-item {
@@ -910,12 +960,12 @@
             
             .ranking-posicao {
                 margin-right: 0;
-                margin-bottom: 10px;
+                margin-bottom: 15px;
             }
             
             .ranking-acoes {
                 margin-left: 0;
-                margin-top: 10px;
+                margin-top: 15px;
             }
             
             .filtro-materia-container {
@@ -929,6 +979,10 @@
             
             .colaboradores-container {
                 grid-template-columns: 1fr;
+            }
+            
+            .card {
+                height: 400px;
             }
         }
     </style>
@@ -1065,6 +1119,7 @@
                 <div class="modal-data" id="modal-data"></div>
                 <div class="modal-descricao" id="modal-descricao"></div>
                 <div class="info-criador" id="modal-info-criador"></div>
+                <div class="info-resposta" id="modal-info-resposta"></div>
                 <div class="card-acoes" id="modal-acoes"></div>
             </div>
         </div>
@@ -1274,6 +1329,7 @@
                 const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
                 const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
                 const infoDataAdicao = tarefa.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(tarefa.dataAdicao)}</div>` : '';
+                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
                 
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
@@ -1283,6 +1339,7 @@
                     ${infoCriador}
                     ${infoEditor}
                     ${infoDataAdicao}
+                    ${infoResposta}
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Ver</button>
                         ${!status.concluida ? 
@@ -1370,6 +1427,7 @@
             
             tarefasComUrgencia.forEach((item, index) => {
                 const { tarefa, proximaAula } = item;
+                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
                 
                 const rankingItem = document.createElement('div');
                 rankingItem.className = 'ranking-item';
@@ -1379,6 +1437,7 @@
                     <div class="ranking-conteudo">
                         <div class="ranking-materia">${tarefa.materia}</div>
                         <div class="ranking-info">${proximaAula.dia} - ${proximaAula.periodo}</div>
+                        ${infoResposta}
                     </div>
                     <div class="ranking-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Visualizar</button>
@@ -1457,12 +1516,14 @@
             const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
             const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
             const infoDataAdicao = tarefa.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(tarefa.dataAdicao)}</div>` : '';
+            const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
             
             document.getElementById('modal-titulo').innerHTML = `${tarefa.materia}`;
             document.getElementById('modal-turma').innerHTML = tarefa.turma ? `Turma: ${tarefa.turma}` : '';
             document.getElementById('modal-data').innerHTML = proximaAulaInfo;
             document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
             document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor + infoDataAdicao;
+            document.getElementById('modal-info-resposta').innerHTML = infoResposta;
             
             let acoesHTML = '';
             if (!status.concluida) {
@@ -1482,13 +1543,14 @@
         
         function visualizarResposta(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            const respostaInfo = tarefa.respostaCriador ? `Resposta adicionada por: ${tarefa.respostaCriador}${tarefa.respostaTurma ? ` (${tarefa.respostaTurma})` : ''}` : '';
+            const respostaInfo = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
             
             document.getElementById('modal-titulo').innerHTML = `Resposta - ${tarefa.materia}`;
             document.getElementById('modal-turma').innerHTML = '';
             document.getElementById('modal-data').innerHTML = '';
             document.getElementById('modal-descricao').innerHTML = tarefa.resposta;
-            document.getElementById('modal-info-criador').innerHTML = respostaInfo;
+            document.getElementById('modal-info-criador').innerHTML = '';
+            document.getElementById('modal-info-resposta').innerHTML = respostaInfo;
             document.getElementById('modal-acoes').innerHTML = '';
             
             abrirModal();
@@ -1505,6 +1567,7 @@
             document.getElementById('modal-data').innerHTML = '';
             document.getElementById('modal-descricao').innerHTML = estudo.descricao;
             document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor;
+            document.getElementById('modal-info-resposta').innerHTML = '';
             
             document.getElementById('modal-acoes').innerHTML = `
                 <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
@@ -1627,7 +1690,7 @@
                         
                         let horarioTexto = '';
                         if (aula.horario) {
-                            horarioTexto = `<div style="font-size: 12px; color: #aaa; margin-top: 2px;">${aula.horario}</div>`;
+                            horarioTexto = `<div style="font-size: 14px; color: #aaa; margin-top: 4px;">${aula.horario}</div>`;
                         }
                         
                         aulaItem.innerHTML = `
@@ -1724,7 +1787,7 @@
         
         function baixarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            const texto = `Matéria: ${tarefa.materia}\nTurma: ${tarefa.turma || 'Não especificada'}\nDescrição: ${tarefa.descricao}\nCriado por: ${tarefa.criador || 'Desconhecido'}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}${tarefa.editor ? `\nEditado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}` : ''}${tarefa.dataAdicao ? `\nAdicionado em: ${formatarData(tarefa.dataAdicao)}` : ''}`;
+            const texto = `Matéria: ${tarefa.materia}\nTurma: ${tarefa.turma || 'Não especificada'}\nDescrição: ${tarefa.descricao}\nCriado por: ${tarefa.criador || 'Desconhecido'}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}${tarefa.editor ? `\nEditado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}` : ''}${tarefa.dataAdicao ? `\nAdicionado em: ${formatarData(tarefa.dataAdicao)}` : ''}${tarefa.autor_da_resposta ? `\nResposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}` : ''}`;
             
             const blob = new Blob([texto], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
