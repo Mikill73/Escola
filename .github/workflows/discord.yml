@@ -32,6 +32,10 @@ jobs:
               DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA"
             elif [[ "$ACTION" == *"Tarefa"* ]]; then
               DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n[Ver Tarefa]($SITE_URL)"
+            elif [[ "$ACTION" == *"Adicionou Resposta"* ]]; then
+              DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n[Ver Tarefa]($SITE_URL)"
+            elif [[ "$ACTION" == *"Deletou Bimestre"* ]]; then
+              DESCRIPTION="**Autor:** $NAME\n**Turma:** $TURMA"
             else
               DESCRIPTION="**Autor:** $NAME\n**Matéria:** $MATERIA\n**Turma:** $TURMA\n[Ver]($SITE_URL)"
             fi
