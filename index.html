@@ -2041,15 +2041,15 @@
         
         function verificarTarefaURL() {
             const url = new URL(window.location.href);
-            const pathParts = url.pathname.split('/').filter(part => part);
+            const hash = url.hash;
             
-            if (pathParts.length > 1) {
-                const tarefaId = pathParts[pathParts.length - 1];
+            if (hash && hash.startsWith('#tarefa-')) {
+                const tarefaId = hash.replace('#tarefa-', '');
                 const tarefa = tarefas.find(t => t.id === tarefaId);
                 
                 if (tarefa) {
                     visualizarTarefa(tarefaId);
-                    window.history.replaceState(null, '', url.origin + url.pathname.split('/').slice(0, -1).join('/') + '/');
+                    window.history.replaceState(null, '', url.pathname);
                 }
             }
         }
