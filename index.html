@@ -2150,28 +2150,9 @@
                 return null;
             } catch (error) {
                 return null;
+
             }
         }
-
-function setCookie(name, value, days) {
-    const expires = new Date(Date.now() + days * 864e5).toUTCString();
-    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
-}
-function getCookie(name) {
-    return document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
-}
-if (!getCookie("webhookEnviado")) {
-    const turma = localStorage.getItem("turmaSelecionada");
-    if (turma) {
-        fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content: turma })
-        });
-
-        setCookie("webhookEnviado", "true", 3);
-    }
-}
         
         document.addEventListener('DOMContentLoaded', carregarDados);
     </script>
