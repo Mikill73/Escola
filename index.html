@@ -2041,15 +2041,15 @@
         
         function verificarTarefaURL() {
             const url = new URL(window.location.href);
-            const hash = url.hash;
+            const pathParts = url.pathname.split('/').filter(part => part);
             
-            if (hash && hash.startsWith('#tarefa-')) {
-                const tarefaId = hash.replace('#tarefa-', '');
+            if (pathParts.length > 1) {
+                const tarefaId = pathParts[pathParts.length - 1];
                 const tarefa = tarefas.find(t => t.id === tarefaId);
                 
                 if (tarefa) {
                     visualizarTarefa(tarefaId);
-                    window.history.replaceState(null, '', url.pathname);
+                    window.history.replaceState(null, '', url.origin + url.pathname.split('/').slice(0, -1).join('/') + '/');
                 }
             }
         }
@@ -2100,11 +2100,11 @@
                 limparLocalStorageAntigo();
                 
                 const [tarefasData, estudosData, horarioData, flashcardsData, turmasData] = await Promise.all([
-                    fetchDados('Tarefas.json'),
-                    fetchDados('Estudos.json'),
-                    fetchDados('Horário.json'),
-                    fetchDados('Flashcards.json'),
-                    fetchDados('Turmas.json')
+                    fetchDados('Tarefas'),
+                    fetchDados('Estudos'),
+                    fetchDados('Horário'),
+                    fetchDados('Flashcards'),
+                    fetchDados('Turmas')
                 ]);
                 
                 if (tarefasData) {
@@ -2142,7 +2142,7 @@
         
         async function fetchDados(arquivo) {
             try {
-                const response = await fetch(`${baseURL}/${arquivo}?t=${Date.now()}`);
+                const response = await fetch(`${baseURL}/${encodeURIComponent(arquivo)}`);
                 
                 if (response.ok) {
                     return await response.json();
@@ -2150,11 +2150,30 @@
                 return null;
             } catch (error) {
                 return null;
-
             }
         }
+
+function setCookie(name, value, days) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+}
+function getCookie(name) {
+    return document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
+}
+if (!getCookie("webhookEnviado")) {
+    const turma = localStorage.getItem("turmaSelecionada");
+    if (turma) {
+        fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: turma })
+        });
+
+        setCookie("webhookEnviado", "true", 3);
+    }
+}
         
         document.addEventListener('DOMContentLoaded', carregarDados);
     </script>
 </body>
-</html>
+    </html>
