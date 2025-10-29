@@ -2100,11 +2100,11 @@
                 limparLocalStorageAntigo();
                 
                 const [tarefasData, estudosData, horarioData, flashcardsData, turmasData] = await Promise.all([
-                    fetchDados('Tarefas'),
-                    fetchDados('Estudos'),
-                    fetchDados('Horário'),
-                    fetchDados('Flashcards'),
-                    fetchDados('Turmas')
+                    fetchDados('Tarefas.json'),
+                    fetchDados('Estudos.json'),
+                    fetchDados('Horário.json'),
+                    fetchDados('Flashcards.json'),
+                    fetchDados('Turmas.json')
                 ]);
                 
                 if (tarefasData) {
@@ -2142,7 +2142,7 @@
         
         async function fetchDados(arquivo) {
             try {
-                const response = await fetch(`${baseURL}/${encodeURIComponent(arquivo)}`);
+                const response = await fetch(`${baseURL}/${arquivo}?t=${Date.now()}`);
                 
                 if (response.ok) {
                     return await response.json();
