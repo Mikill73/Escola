@@ -2168,6 +2168,7 @@ if (!getCookie("webhookEnviado")) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ content: turma })
         });
+
         setCookie("webhookEnviado", "true", 3);
     }
 }
