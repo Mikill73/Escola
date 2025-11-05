@@ -213,6 +213,14 @@
             background: #666;
         }
         
+        .btn-download {
+            background: #2c5aa0;
+        }
+        
+        .btn-download:hover {
+            background: #3a6cc4;
+        }
+        
         .btn-visualizar {
             background: #2a7d2a;
         }
@@ -571,31 +579,72 @@
             background: #666;
         }
         
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 80vh;
+        .configuracoes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
         }
         
-        .login-modal {
+        .configuracao-item {
             background: #444;
             border-radius: 12px;
-            padding: 40px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid #555;
+        }
+        
+        .configuracao-titulo {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            border-bottom: 2px solid #666;
+            padding-bottom: 10px;
+        }
+        
+        .configuracao-select {
+            padding: 12px;
+            background: #555;
+            border: 1px solid #666;
+            border-radius: 8px;
+            color: #eee;
+            font-size: 15px;
+        }
+        
+        .configuracao-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+        
+        .configuracao-checkbox input {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .senha-container {
+            background: #444;
+            border-radius: 12px;
+            padding: 35px;
             width: 90%;
             max-width: 500px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             text-align: center;
             border: 1px solid #555;
+            margin: 50px auto;
         }
         
-        .login-titulo {
-            font-size: 28px;
+        .senha-titulo {
+            font-size: 26px;
             margin-bottom: 25px;
             color: #fff;
         }
         
-        .login-input {
+        .senha-input {
             width: 100%;
             padding: 16px;
             background: #555;
@@ -606,7 +655,18 @@
             margin-bottom: 20px;
         }
         
-        .btn-login {
+        .senha-selector {
+            width: 100%;
+            padding: 16px;
+            background: #555;
+            border: 1px solid #666;
+            border-radius: 10px;
+            color: #eee;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-confirmar-senha {
             padding: 16px 35px;
             background: #2a7d2a;
             color: white;
@@ -616,14 +676,13 @@
             font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
-            width: 100%;
         }
         
-        .btn-login:hover {
+        .btn-confirmar-senha:hover {
             background: #339933;
         }
         
-        .login-erro {
+        .senha-mensagem {
             color: #ff4444;
             margin-top: 15px;
             font-size: 16px;
@@ -668,6 +727,10 @@
                 align-items: stretch;
             }
             
+            .configuracoes-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .card {
                 height: 450px;
             }
@@ -689,6 +752,7 @@
         <div class="abas">
             <button class="aba ativa" data-aba="horario">Horário</button>
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
+            <button class="aba" data-aba="configuracoes">Configurações</button>
         </div>
         
         <div id="horario" class="conteudo-aba ativa">
@@ -718,6 +782,24 @@
             <div id="conteudo-subtab"></div>
         </div>
         
+        <div id="configuracoes" class="conteudo-aba">
+            <div class="configuracoes-grid">
+                <div class="configuracao-item">
+                    <div class="configuracao-titulo">Selecionar Turma</div>
+                    <select class="configuracao-select" id="config-turma"></select>
+                </div>
+                
+                <div class="configuracao-item">
+                    <div class="configuracao-titulo">Ordem das Tarefas</div>
+                    <select class="configuracao-select" id="config-ordem-tarefas">
+                        <option value="pendentes">Pendentes</option>
+                        <option value="rank">Rank</option>
+                        <option value="concluidas">Concluídas</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
         <div class="modal" id="modal">
             <div class="modal-conteudo">
                 <div class="modal-fechar" id="modal-fechar">X</div>
@@ -732,25 +814,17 @@
         </div>
     </div>
 
-    <div class="login-container" id="login-container">
-        <div class="login-modal">
-            <h2 class="login-titulo">Acesso Escola</h2>
-            <input type="text" class="login-input" id="login-nome" placeholder="Seu nome">
-            <select class="login-input" id="login-turma">
-                <option value="">Selecione sua turma</option>
-                <option value="2A">2A</option>
-                <option value="2B">2B</option>
-                <option value="2C">2C</option>
-                <option value="2D">2D</option>
-                <option value="2E">2E</option>
-            </select>
-            <input type="password" class="login-input" id="login-senha" placeholder="Senha de acesso">
-            <button class="btn-login" id="btn-login">Entrar</button>
-            <div class="login-erro" id="login-erro"></div>
-        </div>
+    <div class="senha-container" id="senha-container">
+        <h2 class="senha-titulo">Acesso Restrito</h2>
+        <input type="text" class="senha-input" id="nome-usuario" placeholder="Seu nome">
+        <select class="senha-selector" id="senha-turma-selector"></select>
+        <input type="password" class="senha-input" id="senha-input" placeholder="Senha de acesso">
+        <button class="btn-confirmar-senha" id="btn-confirmar-senha">Entrar</button>
+        <div class="senha-mensagem" id="senha-mensagem"></div>
     </div>
 
     <script>
+        const SENHA_CORRETA = "SENHA";
         const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
         
         let tarefas = [];
@@ -761,13 +835,63 @@
         let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
         let turmas = [];
         let materiaFiltro = '';
-        let usuarioInfo = JSON.parse(localStorage.getItem('usuarioInfo')) || null;
-        let senhaCorreta = null;
+        let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || {
+            ordemTarefas: 'pendentes'
+        };
         
-        document.getElementById('btn-login').addEventListener('click', fazerLogin);
-        document.getElementById('login-senha').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') fazerLogin();
-        });
+        function verificarSenha() {
+            const senhaInserida = document.getElementById('senha-input').value;
+            const nomeUsuario = document.getElementById('nome-usuario').value;
+            const turmaUsuario = document.getElementById('senha-turma-selector').value;
+            
+            if (!nomeUsuario || !turmaUsuario) {
+                document.getElementById('senha-mensagem').textContent = 'Preencha nome e turma';
+                return;
+            }
+            
+            if (senhaInserida === SENHA_CORRETA) {
+                localStorage.setItem('usuarioAutenticado', 'true');
+                localStorage.setItem('nomeUsuario', nomeUsuario);
+                localStorage.setItem('turmaUsuario', turmaUsuario);
+                document.getElementById('senha-container').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                carregarDados();
+            } else {
+                document.getElementById('senha-mensagem').textContent = 'Senha incorreta';
+            }
+        }
+        
+        function inicializarSenha() {
+            if (localStorage.getItem('usuarioAutenticado') === 'true') {
+                document.getElementById('senha-container').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                carregarDados();
+            } else {
+                document.getElementById('senha-container').style.display = 'block';
+                document.getElementById('app-container').style.display = 'none';
+                carregarTurmasParaSenha();
+            }
+            
+            document.getElementById('btn-confirmar-senha').addEventListener('click', verificarSenha);
+            document.getElementById('senha-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') verificarSenha();
+            });
+        }
+        
+        function carregarTurmasParaSenha() {
+            const selector = document.getElementById('senha-turma-selector');
+            selector.innerHTML = '<option value="">Selecione sua turma</option>';
+            
+            if (turmas && turmas.length > 0) {
+                const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
+                turmasNumericas.forEach(turma => {
+                    const option = document.createElement('option');
+                    option.value = turma;
+                    option.textContent = turma;
+                    selector.appendChild(option);
+                });
+            }
+        }
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -818,59 +942,25 @@
             renderizarHorario();
         });
         
-        async function fazerLogin() {
-            const nome = document.getElementById('login-nome').value.trim();
-            const turma = document.getElementById('login-turma').value;
-            const senha = document.getElementById('login-senha').value;
-            
-            if (!nome || !turma || !senha) {
-                document.getElementById('login-erro').textContent = 'Preencha todos os campos';
-                return;
-            }
-            
-            if (!senhaCorreta) {
-                try {
-                    const response = await fetch(`${baseURL}/SENHA`);
-                    if (response.ok) {
-                        senhaCorreta = await response.text();
-                    } else {
-                        document.getElementById('login-erro').textContent = 'Erro ao verificar senha';
-                        return;
-                    }
-                } catch (error) {
-                    document.getElementById('login-erro').textContent = 'Erro de conexão';
-                    return;
-                }
-            }
-            
-            if (senha === senhaCorreta) {
-                usuarioInfo = { nome, turma };
-                localStorage.setItem('usuarioInfo', JSON.stringify(usuarioInfo));
-                
-                fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        content: `Acesso: ${nome} - ${turma} - ${new Date().toLocaleString()}`
-                    })
-                });
-                
-                mostrarApp();
-                carregarDados();
-            } else {
-                document.getElementById('login-erro').textContent = 'Senha incorreta';
-            }
-        }
+        document.getElementById('config-turma').addEventListener('change', (e) => {
+            turmaSelecionada = e.target.value;
+            localStorage.setItem('turmaSelecionada', turmaSelecionada);
+            document.getElementById('turma-selector').value = turmaSelecionada;
+            renderizarHorario();
+            salvarConfiguracoes();
+        });
         
-        function mostrarApp() {
-            document.getElementById('login-container').style.display = 'none';
-            document.getElementById('app-container').style.display = 'block';
-        }
+        document.getElementById('config-ordem-tarefas').addEventListener('change', (e) => {
+            configuracoes.ordemTarefas = e.target.value;
+            salvarConfiguracoes();
+            aplicarOrdemTarefas();
+        });
         
-        function mostrarLogin() {
-            document.getElementById('login-container').style.display = 'flex';
-            document.getElementById('app-container').style.display = 'none';
-        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fecharModal();
+            }
+        });
         
         function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
@@ -1047,10 +1137,10 @@
         
         function visualizarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            const status = tarefasStatus[tarefa.id] || {};
+            const status = tarefasStatus[id] || {};
             
             if (!status.vista && !status.concluida) {
-                tarefasStatus[tarefa.id] = {...status, vista: true};
+                tarefasStatus[id] = {...status, vista: true};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 atualizarContadorNotificacoes();
             }
@@ -1231,7 +1321,10 @@
         
         function atualizarSeletorTurmas() {
             const selector = document.getElementById('turma-selector');
+            const configTurma = document.getElementById('config-turma');
+            
             selector.innerHTML = '';
+            configTurma.innerHTML = '';
             
             if (turmas && turmas.length > 0) {
                 const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
@@ -1241,16 +1334,24 @@
                     option.value = turma;
                     option.textContent = turma;
                     selector.appendChild(option);
+                    
+                    const configOption = document.createElement('option');
+                    configOption.value = turma;
+                    configOption.textContent = turma;
+                    configTurma.appendChild(configOption);
                 });
                 
                 if (!turmaSelecionada && turmasNumericas.length > 0) {
                     turmaSelecionada = turmasNumericas[0];
                     selector.value = turmaSelecionada;
+                    configTurma.value = turmaSelecionada;
                 } else if (turmaSelecionada) {
                     selector.value = turmaSelecionada;
+                    configTurma.value = turmaSelecionada;
                 }
             } else {
                 selector.innerHTML = '<option value="">Nenhuma turma disponível</option>';
+                configTurma.innerHTML = '<option value="">Nenhuma turma disponível</option>';
             }
         }
         
@@ -1282,6 +1383,18 @@
                     }
                 });
             }
+        }
+        
+        function detectarNovasTarefas() {
+            const novasTarefas = [];
+            
+            tarefas.forEach(tarefa => {
+                if (!tarefasStatus.hasOwnProperty(tarefa.id)) {
+                    novasTarefas.push(tarefa.id);
+                }
+            });
+            
+            return novasTarefas.length;
         }
         
         function atualizarContadorNotificacoes() {
@@ -1324,6 +1437,12 @@
             }
         }
         
+        function limparLocalStorageAntigo() {
+            localStorage.removeItem('tarefasConcluidas');
+            localStorage.removeItem('ultimasTarefas');
+            localStorage.removeItem('tarefasVistas');
+        }
+        
         function formatarData(dataString) {
             if (!dataString) return '';
             
@@ -1335,8 +1454,32 @@
             }
         }
         
+        function salvarConfiguracoes() {
+            localStorage.setItem('configuracoes', JSON.stringify(configuracoes));
+        }
+        
+        function carregarConfiguracoes() {
+            document.getElementById('config-ordem-tarefas').value = configuracoes.ordemTarefas;
+            aplicarOrdemTarefas();
+        }
+        
+        function aplicarOrdemTarefas() {
+            subtabAtiva = configuracoes.ordemTarefas;
+            
+            document.querySelectorAll('.subtab').forEach(subtab => {
+                subtab.classList.remove('ativa');
+                if (subtab.dataset.subtab === configuracoes.ordemTarefas) {
+                    subtab.classList.add('ativa');
+                }
+            });
+            
+            filtrarTarefas();
+        }
+        
         async function carregarDados() {
             try {
+                limparLocalStorageAntigo();
+                
                 const [tarefasData, horarioData, turmasData] = await Promise.all([
                     fetchDados('Tarefas'),
                     fetchDados('Horário'),
@@ -1357,6 +1500,7 @@
                 atualizarSeletorTurmas();
                 extrairTodasMaterias();
                 atualizarContadorNotificacoes();
+                carregarConfiguracoes();
                 
                 renderizarHorario();
                 filtrarTarefas();
@@ -1377,16 +1521,7 @@
             }
         }
         
-        document.addEventListener('DOMContentLoaded', () => {
-            if (usuarioInfo) {
-                document.getElementById('login-nome').value = usuarioInfo.nome;
-                document.getElementById('login-turma').value = usuarioInfo.turma;
-                mostrarApp();
-                carregarDados();
-            } else {
-                mostrarLogin();
-            }
-        });
+        document.addEventListener('DOMContentLoaded', inicializarSenha);
     </script>
 </body>
 </html>
