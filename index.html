@@ -831,7 +831,8 @@
     </div>
 
     <script>
-        const SENHA_CORRETA = "%%SENHA%%";
+
+const SENHA_CORRETA = process.env.SENHA_CORRETA;
         const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
         
         let tarefas = [];
@@ -1516,3 +1517,4 @@
     </script>
 </body>
 </html>
+
