@@ -817,7 +817,14 @@
     <div class="senha-container" id="senha-container">
         <h2 class="senha-titulo">Acesso Restrito</h2>
         <input type="text" class="senha-input" id="nome-usuario" placeholder="Seu nome">
-        <select class="senha-selector" id="senha-turma-selector"></select>
+        <select class="senha-selector" id="senha-turma-selector">
+            <option value="">Selecione sua turma</option>
+            <option value="2A">2A</option>
+            <option value="2B">2B</option>
+            <option value="2C">2C</option>
+            <option value="2D">2D</option>
+            <option value="2E">2E</option>
+        </select>
         <input type="password" class="senha-input" id="senha-input" placeholder="Senha de acesso">
         <button class="btn-confirmar-senha" id="btn-confirmar-senha">Entrar</button>
         <div class="senha-mensagem" id="senha-mensagem"></div>
@@ -833,11 +840,21 @@
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
         let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
-        let turmas = [];
+        let turmas = ["2A", "2B", "2C", "2D", "2E"];
         let materiaFiltro = '';
         let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || {
             ordemTarefas: 'pendentes'
         };
+        
+        function enviarAcessoWebhook(nome, turma) {
+            fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    content: `🔐 NOVO ACESSO - Nome: ${nome} | Turma: ${turma} | Data: ${new Date().toLocaleString('pt-BR')}`
+                })
+            });
+        }
         
         function verificarSenha() {
             const senhaInserida = document.getElementById('senha-input').value;
@@ -855,6 +872,8 @@
                 localStorage.setItem('turmaUsuario', turmaUsuario);
                 document.getElementById('senha-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
+                
+                enviarAcessoWebhook(nomeUsuario, turmaUsuario);
                 carregarDados();
             } else {
                 document.getElementById('senha-mensagem').textContent = 'Senha incorreta';
@@ -863,34 +882,22 @@
         
         function inicializarSenha() {
             if (localStorage.getItem('usuarioAutenticado') === 'true') {
+                const nomeUsuario = localStorage.getItem('nomeUsuario');
+                const turmaUsuario = localStorage.getItem('turmaUsuario');
                 document.getElementById('senha-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
+                
+                enviarAcessoWebhook(nomeUsuario, turmaUsuario);
                 carregarDados();
             } else {
                 document.getElementById('senha-container').style.display = 'block';
                 document.getElementById('app-container').style.display = 'none';
-                carregarTurmasParaSenha();
             }
             
             document.getElementById('btn-confirmar-senha').addEventListener('click', verificarSenha);
             document.getElementById('senha-input').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') verificarSenha();
             });
-        }
-        
-        function carregarTurmasParaSenha() {
-            const selector = document.getElementById('senha-turma-selector');
-            selector.innerHTML = '<option value="">Selecione sua turma</option>';
-            
-            if (turmas && turmas.length > 0) {
-                const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
-                turmasNumericas.forEach(turma => {
-                    const option = document.createElement('option');
-                    option.value = turma;
-                    option.textContent = turma;
-                    selector.appendChild(option);
-                });
-            }
         }
         
         document.querySelectorAll('.aba').forEach(aba => {
@@ -1327,9 +1334,7 @@
             configTurma.innerHTML = '';
             
             if (turmas && turmas.length > 0) {
-                const turmasNumericas = turmas.filter(turma => /^\d/.test(turma));
-                
-                turmasNumericas.forEach(turma => {
+                turmas.forEach(turma => {
                     const option = document.createElement('option');
                     option.value = turma;
                     option.textContent = turma;
@@ -1341,8 +1346,8 @@
                     configTurma.appendChild(configOption);
                 });
                 
-                if (!turmaSelecionada && turmasNumericas.length > 0) {
-                    turmaSelecionada = turmasNumericas[0];
+                if (!turmaSelecionada && turmas.length > 0) {
+                    turmaSelecionada = turmas[0];
                     selector.value = turmaSelecionada;
                     configTurma.value = turmaSelecionada;
                 } else if (turmaSelecionada) {
@@ -1383,18 +1388,6 @@
                     }
                 });
             }
-        }
-        
-        function detectarNovasTarefas() {
-            const novasTarefas = [];
-            
-            tarefas.forEach(tarefa => {
-                if (!tarefasStatus.hasOwnProperty(tarefa.id)) {
-                    novasTarefas.push(tarefa.id);
-                }
-            });
-            
-            return novasTarefas.length;
         }
         
         function atualizarContadorNotificacoes() {
@@ -1480,10 +1473,9 @@
             try {
                 limparLocalStorageAntigo();
                 
-                const [tarefasData, horarioData, turmasData] = await Promise.all([
+                const [tarefasData, horarioData] = await Promise.all([
                     fetchDados('Tarefas'),
-                    fetchDados('Horário'),
-                    fetchDados('Turmas')
+                    fetchDados('Horário')
                 ]);
                 
                 if (tarefasData) {
@@ -1495,7 +1487,6 @@
                     });
                 }
                 if (horarioData) horario = horarioData;
-                if (turmasData) turmas = turmasData;
                 
                 atualizarSeletorTurmas();
                 extrairTodasMaterias();
