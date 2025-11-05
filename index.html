@@ -831,10 +831,8 @@
     </div>
 
     <script>
-
-const SENHA_CORRETA = process.env.SENHA_CORRETA;
+        const base = "githubusercontent";
         const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
-        
         let tarefas = [];
         let horario = {};
         let todasMaterias = [];
@@ -842,6 +840,7 @@ const SENHA_CORRETA = process.env.SENHA_CORRETA;
         let subtabAtiva = 'pendentes';
         let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
         let turmas = ["2A", "2B", "2C", "2D", "2E"];
+
         let materiaFiltro = '';
         let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || {
             ordemTarefas: 'pendentes'
@@ -852,7 +851,7 @@ const SENHA_CORRETA = process.env.SENHA_CORRETA;
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
-                    content: `🔐 NOVO ACESSO - Nome: ${nome} | Turma: ${turma} | Data: ${new Date().toLocaleString('pt-BR')}`
+                    content: `ACESSO - Nome: ${nome} | Turma: ${turma} | Data: ${new Date().toLocaleString('pt-BR')}`
                 })
             });
         }
@@ -867,7 +866,7 @@ const SENHA_CORRETA = process.env.SENHA_CORRETA;
                 return;
             }
             
-            if (senhaInserida === SENHA_CORRETA) {
+            if (senhaInserida === base) {
                 localStorage.setItem('usuarioAutenticado', 'true');
                 localStorage.setItem('nomeUsuario', nomeUsuario);
                 localStorage.setItem('turmaUsuario', turmaUsuario);
@@ -1136,6 +1135,7 @@ const SENHA_CORRETA = process.env.SENHA_CORRETA;
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Visualizar</button>
                         <button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>
                         ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
+
                     </div>
                 `;
                 
@@ -1517,4 +1517,3 @@ const SENHA_CORRETA = process.env.SENHA_CORRETA;
     </script>
 </body>
 </html>
-
