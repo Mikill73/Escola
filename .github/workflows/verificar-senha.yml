@@ -9,30 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Verificar senha
-        id: verificar
         run: |
           SENHAS='${{ secrets.SENHAS }}'
           SENHA_INPUT='${{ github.event.client_payload.senha }}'
           
-          echo "Senha recebida: $SENHA_INPUT"
-          
           USUARIO_INFO=$(echo "$SENHAS" | jq -r --arg senha "$SENHA_INPUT" '.[$senha] // "null"')
           
-          echo "Usuario info: $USUARIO_INFO"
-          
           if [ "$USUARIO_INFO" != "null" ]; then
-            echo "valido=true" >> $GITHUB_OUTPUT
-            echo "usuario_info=$USUARIO_INFO" >> $GITHUB_OUTPUT
+            echo "USUARIO_VALIDO: $USUARIO_INFO"
           else
-            echo "valido=false" >> $GITHUB_OUTPUT
+            echo "SENHA_INVALIDA"
           fi
-      
-
-      - name: Retornar resultado
-        run: |
-          echo "Valido: ${{ steps.verificar.outputs.valido }}"
-          echo "Usuario: ${{ steps.verificar.outputs.usuario_info }}"
-
-    outputs:
-      valido: ${{ steps.verificar.outputs.valido }}
-      usuario_info: ${{ steps.verificar.outputs.usuario_info }}
