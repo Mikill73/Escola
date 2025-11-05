@@ -16,7 +16,6 @@ jobs:
           
           echo "Senha recebida: $SENHA_INPUT"
           
-          # Usar jq para verificar se a senha existe no JSON
           USUARIO_INFO=$(echo "$SENHAS" | jq -r --arg senha "$SENHA_INPUT" '.[$senha] // "null"')
           
           echo "Usuario info: $USUARIO_INFO"
@@ -28,6 +27,7 @@ jobs:
             echo "valido=false" >> $GITHUB_OUTPUT
           fi
       
+
       - name: Retornar resultado
         run: |
           echo "Valido: ${{ steps.verificar.outputs.valido }}"
