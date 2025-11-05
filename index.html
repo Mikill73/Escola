@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1018,43 +1019,66 @@
             document.getElementById('app-container').style.display = 'block';
         }
         
-        async function verificarSenha(senha) {
-            try {
-                if (!senhas || Object.keys(senhas).length === 0) {
-                    const senhasData = await fetchDados('SENHAS');
-                    if (senhasData) {
-                        senhas = senhasData;
-                    } else {
-                        document.getElementById('senha-erro').textContent = 'Erro ao carregar senhas';
-                        return false;
+
+async function verificarSenha(senha) {
+    try {
+        if (!senhas || Object.keys(senhas).length === 0) {
+            const workflowResponse = await fetch(`${baseURL}/verificar-senha`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ senha: senha })
+            });
+            
+            if (workflowResponse.ok) {
+                const result = await workflowResponse.json();
+                if (result.valido && result.usuarioInfo) {
+                    usuarioInfo = result.usuarioInfo;
+                    localStorage.setItem('usuarioInfo', JSON.stringify(usuarioInfo));
+                    setCookie("senhaValida", "true", 10);
+                    
+                    if (usuarioInfo.nome && usuarioInfo.turma) {
+                        fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ 
+                                content: `Acesso: ${usuarioInfo.nome} - ${usuarioInfo.turma} - ${new Date().toLocaleString()}`
+                            })
+                        });
                     }
+                    return true;
+
+                }
+            }
+            return false;
+        }
+        
+        for (const [userPass, userInfo] of Object.entries(senhas)) {
+            if (userPass === senha) {
+                usuarioInfo = userInfo;
+                localStorage.setItem('usuarioInfo', JSON.stringify(userInfo));
+                setCookie("senhaValida", "true", 10);
+                
+                if (userInfo.nome && userInfo.turma) {
+                    fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ 
+                            content: `Acesso: ${userInfo.nome} - ${userInfo.turma} - ${new Date().toLocaleString()}`
+                        })
+                    });
                 }
                 
-                for (const [userPass, userInfo] of Object.entries(senhas)) {
-                    if (userPass === senha) {
-                        usuarioInfo = userInfo;
-                        localStorage.setItem('usuarioInfo', JSON.stringify(userInfo));
-                        setCookie("senhaValida", "true", 10);
-                        
-                        if (userInfo.nome && userInfo.turma) {
-                            fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ 
-                                    content: `Acesso: ${userInfo.nome} - ${userInfo.turma} - ${new Date().toLocaleString()}`
-                                })
-                            });
-                        }
-                        
-                        return true;
-                    }
-                }
-                return false;
-            } catch (error) {
-                document.getElementById('senha-erro').textContent = 'Erro ao verificar senha';
-                return false;
+                return true;
             }
         }
+        return false;
+    } catch (error) {
+        document.getElementById('senha-erro').textContent = 'Senha incorreta ou erro';
+        return false;
+    }
+}
         
         document.getElementById('btn-confirmar-senha').addEventListener('click', async () => {
             const senha = document.getElementById('senha-input').value;
