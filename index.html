@@ -534,90 +534,6 @@
             font-weight: 500;
         }
         
-        .flashcard-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px;
-        }
-        
-        .flashcard {
-            width: 100%;
-            max-width: 600px;
-            height: 350px;
-            perspective: 1200px;
-            cursor: pointer;
-        }
-        
-        .flashcard-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-        }
-        
-        .flashcard.virado .flashcard-inner {
-            transform: rotateY(180deg);
-        }
-        
-        .flashcard-frente, .flashcard-verso {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            background: #444;
-            border-radius: 12px;
-            padding: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            overflow-y: auto;
-            border: 1px solid #555;
-        }
-        
-        .flashcard-verso {
-            transform: rotateY(180deg);
-            background: #555;
-        }
-        
-        .flashcard-conteudo {
-            font-size: 22px;
-            line-height: 1.6;
-            text-align: center;
-            white-space: pre-wrap;
-        }
-        
-        .flashcard-navegacao {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-        
-        .btn-navegar {
-            padding: 14px 25px;
-            background: #555;
-            color: #eee;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        
-        .btn-navegar:hover {
-            background: #666;
-        }
-        
-        .flashcard-info {
-            color: #999;
-            font-size: 16px;
-            margin-top: 15px;
-            text-align: center;
-        }
-        
         .tarefa-info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -800,34 +716,6 @@
             background: #666;
         }
         
-        .flashcard-controle {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 25px;
-            width: 100%;
-            max-width: 350px;
-        }
-        
-        .flashcard-input {
-            width: 100%;
-            padding: 12px;
-            background: #444;
-            border: 1px solid #555;
-            border-radius: 8px;
-            color: #eee;
-            font-size: 16px;
-            text-align: center;
-        }
-        
-        .flashcard-mensagem {
-            color: #aaccaa;
-            font-size: 15px;
-            text-align: center;
-            min-height: 20px;
-        }
-        
         .configuracoes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -875,58 +763,61 @@
             height: 20px;
         }
         
-        .colaboradores-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-            margin-top: 25px;
+        .senha-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
         }
         
-        .colaborador-turma {
+        .senha-modal {
             background: #444;
             border-radius: 12px;
-            padding: 25px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            text-align: center;
             border: 1px solid #555;
         }
         
-        .colaborador-turma h3 {
-            margin-bottom: 18px;
+        .senha-titulo {
+            font-size: 28px;
+            margin-bottom: 25px;
             color: #fff;
-            border-bottom: 2px solid #666;
-            padding-bottom: 12px;
-            font-size: 20px;
         }
         
-        .colaborador-item {
+        .senha-input {
+            width: 100%;
+            padding: 16px;
             background: #555;
-            padding: 12px 18px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            color: #ddd;
             border: 1px solid #666;
-        }
-        
-        .colaborador-nome {
-            font-weight: 500;
-            color: #aaccaa;
-            font-size: 16px;
-        }
-        
-        .colaborador-funcao {
-            font-size: 14px;
-            color: #bbb;
-            margin-top: 5px;
-        }
-        
-        .colaborador-sugestao {
-            background: #5a2a7d;
-            padding: 20px;
             border-radius: 10px;
-            margin-top: 25px;
-            text-align: center;
-            font-size: 15px;
-            color: #ddd;
-            border: 1px solid #6b3399;
+            color: #eee;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+        
+        .btn-confirmar-senha {
+            padding: 16px 35px;
+            background: #2a7d2a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-confirmar-senha:hover {
+            background: #339933;
+        }
+        
+        .senha-erro {
+            color: #ff4444;
+            margin-top: 15px;
+            font-size: 16px;
         }
         
         @media (max-width: 768px) {
@@ -980,10 +871,6 @@
                 grid-template-columns: 1fr;
             }
             
-            .colaboradores-container {
-                grid-template-columns: 1fr;
-            }
-            
             .card {
                 height: 450px;
             }
@@ -1000,14 +887,11 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="app-container" style="display: none;">
         
         <div class="abas">
             <button class="aba ativa" data-aba="horario">Horário</button>
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
-            <button class="aba" data-aba="flashcards">Flashcards</button>
-            <button class="aba" data-aba="estudos">Estudos</button>
-            <button class="aba" data-aba="colaboradores">Colaboradores</button>
             <button class="aba" data-aba="configuracoes">Configurações</button>
         </div>
         
@@ -1038,49 +922,6 @@
             <div id="conteudo-subtab"></div>
         </div>
         
-        <div id="flashcards" class="conteudo-aba">
-            <div class="flashcard-controle">
-                <input type="number" class="flashcard-input" id="flashcard-quantidade" placeholder="Quantidade de flashcards" min="1">
-                <div class="flashcard-mensagem" id="flashcard-mensagem"></div>
-            </div>
-            
-            <div class="flashcard-container">
-                <div class="flashcard" id="flashcard">
-                    <div class="flashcard-inner">
-                        <div class="flashcard-frente">
-                            <div class="flashcard-conteudo" id="flashcard-frente"></div>
-                        </div>
-                        <div class="flashcard-verso">
-                            <div class="flashcard-conteudo" id="flashcard-verso"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flashcard-navegacao">
-                    <button class="btn-navegar" id="flashcard-anterior">← Anterior</button>
-                    <button class="btn-navegar" id="flashcard-proximo">Próximo →</button>
-                </div>
-                
-                <div class="flashcard-info" id="flashcard-info"></div>
-            </div>
-        </div>
-        
-        <div id="estudos" class="conteudo-aba">
-            <div class="pesquisa-container">
-                <input type="text" class="pesquisa" id="pesquisa-estudos" placeholder="Pesquisar estudos...">
-            </div>
-            
-            <div class="grid-container" id="lista-estudos"></div>
-        </div>
-        
-        <div id="colaboradores" class="conteudo-aba">
-            <div class="colaboradores-container" id="lista-colaboradores"></div>
-            
-            <div class="colaborador-sugestao">
-                Torne-se um colaborador entrando em contato com qualquer um dos colaboradores dessa lista (Preferencialmente os que tem Full-Acess)
-            </div>
-        </div>
-        
         <div id="configuracoes" class="conteudo-aba">
             <div class="configuracoes-grid">
                 <div class="configuracao-item">
@@ -1095,30 +936,6 @@
                         <option value="rank">Rank</option>
                         <option value="concluidas">Concluídas</option>
                     </select>
-                </div>
-                
-                <div class="configuracao-item">
-                    <div class="configuracao-titulo">Abas Ativas</div>
-                    <label class="configuracao-checkbox">
-                        <input type="checkbox" id="config-aba-horario" checked>
-                        <span>Horário</span>
-                    </label>
-                    <label class="configuracao-checkbox">
-                        <input type="checkbox" id="config-aba-tarefas" checked>
-                        <span>Tarefas</span>
-                    </label>
-                    <label class="configuracao-checkbox">
-                        <input type="checkbox" id="config-aba-flashcards" checked>
-                        <span>Flashcards</span>
-                    </label>
-                    <label class="configuracao-checkbox">
-                        <input type="checkbox" id="config-aba-estudos" checked>
-                        <span>Estudos</span>
-                    </label>
-                    <label class="configuracao-checkbox">
-                        <input type="checkbox" id="config-aba-colaboradores" checked>
-                        <span>Colaboradores</span>
-                    </label>
                 </div>
             </div>
         </div>
@@ -1145,34 +962,125 @@
         </div>
     </div>
 
+    <div class="senha-container" id="senha-container">
+        <div class="senha-modal">
+            <h2 class="senha-titulo">Acesso Restrito</h2>
+            <input type="password" class="senha-input" id="senha-input" placeholder="Digite a senha de acesso">
+            <button class="btn-confirmar-senha" id="btn-confirmar-senha">Acessar</button>
+            <div class="senha-erro" id="senha-erro"></div>
+        </div>
+    </div>
+
     <script>
         const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
         
         let tarefas = [];
-        let estudos = [];
         let horario = {};
-        let flashcards = [];
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
         let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
         let turmas = [];
-        let flashcardIndex = 0;
-        let flashcardsVistos = new Set();
         let materiaFiltro = '';
-        let quantidadeFlashcards = 0;
-        let flashcardsDisponiveis = [];
         let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || {
-            ordemTarefas: 'pendentes',
-            abasAtivas: {
-                horario: true,
-                tarefas: true,
-                flashcards: true,
-                estudos: true,
-                colaboradores: true,
-                configuracoes: true
-            }
+            ordemTarefas: 'pendentes'
         };
+        let senhas = {};
+        let usuarioInfo = JSON.parse(localStorage.getItem('usuarioInfo')) || null;
+        
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+        }
+        
+        function getCookie(name) {
+            return document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
+        }
+        
+        function verificarSenhaCookie() {
+            const senhaCookie = getCookie("senhaValida");
+            if (!senhaCookie) {
+                localStorage.removeItem("usuarioInfo");
+                usuarioInfo = null;
+                mostrarTelaSenha();
+                return false;
+            }
+            return true;
+        }
+        
+        function mostrarTelaSenha() {
+            document.getElementById('senha-container').style.display = 'flex';
+            document.getElementById('app-container').style.display = 'none';
+        }
+        
+        function mostrarApp() {
+            document.getElementById('senha-container').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+        }
+        
+        async function verificarSenha(senha) {
+            try {
+                if (!senhas || Object.keys(senhas).length === 0) {
+                    const senhasData = await fetchDados('SENHAS');
+                    if (senhasData) {
+                        senhas = senhasData;
+                    } else {
+                        document.getElementById('senha-erro').textContent = 'Erro ao carregar senhas';
+                        return false;
+                    }
+                }
+                
+                for (const [userPass, userInfo] of Object.entries(senhas)) {
+                    if (userPass === senha) {
+                        usuarioInfo = userInfo;
+                        localStorage.setItem('usuarioInfo', JSON.stringify(userInfo));
+                        setCookie("senhaValida", "true", 10);
+                        
+                        if (userInfo.nome && userInfo.turma) {
+                            fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ 
+                                    content: `Acesso: ${userInfo.nome} - ${userInfo.turma} - ${new Date().toLocaleString()}`
+                                })
+                            });
+                        }
+                        
+                        return true;
+                    }
+                }
+                return false;
+            } catch (error) {
+                document.getElementById('senha-erro').textContent = 'Erro ao verificar senha';
+                return false;
+            }
+        }
+        
+        document.getElementById('btn-confirmar-senha').addEventListener('click', async () => {
+            const senha = document.getElementById('senha-input').value;
+            const senhaValida = await verificarSenha(senha);
+            
+            if (senhaValida) {
+                mostrarApp();
+                carregarDados();
+            } else {
+                document.getElementById('senha-erro').textContent = 'Senha incorreta';
+            }
+        });
+        
+        document.getElementById('senha-input').addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                const senha = document.getElementById('senha-input').value;
+                const senhaValida = await verificarSenha(senha);
+                
+                if (senhaValida) {
+                    mostrarApp();
+                    carregarDados();
+                } else {
+                    document.getElementById('senha-erro').textContent = 'Senha incorreta';
+                }
+            }
+        });
         
         document.querySelectorAll('.aba').forEach(aba => {
             aba.addEventListener('click', () => {
@@ -1186,8 +1094,6 @@
                     marcarTarefasComoVistas();
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
-                } else if (aba.dataset.aba === 'flashcards') {
-                    atualizarFlashcardsDisponiveis();
                 }
             });
         });
@@ -1202,7 +1108,6 @@
         });
         
         document.getElementById('pesquisa-tarefas').addEventListener('input', filtrarTarefas);
-        document.getElementById('pesquisa-estudos').addEventListener('input', filtrarEstudos);
         document.getElementById('filtro-materia').addEventListener('change', (e) => {
             materiaFiltro = e.target.value;
             filtrarTarefas();
@@ -1226,19 +1131,6 @@
             renderizarHorario();
         });
         
-        document.getElementById('flashcard-anterior').addEventListener('click', () => {
-            flashcardIndex = (flashcardIndex - 1 + flashcardsDisponiveis.length) % flashcardsDisponiveis.length;
-            mostrarFlashcard();
-        });
-        
-        document.getElementById('flashcard-proximo').addEventListener('click', () => {
-            selecionarFlashcardAleatorio();
-        });
-        
-        document.getElementById('flashcard').addEventListener('click', () => {
-            document.getElementById('flashcard').classList.toggle('virado');
-        });
-        
         document.getElementById('btn-confirmar-turma').addEventListener('click', () => {
             const selector = document.getElementById('selecao-turma-selector');
             turmaSelecionada = selector.value;
@@ -1246,11 +1138,6 @@
             document.getElementById('selecao-turma-modal').classList.remove('ativo');
             document.getElementById('turma-selector').value = turmaSelecionada;
             renderizarHorario();
-        });
-        
-        document.getElementById('flashcard-quantidade').addEventListener('change', (e) => {
-            quantidadeFlashcards = parseInt(e.target.value) || 0;
-            atualizarFlashcardsDisponiveis();
         });
         
         document.getElementById('config-turma').addEventListener('change', (e) => {
@@ -1267,25 +1154,9 @@
             aplicarOrdemTarefas();
         });
         
-        document.querySelectorAll('#configuracoes input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const aba = e.target.id.replace('config-aba-', '');
-                configuracoes.abasAtivas[aba] = e.target.checked;
-                salvarConfiguracoes();
-                atualizarVisibilidadeAbas();
-            });
-        });
-        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 fecharModal();
-            } else if (e.key === 'ArrowLeft') {
-                flashcardIndex = (flashcardIndex - 1 + flashcardsDisponiveis.length) % flashcardsDisponiveis.length;
-                mostrarFlashcard();
-            } else if (e.key === 'ArrowRight') {
-                selecionarFlashcardAleatorio();
-            } else if (e.key === ' ' || e.key === 'Spacebar') {
-                document.getElementById('flashcard').classList.toggle('virado');
             }
         });
         
@@ -1462,62 +1333,12 @@
             });
         }
         
-        function filtrarEstudos() {
-            const termo = document.getElementById('pesquisa-estudos').value.toLowerCase();
-            const container = document.getElementById('lista-estudos');
-            container.innerHTML = '';
-            
-            const estudosFiltrados = estudos.filter(estudo => 
-                estudo.materia.toLowerCase().includes(termo) || 
-                estudo.descricao.toLowerCase().includes(termo) ||
-                (estudo.turma && estudo.turma.toLowerCase().includes(termo))
-            );
-            
-            renderizarEstudos(estudosFiltrados);
-        }
-        
-        function renderizarEstudos(listaEstudos = estudos) {
-            const container = document.getElementById('lista-estudos');
-            
-            if (listaEstudos.length === 0) {
-                container.innerHTML = '<div class="vazio">Nenhum estudo encontrado</div>';
-                return;
-            }
-            
-            listaEstudos.forEach((estudo, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                
-                const descricaoResumida = estudo.descricao.length > 150 
-                    ? estudo.descricao.substring(0, 150) + '...' 
-                    : estudo.descricao;
-                
-                const infoCriador = estudo.criador ? `<div class="info-criador">Criado por: ${estudo.criador}${estudo.turmaCriador ? ` (${estudo.turmaCriador})` : ''}</div>` : '';
-                const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''} em ${formatarData(estudo.ultimaEdicao)}</div>` : '';
-                
-                card.innerHTML = `
-                    <div class="card-titulo">${estudo.materia}</div>
-                    ${estudo.turma ? `<div class="card-turma">Turma: ${estudo.turma}</div>` : ''}
-                    <div class="card-descricao">${descricaoResumida}</div>
-                    ${infoCriador}
-                    ${infoEditor}
-                    <div class="card-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarEstudo(${index})">Visualizar</button>
-                        <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
-                        ${estudo.arquivo ? '<button class="btn btn-download" onclick="baixarEstudoPDF(' + index + ')">Baixar PDF</button>' : ''}
-                    </div>
-                `;
-                
-                container.appendChild(card);
-            });
-        }
-        
         function visualizarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            const status = tarefasStatus[id] || {};
+            const status = tarefasStatus[tarefa.id] || {};
             
             if (!status.vista && !status.concluida) {
-                tarefasStatus[id] = {...status, vista: true};
+                tarefasStatus[tarefa.id] = {...status, vista: true};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 atualizarContadorNotificacoes();
             }
@@ -1564,27 +1385,6 @@
             document.getElementById('modal-info-criador').innerHTML = '';
             document.getElementById('modal-info-resposta').innerHTML = respostaInfo;
             document.getElementById('modal-acoes').innerHTML = '';
-            
-            abrirModal();
-        }
-        
-        function visualizarEstudo(index) {
-            const estudo = estudos[index];
-            
-            const infoCriador = estudo.criador ? `<div class="info-criador">Criado por: ${estudo.criador}${estudo.turmaCriador ? ` (${estudo.turmaCriador})` : ''}</div>` : '';
-            const infoEditor = estudo.editor && estudo.ultimaEdicao ? `<div class="info-criador">Editado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''} em ${formatarData(estudo.ultimaEdicao)}</div>` : '';
-            
-            document.getElementById('modal-titulo').innerHTML = estudo.materia;
-            document.getElementById('modal-turma').innerHTML = estudo.turma ? `Turma: ${estudo.turma}` : '';
-            document.getElementById('modal-data').innerHTML = '';
-            document.getElementById('modal-descricao').innerHTML = estudo.descricao;
-            document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor;
-            document.getElementById('modal-info-resposta').innerHTML = '';
-            
-            document.getElementById('modal-acoes').innerHTML = `
-                <button class="btn btn-download" onclick="baixarEstudo(${index})">Baixar TXT</button>
-                ${estudo.arquivo ? '<button class="btn btn-download" onclick="baixarEstudoPDF(' + index + ')">Baixar PDF</button>' : ''}
-            `;
             
             abrirModal();
         }
@@ -1797,69 +1597,6 @@
             }
         }
         
-        function baixarTarefa(id) {
-            const tarefa = tarefas.find(t => t.id === id);
-            const texto = `Matéria: ${tarefa.materia}\nTurma: ${tarefa.turma || 'Não especificada'}\nDescrição: ${tarefa.descricao}\nCriado por: ${tarefa.criador || 'Desconhecido'}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}${tarefa.editor ? `\nEditado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''}` : ''}${tarefa.dataAdicao ? `\nAdicionado em: ${formatarData(tarefa.dataAdicao)}` : ''}${tarefa.autor_da_resposta ? `\nResposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}` : ''}`;
-            
-            const blob = new Blob([texto], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Tarefa - ${tarefa.materia}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 100);
-        }
-        
-        function baixarEstudo(index) {
-            const estudo = estudos[index];
-            const texto = `Matéria: ${estudo.materia}\nTurma: ${estudo.turma || 'Não especificada'}\nDescrição: ${estudo.descricao}\nCriado por: ${estudo.criador || 'Desconhecido'}${estudo.turmaCriador ? ` (${estudo.turmaCriador})` : ''}${estudo.editor ? `\nEditado por: ${estudo.editor}${estudo.turmaEditor ? ` (${estudo.turmaEditor})` : ''}` : ''}`;
-            
-            const blob = new Blob([texto], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Estudo - ${estudo.materia}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 100);
-        }
-        
-        function baixarEstudoPDF(index) {
-            const estudo = estudos[index];
-            if (estudo.arquivo) {
-                const byteCharacters = atob(estudo.arquivo);
-                const byteNumbers = new Array(byteCharacters.length);
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-                const byteArray = new Uint8Array(byteNumbers);
-                const blob = new Blob([byteArray], { type: 'application/pdf' });
-                
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Estudo - ${estudo.materia}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                }, 100);
-            }
-        }
-        
         function detectarNovasTarefas() {
             const novasTarefas = [];
             
@@ -1918,62 +1655,6 @@
             localStorage.removeItem('tarefasVistas');
         }
         
-        function atualizarFlashcardsDisponiveis() {
-            const input = document.getElementById('flashcard-quantidade');
-            const mensagem = document.getElementById('flashcard-mensagem');
-            
-            if (!quantidadeFlashcards || quantidadeFlashcards <= 0) {
-                flashcardsDisponiveis = [...flashcards];
-                mensagem.textContent = `Mostrando todos os ${flashcards.length} flashcards`;
-            } else {
-                const maxFlashcards = Math.min(quantidadeFlashcards, flashcards.length);
-                flashcardsDisponiveis = flashcards.slice(0, maxFlashcards);
-                mensagem.textContent = `Mostrando ${maxFlashcards} de ${flashcards.length} flashcards`;
-            }
-            
-            flashcardsVistos.clear();
-            flashcardIndex = 0;
-            
-            if (flashcardsDisponiveis.length > 0) {
-                selecionarFlashcardAleatorio();
-            } else {
-                document.getElementById('flashcard-frente').textContent = 'Nenhum flashcard disponível';
-                document.getElementById('flashcard-verso').textContent = '';
-                document.getElementById('flashcard-info').textContent = '0/0';
-            }
-        }
-        
-        function selecionarFlashcardAleatorio() {
-            if (flashcardsDisponiveis.length === 0) return;
-            
-            if (flashcardsVistos.size >= flashcardsDisponiveis.length) {
-                const mensagem = document.getElementById('flashcard-mensagem');
-                mensagem.textContent = `Você já viu todos os ${flashcardsVistos.size} flashcards selecionados`;
-                return;
-            }
-            
-            let novoIndex;
-            do {
-                novoIndex = Math.floor(Math.random() * flashcardsDisponiveis.length);
-            } while (flashcardsVistos.has(novoIndex) && flashcardsVistos.size < flashcardsDisponiveis.length);
-            
-            flashcardsVistos.add(novoIndex);
-            flashcardIndex = novoIndex;
-            mostrarFlashcard();
-        }
-        
-        function mostrarFlashcard() {
-            if (flashcardsDisponiveis.length === 0) return;
-            
-            const flashcard = flashcardsDisponiveis[flashcardIndex];
-            document.getElementById('flashcard-frente').textContent = flashcard.frente;
-            document.getElementById('flashcard-verso').textContent = flashcard.verso;
-            document.getElementById('flashcard').classList.remove('virado');
-            
-            const infoCriador = flashcard.criador ? `Criado por: ${flashcard.criador}${flashcard.turmaCriador ? ` (${flashcard.turmaCriador})` : ''}` : '';
-            document.getElementById('flashcard-info').textContent = `${flashcardIndex + 1}/${flashcardsDisponiveis.length} ${infoCriador}`;
-        }
-        
         function formatarData(dataString) {
             if (!dataString) return '';
             
@@ -1991,39 +1672,7 @@
         
         function carregarConfiguracoes() {
             document.getElementById('config-ordem-tarefas').value = configuracoes.ordemTarefas;
-            
-            document.getElementById('config-aba-horario').checked = configuracoes.abasAtivas.horario;
-            document.getElementById('config-aba-tarefas').checked = configuracoes.abasAtivas.tarefas;
-            document.getElementById('config-aba-flashcards').checked = configuracoes.abasAtivas.flashcards;
-            document.getElementById('config-aba-estudos').checked = configuracoes.abasAtivas.estudos;
-            document.getElementById('config-aba-colaboradores').checked = configuracoes.abasAtivas.colaboradores;
-            
-            atualizarVisibilidadeAbas();
             aplicarOrdemTarefas();
-        }
-        
-        function atualizarVisibilidadeAbas() {
-            document.querySelectorAll('.aba').forEach(aba => {
-                const abaId = aba.dataset.aba;
-                if (abaId === 'configuracoes') return;
-                
-                const estaAtiva = configuracoes.abasAtivas[abaId];
-                if (estaAtiva === false) {
-                    aba.style.display = 'none';
-                    if (aba.classList.contains('ativa')) {
-                        aba.classList.remove('ativa');
-                        document.getElementById(abaId).classList.remove('ativa');
-                        
-                        const primeiraAbaAtiva = document.querySelector('.aba[style=""]');
-                        if (primeiraAbaAtiva) {
-                            primeiraAbaAtiva.classList.add('ativa');
-                            document.getElementById(primeiraAbaAtiva.dataset.aba).classList.add('ativa');
-                        }
-                    }
-                } else {
-                    aba.style.display = 'block';
-                }
-            });
         }
         
         function aplicarOrdemTarefas() {
@@ -2054,56 +1703,17 @@
             }
         }
         
-        function renderizarColaboradores() {
-            const container = document.getElementById('lista-colaboradores');
-            container.innerHTML = '';
-            
-            const colaboradores = {
-                '2A': [
-                    { nome: 'Yuri', funcao: 'Full' },
-                    { nome: 'Hector Hiro', funcao: 'Full' },
-                    { nome: 'Vitor Hugo Luciano', funcao: 'Respostas' },
-                    { nome: 'Maria Eduarda Ferreira', funcao: 'Respostas' }
-                ],
-                '2B': [],
-                '2C': [],
-                '2D': [],
-                '2E': []
-            };
-            
-            Object.keys(colaboradores).forEach(turma => {
-                if (colaboradores[turma].length > 0) {
-                    const turmaDiv = document.createElement('div');
-                    turmaDiv.className = 'colaborador-turma';
-                    
-                    turmaDiv.innerHTML = `<h3>${turma}</h3>`;
-                    
-                    colaboradores[turma].forEach(colaborador => {
-                        const colaboradorItem = document.createElement('div');
-                        colaboradorItem.className = 'colaborador-item';
-                        
-                        colaboradorItem.innerHTML = `
-                            <div class="colaborador-nome">${colaborador.nome}</div>
-                            <div class="colaborador-funcao">${colaborador.funcao}</div>
-                        `;
-                        
-                        turmaDiv.appendChild(colaboradorItem);
-                    });
-                    
-                    container.appendChild(turmaDiv);
-                }
-            });
-        }
-        
         async function carregarDados() {
+            if (!verificarSenhaCookie()) {
+                return;
+            }
+            
             try {
                 limparLocalStorageAntigo();
                 
-                const [tarefasData, estudosData, horarioData, flashcardsData, turmasData] = await Promise.all([
+                const [tarefasData, horarioData, turmasData] = await Promise.all([
                     fetchDados('Tarefas'),
-                    fetchDados('Estudos'),
                     fetchDados('Horário'),
-                    fetchDados('Flashcards'),
                     fetchDados('Turmas')
                 ]);
                 
@@ -2115,9 +1725,7 @@
                         }
                     });
                 }
-                if (estudosData) estudos = estudosData;
                 if (horarioData) horario = horarioData;
-                if (flashcardsData) flashcards = flashcardsData;
                 if (turmasData) turmas = turmasData;
                 
                 atualizarSeletorTurmas();
@@ -2127,12 +1735,6 @@
                 
                 renderizarHorario();
                 filtrarTarefas();
-                renderizarEstudos();
-                renderizarColaboradores();
-                
-                if (flashcards.length > 0) {
-                    atualizarFlashcardsDisponiveis();
-                }
                 
                 mostrarSelecaoTurma();
                 verificarTarefaURL();
@@ -2152,28 +1754,15 @@
                 return null;
             }
         }
-
-function setCookie(name, value, days) {
-    const expires = new Date(Date.now() + days * 864e5).toUTCString();
-    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
-}
-function getCookie(name) {
-    return document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
-}
-if (!getCookie("webhookEnviado")) {
-    const turma = localStorage.getItem("turmaSelecionada");
-    if (turma) {
-        fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content: turma })
-        });
-
-        setCookie("webhookEnviado", "true", 3);
-    }
-}
         
-        document.addEventListener('DOMContentLoaded', carregarDados);
+        document.addEventListener('DOMContentLoaded', () => {
+            if (usuarioInfo && verificarSenhaCookie()) {
+                mostrarApp();
+                carregarDados();
+            } else {
+                mostrarTelaSenha();
+            }
+        });
     </script>
 </body>
-    </html>
+</html>
