@@ -1,0 +1,25 @@
+on:
+  repository_dispatch:
+    types: [verificar-senha]
+
+jobs:
+  verificar-senha:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Verificar senha
+      id: verificar
+      run: |
+        SENHAS='${{ secrets.SENHAS }}'
+        SENHA_INPUT='${{ github.event.client_payload.senha }}'
+        
+        SENHAS_OBJ=$(echo "$SENHAS" | jq -r '.')
+        
+        USUARIO_INFO=$(echo "$SENHAS_OBJ" | jq -r --arg senha "$SENHA_INPUT" '.[$senha]')
+        
+        if [ "$USUARIO_INFO" != "null" ]; then
+          echo "valido=true" >> $GITHUB_OUTPUT
+          echo "usuario_info=$USUARIO_INFO" >> $GITHUB_OUTPUT
+        else
+          echo "valido=false" >> $GITHUB_OUTPUT
+        fi
