@@ -688,96 +688,111 @@
             font-size: 16px;
         }
         
-        .grupo-trabalho {
-            background: #444;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-        
-        .grupo-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .grupo-nome {
-            font-weight: bold;
-        }
-        
-        .integrante-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 5px;
-        }
-        
-        .integrante-item input {
-            flex: 1;
-        }
-        
-        .grupo-acoes {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .btn-adicionar-integrante {
-            background: #284;
-        }
-        
-        .btn-adicionar-integrante:hover {
-            background: #3a5;
-        }
-        
-        .btn-remover-grupo {
-            background: #822;
-        }
-        
-        .btn-remover-grupo:hover {
-            background: #a33;
-        }
-        
         .trabalho-container {
             background: #444;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 15px;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #555;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
         
         .trabalho-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #666;
+            padding-bottom: 15px;
         }
         
-        .trabalho-info {
-            margin-bottom: 15px;
+        .trabalho-info-principal {
+            flex: 1;
+        }
+        
+        .trabalho-materia {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        
+        .trabalho-turma {
+            color: #aaccaa;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .trabalho-data {
+            background: #555;
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: #eee;
+            font-size: 14px;
+            border: 1px solid #666;
+        }
+        
+        .trabalho-descricao {
+            color: #ddd;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #555;
+            border-radius: 10px;
+            border: 1px solid #666;
+            font-size: 15px;
         }
         
         .grupos-container {
-            margin-top: 15px;
+            margin-top: 20px;
         }
         
-        .btn-remover-x {
-            background: #822;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
+        .grupos-titulo {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #666;
+            padding-bottom: 8px;
+        }
+        
+        .grupo-trabalho {
+            background: #555;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #666;
+        }
+        
+        .grupo-nome {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .integrantes-lista {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-weight: bold;
-            margin-left: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         
-        .btn-remover-x:hover {
-            background: #a33;
+        .integrante-item {
+            background: #666;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: #eee;
+            font-size: 14px;
+            border: 1px solid #777;
+        }
+        
+        .info-criador-trabalho {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #666;
         }
         
         @media (max-width: 768px) {
@@ -835,6 +850,15 @@
                 padding: 10px 15px;
                 font-size: 14px;
             }
+            
+            .trabalho-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .trabalho-data {
+                align-self: flex-start;
+            }
         }
     </style>
 </head>
@@ -876,24 +900,7 @@
         </div>
         
         <div id="trabalhos" class="conteudo-aba">
-            <div class="subtabs">
-                <button class="subtab ativa" data-subtab="trabalhos-pendentes">Pendentes</button>
-                <button class="subtab" data-subtab="trabalhos-concluidos">Concluídos</button>
-            </div>
-            
-            <div class="filtro-materia-container">
-                <span class="filtro-materia-label">Filtrar por matéria:</span>
-                <select class="filtro-materia-select" id="filtro-materia-trabalhos">
-                    <option value="">Todas as matérias</option>
-                </select>
-                <button class="btn-limpar-filtro" id="btn-limpar-filtro-trabalhos">Limpar</button>
-            </div>
-            
-            <div class="pesquisa-container">
-                <input type="text" class="pesquisa" id="pesquisa-trabalhos" placeholder="Pesquisar trabalhos...">
-            </div>
-            
-            <div id="conteudo-trabalhos"></div>
+            <div id="lista-trabalhos"></div>
         </div>
         
         <div id="configuracoes" class="conteudo-aba">
@@ -953,19 +960,11 @@
         let horario = {};
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
-        let trabalhosStatus = JSON.parse(localStorage.getItem('trabalhosStatus')) || {};
         let subtabAtiva = 'pendentes';
-        let subtabTrabalhosAtiva = 'trabalhos-pendentes';
         let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
         let turmas = ["2A", "2B", "2C", "2D", "2E"];
-        let gruposTrabalho = [{
-            id: Date.now().toString(),
-            nome: 'Grupo 1',
-            integrantes: ['']
-        }];
 
         let materiaFiltro = '';
-        let materiaFiltroTrabalhos = '';
         let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || {
             ordemTarefas: 'pendentes'
         };
@@ -1037,26 +1036,17 @@
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
                 } else if (aba.dataset.aba === 'trabalhos') {
-                    filtrarTrabalhos();
+                    renderizarTrabalhos();
                 }
             });
         });
         
         document.querySelectorAll('.subtab').forEach(subtab => {
             subtab.addEventListener('click', () => {
-                const parentId = subtab.closest('.conteudo-aba').id;
-                
-                if (parentId === 'tarefas') {
-                    document.querySelectorAll('#tarefas .subtab').forEach(s => s.classList.remove('ativa'));
-                    subtab.classList.add('ativa');
-                    subtabAtiva = subtab.dataset.subtab;
-                    filtrarTarefas();
-                } else if (parentId === 'trabalhos') {
-                    document.querySelectorAll('#trabalhos .subtab').forEach(s => s.classList.remove('ativa'));
-                    subtab.classList.add('ativa');
-                    subtabTrabalhosAtiva = subtab.dataset.subtab;
-                    filtrarTrabalhos();
-                }
+                document.querySelectorAll('.subtab').forEach(s => s.classList.remove('ativa'));
+                subtab.classList.add('ativa');
+                subtabAtiva = subtab.dataset.subtab;
+                filtrarTarefas();
             });
         });
         
@@ -1069,17 +1059,6 @@
             document.getElementById('filtro-materia').value = '';
             materiaFiltro = '';
             filtrarTarefas();
-        });
-        
-        document.getElementById('pesquisa-trabalhos').addEventListener('input', filtrarTrabalhos);
-        document.getElementById('filtro-materia-trabalhos').addEventListener('change', (e) => {
-            materiaFiltroTrabalhos = e.target.value;
-            filtrarTrabalhos();
-        });
-        document.getElementById('btn-limpar-filtro-trabalhos').addEventListener('click', () => {
-            document.getElementById('filtro-materia-trabalhos').value = '';
-            materiaFiltroTrabalhos = '';
-            filtrarTrabalhos();
         });
         
         document.getElementById('modal-fechar').addEventListener('click', fecharModal);
@@ -1141,27 +1120,6 @@
             renderizarTarefas(tarefasFiltradas);
         }
         
-        function filtrarTrabalhos() {
-            const termo = document.getElementById('pesquisa-trabalhos').value.toLowerCase();
-            const container = document.getElementById('conteudo-trabalhos');
-            
-            container.innerHTML = '<div class="grid-container" id="lista-trabalhos"></div>';
-            const listaContainer = document.getElementById('lista-trabalhos');
-            
-            let trabalhosFiltrados = subtabTrabalhosAtiva === 'trabalhos-pendentes' 
-                ? trabalhos.filter(trabalho => !trabalhosStatus[trabalho.id]?.concluido)
-                : trabalhos.filter(trabalho => trabalhosStatus[trabalho.id]?.concluido);
-            
-            trabalhosFiltrados = trabalhosFiltrados.filter(trabalho => 
-                (trabalho.materia.toLowerCase().includes(termo) || 
-                 trabalho.descricao.toLowerCase().includes(termo) ||
-                 (trabalho.turma && trabalho.turma.toLowerCase().includes(termo))) &&
-                (materiaFiltroTrabalhos === '' || trabalho.materia === materiaFiltroTrabalhos)
-            );
-            
-            renderizarTrabalhos(trabalhosFiltrados);
-        }
-        
         function renderizarTarefas(listaTarefas) {
             const container = document.getElementById('lista-tarefas');
             
@@ -1213,51 +1171,55 @@
             });
         }
         
-        function renderizarTrabalhos(listaTrabalhos) {
+        function renderizarTrabalhos() {
             const container = document.getElementById('lista-trabalhos');
             
-            if (listaTrabalhos.length === 0) {
+            if (trabalhos.length === 0) {
                 container.innerHTML = '<div class="vazio">Nenhum trabalho encontrado</div>';
                 return;
             }
             
             container.innerHTML = '';
             
-            listaTrabalhos.forEach((trabalho) => {
-                const status = trabalhosStatus[trabalho.id] || {};
+            trabalhos.forEach((trabalho) => {
+                const trabalhoDiv = document.createElement('div');
+                trabalhoDiv.className = 'trabalho-container';
                 
-                const card = document.createElement('div');
-                card.className = 'card';
+                const infoCriador = trabalho.criador ? `<div class="info-criador-trabalho">Criado por: ${trabalho.criador}${trabalho.turmaCriador ? ` (${trabalho.turmaCriador})` : ''}</div>` : '';
+                const infoDataAdicao = trabalho.dataAdicao ? `<div class="info-criador-trabalho">Adicionado em: ${formatarData(trabalho.dataAdicao)}</div>` : '';
                 
-                const proximaAula = encontrarProximaAula(trabalho.materia);
-                const proximaAulaInfo = proximaAula ? `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>` : '';
+                const gruposHTML = trabalho.grupos.map(grupo => `
+                    <div class="grupo-trabalho">
+                        <div class="grupo-nome">${grupo.nome}</div>
+                        <div class="integrantes-lista">
+                            ${grupo.integrantes.map(integrante => `
+                                <div class="integrante-item">${integrante}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
                 
-                const descricaoResumida = trabalho.descricao.length > 150 
-                    ? trabalho.descricao.substring(0, 150) + '...' 
-                    : trabalho.descricao;
-                
-                const infoCriador = trabalho.criador ? `<div class="info-criador">Criado por: ${trabalho.criador}${trabalho.turmaCriador ? ` (${trabalho.turmaCriador})` : ''}</div>` : '';
-                const infoDataAdicao = trabalho.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(trabalho.dataAdicao)}</div>` : '';
-                const infoDataEntrega = trabalho.dataEntrega ? `<div class="info-criador">Data de entrega: ${formatarData(trabalho.dataEntrega)}</div>` : '';
-                
-                card.innerHTML = `
-                    <div class="card-titulo">${trabalho.materia}</div>
-                    ${trabalho.turma ? `<div class="card-turma">Turma: ${trabalho.turma}</div>` : ''}
-                    ${proximaAulaInfo}
-                    <div class="card-descricao">${descricaoResumida}</div>
+                trabalhoDiv.innerHTML = `
+                    <div class="trabalho-header">
+                        <div class="trabalho-info-principal">
+                            <div class="trabalho-materia">${trabalho.materia}</div>
+                            ${trabalho.turma ? `<div class="trabalho-turma">Turma: ${trabalho.turma}</div>` : ''}
+                        </div>
+                        ${trabalho.dataEntrega ? `<div class="trabalho-data">Entrega: ${formatarData(trabalho.dataEntrega)}</div>` : ''}
+                    </div>
+                    
+                    <div class="trabalho-descricao">${trabalho.descricao}</div>
+                    
+                    <div class="grupos-container">
+                        <div class="grupos-titulo">Grupos</div>
+                        ${gruposHTML}
+                    </div>
+                    
                     ${infoCriador}
                     ${infoDataAdicao}
-                    ${infoDataEntrega}
-                    <div class="card-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarTrabalho('${trabalho.id}')">Ver</button>
-                        ${!status.concluido ? 
-                            `<button class="btn btn-concluida" onclick="marcarTrabalhoConcluido('${trabalho.id}')">Concluir</button>` : 
-                            `<button class="btn btn-desfazer" onclick="desmarcarTrabalhoConcluido('${trabalho.id}')">Desfazer</button>`
-                        }
-                    </div>
                 `;
                 
-                container.appendChild(card);
+                container.appendChild(trabalhoDiv);
             });
         }
         
@@ -1399,58 +1361,6 @@
             abrirModal();
         }
         
-        function visualizarTrabalho(id) {
-            const trabalho = trabalhos.find(t => t.id === id);
-            const status = trabalhosStatus[id] || {};
-            
-            const proximaAula = encontrarProximaAula(trabalho.materia);
-            const proximaAulaInfo = proximaAula ? `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>` : '';
-            
-            const infoCriador = trabalho.criador ? `<div class="info-criador">Criado por: ${trabalho.criador}${trabalho.turmaCriador ? ` (${trabalho.turmaCriador})` : ''}</div>` : '';
-            const infoDataAdicao = trabalho.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(trabalho.dataAdicao)}</div>` : '';
-            const infoDataEntrega = trabalho.dataEntrega ? `<div class="info-criador">Data de entrega: ${formatarData(trabalho.dataEntrega)}</div>` : '';
-            
-            const gruposHTML = trabalho.grupos.map(grupo => `
-                <div class="grupo-trabalho">
-                    <div class="grupo-header">
-                        <span class="grupo-nome">${grupo.nome}</span>
-                    </div>
-                    <div class="integrantes-container">
-                        ${grupo.integrantes.map(integrante => `
-                            <div class="integrante-item">
-                                <span>${integrante}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('modal-titulo').innerHTML = `${trabalho.materia}`;
-            document.getElementById('modal-turma').innerHTML = trabalho.turma ? `Turma: ${trabalho.turma}` : '';
-            document.getElementById('modal-data').innerHTML = proximaAulaInfo;
-            document.getElementById('modal-descricao').innerHTML = trabalho.descricao;
-            document.getElementById('modal-info-criador').innerHTML = infoCriador + infoDataAdicao + infoDataEntrega;
-            document.getElementById('modal-info-resposta').innerHTML = '';
-            
-            document.getElementById('modal-descricao').innerHTML += `
-                <div class="grupos-container" style="margin-top: 20px;">
-                    <h4 style="margin-bottom: 10px;">Grupos:</h4>
-                    ${gruposHTML}
-                </div>
-            `;
-            
-            let acoesHTML = '';
-            if (!status.concluido) {
-                acoesHTML += `<button class="btn btn-concluida" onclick="marcarTrabalhoConcluido('${id}');fecharModal();">Marcar como Concluído</button>`;
-            } else {
-                acoesHTML += `<button class="btn btn-desfazer" onclick="desmarcarTrabalhoConcluido('${id}');fecharModal();">Desfazer Conclusão</button>`;
-            }
-            
-            document.getElementById('modal-acoes').innerHTML = acoesHTML;
-            
-            abrirModal();
-        }
-        
         function visualizarResposta(id) {
             const tarefa = tarefas.find(t => t.id === id);
             const respostaInfo = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
@@ -1485,26 +1395,6 @@
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 filtrarTarefas();
                 atualizarContadorNotificacoes();
-            }
-        }
-        
-        function marcarTrabalhoConcluido(id) {
-            const status = trabalhosStatus[id] || {};
-            
-            if (!status.concluido) {
-                trabalhosStatus[id] = {...status, concluido: true};
-                localStorage.setItem('trabalhosStatus', JSON.stringify(trabalhosStatus));
-                filtrarTrabalhos();
-            }
-        }
-        
-        function desmarcarTrabalhoConcluido(id) {
-            const status = trabalhosStatus[id] || {};
-            
-            if (status.concluido) {
-                trabalhosStatus[id] = {...status, concluido: false};
-                localStorage.setItem('trabalhosStatus', JSON.stringify(trabalhosStatus));
-                filtrarTrabalhos();
             }
         }
         
@@ -1672,7 +1562,6 @@
         
         function atualizarFiltroMaterias() {
             const filtroSelect = document.getElementById('filtro-materia');
-            const filtroTrabalhosSelect = document.getElementById('filtro-materia-trabalhos');
             const opcoesExistentes = Array.from(filtroSelect.options).map(opt => opt.value);
             
             if (todasMaterias && todasMaterias.length > 0) {
@@ -1682,11 +1571,6 @@
                         option.value = materia;
                         option.textContent = materia;
                         filtroSelect.appendChild(option);
-                        
-                        const optionTrabalhos = document.createElement('option');
-                        optionTrabalhos.value = materia;
-                        optionTrabalhos.textContent = materia;
-                        filtroTrabalhosSelect.appendChild(optionTrabalhos);
                     }
                 });
             }
@@ -1806,11 +1690,10 @@
                 
                 renderizarHorario();
                 filtrarTarefas();
-                filtrarTrabalhos();
+                renderizarTrabalhos();
             } catch (error) {
             }
         }
-
         
         async function fetchDados(arquivo) {
             try {
