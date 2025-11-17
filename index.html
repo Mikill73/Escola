@@ -795,6 +795,13 @@
             border-top: 1px solid #666;
         }
         
+        .alternativa-correta {
+            background-color: #7d2a2a !important;
+            color: white !important;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 grid-template-columns: 1fr;
@@ -1094,6 +1101,41 @@
             }
         });
         
+        function processarRespostas(respostaTexto) {
+            const linhas = respostaTexto.split('\n');
+            const respostasMap = new Map();
+            
+            linhas.forEach(linha => {
+                const match = linha.match(/(\d+)\s*-\s*([A-E])/i);
+                if (match) {
+                    const numero = parseInt(match[1]);
+                    const alternativa = match[2].toUpperCase();
+                    respostasMap.set(numero, alternativa);
+                }
+            });
+            
+            return respostasMap;
+        }
+        
+        function aplicarMarcacaoAlternativas(descricaoElemento, respostasMap) {
+            if (!descricaoElemento || respostasMap.size === 0) return;
+            
+            let html = descricaoElemento.innerHTML;
+            
+            respostasMap.forEach((alternativa, numero) => {
+                const padrao = new RegExp(`(${numero}\\s*[\\-\\:\\.]\\s*)([A-E])(?![^<]*>)`, 'gi');
+                html = html.replace(padrao, `$1<span class="alternativa-correta">$2</span>`);
+                
+                const padraoParenteses = new RegExp(`(\\(\\s*)(${alternativa})(\\s*\\))`, 'gi');
+                html = html.replace(padraoParenteses, `$1<span class="alternativa-correta">$2</span>$3`);
+                
+                const padraoLetraSozinha = new RegExp(`(>[^<]*?\\b${numero}\\b[^<]*?)(${alternativa})(?![^<]*<)`, 'gi');
+                html = html.replace(padraoLetraSozinha, `$1<span class="alternativa-correta">$2</span>`);
+            });
+            
+            descricaoElemento.innerHTML = html;
+        }
+        
         function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
             const container = document.getElementById('conteudo-subtab');
@@ -1344,6 +1386,11 @@
             document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
             document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor + infoDataAdicao;
             document.getElementById('modal-info-resposta').innerHTML = infoResposta;
+            
+            if (tarefa.resposta) {
+                const respostasMap = processarRespostas(tarefa.resposta);
+                aplicarMarcacaoAlternativas(document.getElementById('modal-descricao'), respostasMap);
+            }
             
             let acoesHTML = '';
             if (!status.concluida) {
