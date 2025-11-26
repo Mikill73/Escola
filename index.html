@@ -9,7 +9,6 @@
         * {
             margin: 0;
             padding: 0;
-
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
@@ -799,8 +798,9 @@
         .alternativa-correta {
             background-color: #7d2a2a !important;
             color: white !important;
-            padding: 2px 4px;
-            border-radius: 3px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 2px;
         }
         
         @media (max-width: 768px) {
@@ -944,7 +944,7 @@
     </div>
 
     <div class="senha-container" id="senha-container">
-        <h2 class="senha-titulo">O site agora é privado, somente pessoas próximas, volta em 2026</h2>
+        <h2 class="senha-titulo">O site agora é privado, somente pessoas próximas</h2>
 
         <input type="text" class="senha-input" id="nome-usuario" placeholder="Seu nome">
         <select class="senha-selector" id="senha-turma-selector">
@@ -1107,7 +1107,7 @@
             const respostasMap = new Map();
             
             linhas.forEach(linha => {
-                const match = linha.match(/(\d+)\s*-\s*([A-E])/i);
+                const match = linha.match(/(\d+)\s*[-\s]\s*([A-E])/i);
                 if (match) {
                     const numero = parseInt(match[1]);
                     const alternativa = match[2].toUpperCase();
@@ -1124,14 +1124,11 @@
             let html = descricaoElemento.innerHTML;
             
             respostasMap.forEach((alternativa, numero) => {
-                const padrao = new RegExp(`(${numero}\\s*[\\-\\:\\.]\\s*)([A-E])(?![^<]*>)`, 'gi');
-                html = html.replace(padrao, `$1<span class="alternativa-correta">$2</span>`);
+                const padraoAlternativa = new RegExp(`(${numero}\\)[^<]*?${alternativa}\\))(?![^<]*>)`, 'gi');
+                html = html.replace(padraoAlternativa, `<span class="alternativa-correta">$1</span>`);
                 
-                const padraoParenteses = new RegExp(`(\\(\\s*)(${alternativa})(\\s*\\))`, 'gi');
-                html = html.replace(padraoParenteses, `$1<span class="alternativa-correta">$2</span>$3`);
-                
-                const padraoLetraSozinha = new RegExp(`(>[^<]*?\\b${numero}\\b[^<]*?)(${alternativa})(?![^<]*<)`, 'gi');
-                html = html.replace(padraoLetraSozinha, `$1<span class="alternativa-correta">$2</span>`);
+                const padraoLetra = new RegExp(`(${numero}\\)[^<]*?)(${alternativa})(?=\\))`, 'gi');
+                html = html.replace(padraoLetra, `$1<span class="alternativa-correta">$2</span>`);
             });
             
             descricaoElemento.innerHTML = html;
