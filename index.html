@@ -257,6 +257,15 @@
             background: #334;
         }
         
+        .btn-perigo {
+            background: #500;
+            color: white;
+        }
+        
+        .btn-perigo:hover {
+            background: #600;
+        }
+        
         .vazio {
             text-align: center;
             padding: 40px;
@@ -620,6 +629,15 @@
             font-size: 14px;
         }
         
+        .configuracao-input {
+            padding: 10px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #ddd;
+            font-size: 14px;
+        }
+        
         .configuracao-checkbox {
             display: flex;
             align-items: center;
@@ -887,7 +905,6 @@
 </head>
 <body>
     <div class="container" id="app-container" style="display: none;">
-        
         <div class="abas">
             <button class="aba ativa" data-aba="horario">Horário</button>
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
@@ -941,6 +958,17 @@
                         <option value="concluidas">Concluídas</option>
                     </select>
                 </div>
+                
+                <div class="configuracao-item">
+                    <div class="configuracao-titulo">Código de Amigo</div>
+                    <input type="text" class="configuracao-input" id="config-codigo-amigo" placeholder="Novo código">
+                    <button class="btn" onclick="alterarCodigoAmigo()">Alterar Código</button>
+                </div>
+                
+                <div class="configuracao-item">
+                    <div class="configuracao-titulo">Segurança</div>
+                    <button class="btn btn-perigo" onclick="confirmarResetSenha()">Resetar Senha</button>
+                </div>
             </div>
         </div>
         
@@ -960,7 +988,6 @@
 
     <div class="senha-container" id="senha-container">
         <h2 class="senha-titulo">Por enquanto o site é privado, somente pessoas próximas</h2>
-
         <input type="text" class="senha-input" id="nome-usuario" placeholder="Seu nome">
         <select class="senha-selector" id="senha-turma-selector">
             <option value="">Selecione sua turma</option>
@@ -971,13 +998,17 @@
             <option value="2E">2E</option>
         </select>
         <input type="password" class="senha-input" id="senha-input" placeholder="Senha de acesso">
+        <input type="text" class="senha-input" id="codigo-amigo-input" placeholder="Código de amigo">
         <button class="btn-confirmar-senha" id="btn-confirmar-senha">Entrar</button>
         <div class="senha-mensagem" id="senha-mensagem"></div>
     </div>
 
     <script>
-        const senhaCorreta = "githubusercontent.com";
+        const senhaCorreta = "githubusercontent/com";
         const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
+        const webhookURL = "https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-";
+        const bloqueadosURL = "https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos/C%C3%B3digos%20Bloqueados";
+        
         let tarefas = [];
         let trabalhos = [];
         let horario = {};
@@ -986,51 +1017,90 @@
         let subtabAtiva = 'pendentes';
         let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
         let turmas = ["2A", "2B", "2C", "2D", "2E"];
-
+        let codigosBloqueados = [];
+        let usuarioBloqueado = false;
         let materiaFiltro = '';
-        let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || {
-            ordemTarefas: 'pendentes'
-        };
+        let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || { ordemTarefas: 'pendentes' };
         
-        function enviarAcessoWebhook(nome, turma) {
-            fetch("https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-", {
+        function enviarAcessoWebhook(nome, turma, codigo) {
+            const dataAtual = new Date().toLocaleString('pt-BR');
+            fetch(webhookURL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    content: `ACESSO - Nome: ${nome} | Turma: ${turma} | Data: ${new Date().toLocaleString('pt-BR')}`
+                body: JSON.stringify({
+                    embeds: [{
+                        title: "Novo Acesso",
+                        color: 16777215,
+                        fields: [
+                            { name: "Nome", value: nome, inline: true },
+                            { name: "Turma", value: turma, inline: true },
+                            { name: "Código", value: codigo, inline: true }
+                        ],
+                        footer: { text: dataAtual }
+                    }]
                 })
             });
         }
         
+        async function verificarCodigosBloqueados() {
+            try {
+                const response = await fetch(bloqueadosURL);
+                if (response.ok) {
+                    const texto = await response.text();
+                    codigosBloqueados = texto.split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0);
+                }
+            } catch {}
+        }
+        
+        function verificarUsuarioBloqueado() {
+            const codigoUsuario = localStorage.getItem('codigoAmigo');
+            usuarioBloqueado = codigosBloqueados.includes(codigoUsuario);
+            return usuarioBloqueado;
+        }
+        
         function verificarSenha() {
             const senhaInserida = document.getElementById('senha-input').value;
-            const nomeUsuario = document.getElementById('nome-usuario').value;
+            const nomeUsuario = document.getElementById('nome-usuario').value.trim();
             const turmaUsuario = document.getElementById('senha-turma-selector').value;
+            const codigoAmigo = document.getElementById('codigo-amigo-input').value.trim();
             const senhaSalva = localStorage.getItem('senhaUsuario');
+            const codigoSalvo = localStorage.getItem('codigoAmigo');
             
-            if (!nomeUsuario || !turmaUsuario) {
-                document.getElementById('senha-mensagem').textContent = 'Preencha nome e turma';
+            if (!nomeUsuario || !turmaUsuario || !codigoAmigo) {
+                document.getElementById('senha-mensagem').textContent = 'Preencha todos os campos';
                 return;
             }
             
-            if (senhaSalva && senhaInserida !== senhaSalva) {
-                localStorage.removeItem('usuarioAutenticado');
-                localStorage.removeItem('nomeUsuario');
-                localStorage.removeItem('turmaUsuario');
-                localStorage.removeItem('senhaUsuario');
-                return;
+            if (senhaSalva && codigoSalvo) {
+                if (senhaInserida !== senhaSalva || codigoAmigo !== codigoSalvo) {
+                    localStorage.removeItem('usuarioAutenticado');
+                    localStorage.removeItem('nomeUsuario');
+                    localStorage.removeItem('turmaUsuario');
+                    localStorage.removeItem('senhaUsuario');
+                    localStorage.removeItem('codigoAmigo');
+                    document.getElementById('senha-mensagem').textContent = 'Credenciais inválidas';
+                    return;
+                }
             }
             
             if (senhaInserida === senhaCorreta) {
+                if (verificarUsuarioBloqueado()) {
+                    document.getElementById('senha-mensagem').textContent = 'Acesso negado';
+                    return;
+                }
+                
                 localStorage.setItem('usuarioAutenticado', 'true');
                 localStorage.setItem('nomeUsuario', nomeUsuario);
                 localStorage.setItem('turmaUsuario', turmaUsuario);
                 localStorage.setItem('senhaUsuario', senhaInserida);
+                localStorage.setItem('codigoAmigo', codigoAmigo);
                 document.getElementById('senha-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
                 
-                enviarAcessoWebhook(nomeUsuario, turmaUsuario);
-                carregarDados();
+                enviarAcessoWebhook(nomeUsuario, turmaUsuario, codigoAmigo);
+                if (!usuarioBloqueado) carregarDados();
             } else {
                 document.getElementById('senha-mensagem').textContent = 'Senha incorreta';
             }
@@ -1039,28 +1109,39 @@
         function inicializarSenha() {
             const senhaSalva = localStorage.getItem('senhaUsuario');
             const usuarioAutenticado = localStorage.getItem('usuarioAutenticado');
+            const codigoSalvo = localStorage.getItem('codigoAmigo');
             
-            if (usuarioAutenticado === 'true' && senhaSalva === senhaCorreta) {
-                const nomeUsuario = localStorage.getItem('nomeUsuario');
-                const turmaUsuario = localStorage.getItem('turmaUsuario');
-                document.getElementById('senha-container').style.display = 'none';
-                document.getElementById('app-container').style.display = 'block';
-                
-                enviarAcessoWebhook(nomeUsuario, turmaUsuario);
-                carregarDados();
-            } else {
-                if (usuarioAutenticado === 'true') {
-                    localStorage.removeItem('usuarioAutenticado');
-                    localStorage.removeItem('nomeUsuario');
-                    localStorage.removeItem('turmaUsuario');
+            verificarCodigosBloqueados().then(() => {
+                if (usuarioAutenticado === 'true' && senhaSalva === senhaCorreta && codigoSalvo) {
+                    if (verificarUsuarioBloqueado()) {
+                        localStorage.clear();
+                        document.getElementById('senha-container').style.display = 'block';
+                        document.getElementById('app-container').style.display = 'none';
+                        return;
+                    }
+                    
+                    const nomeUsuario = localStorage.getItem('nomeUsuario');
+                    const turmaUsuario = localStorage.getItem('turmaUsuario');
+                    document.getElementById('senha-container').style.display = 'none';
+                    document.getElementById('app-container').style.display = 'block';
+                    
+                    enviarAcessoWebhook(nomeUsuario, turmaUsuario, codigoSalvo);
+                    carregarDados();
+                } else {
+                    if (usuarioAutenticado === 'true') {
+                        localStorage.removeItem('usuarioAutenticado');
+                        localStorage.removeItem('nomeUsuario');
+                        localStorage.removeItem('turmaUsuario');
+                        localStorage.removeItem('codigoAmigo');
+                    }
+                    document.getElementById('senha-container').style.display = 'block';
+                    document.getElementById('app-container').style.display = 'none';
                 }
-                document.getElementById('senha-container').style.display = 'block';
-                document.getElementById('app-container').style.display = 'none';
-            }
-            
-            document.getElementById('btn-confirmar-senha').addEventListener('click', verificarSenha);
-            document.getElementById('senha-input').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') verificarSenha();
+                
+                document.getElementById('btn-confirmar-senha').addEventListener('click', verificarSenha);
+                document.getElementById('senha-input').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') verificarSenha();
+                });
             });
         }
         
@@ -1168,6 +1249,8 @@
         }
         
         function filtrarTarefas() {
+            if (usuarioBloqueado) return;
+            
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
             const container = document.getElementById('conteudo-subtab');
             
@@ -1245,6 +1328,8 @@
         }
         
         function renderizarTrabalhos() {
+            if (usuarioBloqueado) return;
+            
             const container = document.getElementById('lista-trabalhos');
             
             if (trabalhos.length === 0) {
@@ -1297,6 +1382,8 @@
         }
         
         function renderizarTarefasRank(termoPesquisa = '') {
+            if (usuarioBloqueado) return;
+            
             const container = document.getElementById('conteudo-subtab');
             container.innerHTML = `
                 <div class="aviso-urgente">Só considera quando é a próxima aula e em qual horário, não a data de entrega</div>
@@ -1385,7 +1472,6 @@
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Visualizar</button>
                         <button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>
                         ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
-
                     </div>
                 `;
                 
@@ -1394,6 +1480,8 @@
         }
         
         function visualizarTarefa(id) {
+            if (usuarioBloqueado) return;
+            
             const tarefa = tarefas.find(t => t.id === id);
             const status = tarefasStatus[id] || {};
             
@@ -1440,6 +1528,8 @@
         }
         
         function visualizarResposta(id) {
+            if (usuarioBloqueado) return;
+            
             const tarefa = tarefas.find(t => t.id === id);
             const respostaInfo = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
             
@@ -1455,6 +1545,8 @@
         }
         
         function marcarTarefaConcluida(id) {
+            if (usuarioBloqueado) return;
+            
             const status = tarefasStatus[id] || {};
             
             if (!status.concluida) {
@@ -1466,6 +1558,8 @@
         }
         
         function desmarcarTarefaConcluida(id) {
+            if (usuarioBloqueado) return;
+            
             const status = tarefasStatus[id] || {};
             
             if (status.concluida) {
@@ -1527,6 +1621,8 @@
         }
         
         function renderizarHorario() {
+            if (usuarioBloqueado) return;
+            
             const container = document.getElementById('horario-aulas');
             container.innerHTML = '';
             
@@ -1717,6 +1813,7 @@
         
         function carregarConfiguracoes() {
             document.getElementById('config-ordem-tarefas').value = configuracoes.ordemTarefas;
+            document.getElementById('config-codigo-amigo').value = localStorage.getItem('codigoAmigo') || '';
             aplicarOrdemTarefas();
         }
         
@@ -1736,6 +1833,16 @@
         async function carregarDados() {
             try {
                 limparLocalStorageAntigo();
+                
+                if (usuarioBloqueado) {
+                    tarefas = [];
+                    horario = {};
+                    trabalhos = [];
+                    renderizarHorario();
+                    filtrarTarefas();
+                    renderizarTrabalhos();
+                    return;
+                }
                 
                 const [tarefasData, horarioData, trabalhosData] = await Promise.all([
                     fetchDados('Tarefas'),
@@ -1786,11 +1893,33 @@
             }
         }
         
+        function confirmarResetSenha() {
+            if (confirm("Você quer perder o acesso ao site? Vai precisar colocar a senha novamente")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+        
+        function alterarCodigoAmigo() {
+            const novoCodigo = document.getElementById('config-codigo-amigo').value.trim();
+            if (!novoCodigo) {
+                alert("Digite o código certo");
+                return;
+            }
+            
+            if (codigosBloqueados.includes(novoCodigo)) {
+                return;
+            }
+            
+            localStorage.setItem('codigoAmigo', novoCodigo);
+            alert("Código alterado");
+            
+            const nomeUsuario = localStorage.getItem('nomeUsuario');
+            const turmaUsuario = localStorage.getItem('turmaUsuario');
+            enviarAcessoWebhook(nomeUsuario, turmaUsuario, novoCodigo);
+        }
+        
         document.addEventListener('DOMContentLoaded', inicializarSenha);
-localStorage.removeItem('usuarioAutenticado');
-localStorage.removeItem('nomeUsuario');
-localStorage.removeItem('turmaUsuario');
-
     </script>
 </body>
 </html>
