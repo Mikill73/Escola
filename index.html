@@ -987,15 +987,15 @@
     </div>
 
     <div class="senha-container" id="senha-container">
-        <h2 class="senha-titulo">Por enquanto o site é privado, procure alguém que tenha acesso e peça permissão</h2>
+        <h2 class="senha-titulo">Por enquanto o site é privado, peça permissão à alguém na escola</h2>
         <input type="text" class="senha-input" id="nome-usuario" placeholder="Seu nome">
         <select class="senha-selector" id="senha-turma-selector">
             <option value="">Selecione sua turma</option>
-            <option value="2A">3A</option>
-            <option value="2B">3B</option>
-            <option value="2C">3C</option>
-            <option value="2D">3D</option>
-            <option value="2E">3E</option>
+            <option value="3A">3A</option>
+            <option value="3B">3B</option>
+            <option value="3C">3C</option>
+            <option value="3D">3D</option>
+            <option value="3E">3E</option>
         </select>
         <input type="password" class="senha-input" id="senha-input" placeholder="Senha de acesso">
         <input type="text" class="senha-input" id="codigo-amigo-input" placeholder="Código de amigo">
@@ -1016,7 +1016,7 @@
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
         let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
-        let turmas = ["2A", "2B", "2C", "2D", "2E"];
+        let turmas = ["3A", "3B", "3C", "3D", "3E"];
         let codigosBloqueados = [];
         let usuarioBloqueado = false;
         let materiaFiltro = '';
@@ -1029,7 +1029,6 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     embeds: [{
-                        title: "Novo Acesso",
                         color: 16777215,
                         fields: [
                             { name: "Nome", value: nome, inline: true },
@@ -1086,21 +1085,31 @@
             }
             
             if (senhaInserida === senhaCorreta) {
-                if (verificarUsuarioBloqueado()) {
-                    document.getElementById('senha-mensagem').textContent = 'Acesso negado';
-                    return;
+                if (codigosBloqueados.includes(codigoAmigo)) {
+                    localStorage.setItem('usuarioAutenticado', 'true');
+                    localStorage.setItem('nomeUsuario', nomeUsuario);
+                    localStorage.setItem('turmaUsuario', turmaUsuario);
+                    localStorage.setItem('senhaUsuario', senhaInserida);
+                    localStorage.setItem('codigoAmigo', codigoAmigo);
+                    document.getElementById('senha-container').style.display = 'none';
+                    document.getElementById('app-container').style.display = 'block';
+                    usuarioBloqueado = true;
+                    
+                    enviarAcessoWebhook(nomeUsuario, turmaUsuario, codigoAmigo);
+                    carregarDados();
+                } else {
+                    localStorage.setItem('usuarioAutenticado', 'true');
+                    localStorage.setItem('nomeUsuario', nomeUsuario);
+                    localStorage.setItem('turmaUsuario', turmaUsuario);
+                    localStorage.setItem('senhaUsuario', senhaInserida);
+                    localStorage.setItem('codigoAmigo', codigoAmigo);
+                    document.getElementById('senha-container').style.display = 'none';
+                    document.getElementById('app-container').style.display = 'block';
+                    usuarioBloqueado = false;
+                    
+                    enviarAcessoWebhook(nomeUsuario, turmaUsuario, codigoAmigo);
+                    carregarDados();
                 }
-                
-                localStorage.setItem('usuarioAutenticado', 'true');
-                localStorage.setItem('nomeUsuario', nomeUsuario);
-                localStorage.setItem('turmaUsuario', turmaUsuario);
-                localStorage.setItem('senhaUsuario', senhaInserida);
-                localStorage.setItem('codigoAmigo', codigoAmigo);
-                document.getElementById('senha-container').style.display = 'none';
-                document.getElementById('app-container').style.display = 'block';
-                
-                enviarAcessoWebhook(nomeUsuario, turmaUsuario, codigoAmigo);
-                if (!usuarioBloqueado) carregarDados();
             } else {
                 document.getElementById('senha-mensagem').textContent = 'Senha incorreta';
             }
@@ -1113,12 +1122,7 @@
             
             verificarCodigosBloqueados().then(() => {
                 if (usuarioAutenticado === 'true' && senhaSalva === senhaCorreta && codigoSalvo) {
-                    if (verificarUsuarioBloqueado()) {
-                        localStorage.clear();
-                        document.getElementById('senha-container').style.display = 'block';
-                        document.getElementById('app-container').style.display = 'none';
-                        return;
-                    }
+                    usuarioBloqueado = verificarUsuarioBloqueado();
                     
                     const nomeUsuario = localStorage.getItem('nomeUsuario');
                     const turmaUsuario = localStorage.getItem('turmaUsuario');
@@ -1249,8 +1253,6 @@
         }
         
         function filtrarTarefas() {
-            if (usuarioBloqueado) return;
-            
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
             const container = document.getElementById('conteudo-subtab');
             
@@ -1328,8 +1330,6 @@
         }
         
         function renderizarTrabalhos() {
-            if (usuarioBloqueado) return;
-            
             const container = document.getElementById('lista-trabalhos');
             
             if (trabalhos.length === 0) {
@@ -1382,8 +1382,6 @@
         }
         
         function renderizarTarefasRank(termoPesquisa = '') {
-            if (usuarioBloqueado) return;
-            
             const container = document.getElementById('conteudo-subtab');
             container.innerHTML = `
                 <div class="aviso-urgente">Só considera quando é a próxima aula e em qual horário, não a data de entrega</div>
@@ -1480,8 +1478,6 @@
         }
         
         function visualizarTarefa(id) {
-            if (usuarioBloqueado) return;
-            
             const tarefa = tarefas.find(t => t.id === id);
             const status = tarefasStatus[id] || {};
             
@@ -1528,8 +1524,6 @@
         }
         
         function visualizarResposta(id) {
-            if (usuarioBloqueado) return;
-            
             const tarefa = tarefas.find(t => t.id === id);
             const respostaInfo = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
             
@@ -1545,8 +1539,6 @@
         }
         
         function marcarTarefaConcluida(id) {
-            if (usuarioBloqueado) return;
-            
             const status = tarefasStatus[id] || {};
             
             if (!status.concluida) {
@@ -1558,8 +1550,6 @@
         }
         
         function desmarcarTarefaConcluida(id) {
-            if (usuarioBloqueado) return;
-            
             const status = tarefasStatus[id] || {};
             
             if (status.concluida) {
@@ -1621,8 +1611,6 @@
         }
         
         function renderizarHorario() {
-            if (usuarioBloqueado) return;
-            
             const container = document.getElementById('horario-aulas');
             container.innerHTML = '';
             
@@ -1903,20 +1891,20 @@
         function alterarCodigoAmigo() {
             const novoCodigo = document.getElementById('config-codigo-amigo').value.trim();
             if (!novoCodigo) {
-                alert("Digite o código certo");
-                return;
-            }
-            
-            if (codigosBloqueados.includes(novoCodigo)) {
+                alert("Digite um código correto");
                 return;
             }
             
             localStorage.setItem('codigoAmigo', novoCodigo);
-            alert("Código alterado");
+            usuarioBloqueado = codigosBloqueados.includes(novoCodigo);
             
             const nomeUsuario = localStorage.getItem('nomeUsuario');
             const turmaUsuario = localStorage.getItem('turmaUsuario');
             enviarAcessoWebhook(nomeUsuario, turmaUsuario, novoCodigo);
+            
+            alert("Código alterado");
+            
+            carregarDados();
         }
         
         document.addEventListener('DOMContentLoaded', inicializarSenha);
