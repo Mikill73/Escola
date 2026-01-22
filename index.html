@@ -829,6 +829,50 @@
             margin: 0 2px;
         }
         
+        .btn-compartilhar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: #ddd;
+            cursor: pointer;
+            font-size: 16px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+        
+        .btn-compartilhar:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-compartilhar-modal {
+            position: absolute;
+            top: 15px;
+            right: 55px;
+            background: #223;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+            border: none;
+        }
+        
+        .btn-compartilhar-modal:hover {
+            background: #334;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 flex-direction: column;
@@ -899,6 +943,13 @@
             
             .trabalho-data {
                 align-self: flex-start;
+            }
+            
+            .btn-compartilhar-modal {
+                right: 50px;
+                top: 20px;
+                width: 35px;
+                height: 35px;
             }
         }
     </style>
@@ -975,6 +1026,7 @@
         <div class="modal" id="modal">
             <div class="modal-conteudo">
                 <div class="modal-fechar" id="modal-fechar">X</div>
+                <button class="btn-compartilhar-modal" id="modal-compartilhar" title="Compartilhar">🔗</button>
                 <div class="modal-titulo" id="modal-titulo"></div>
                 <div class="modal-turma" id="modal-turma"></div>
                 <div class="modal-data" id="modal-data"></div>
@@ -1008,6 +1060,7 @@
         const baseURL = 'https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos';
         const webhookURL = "https://discord.com/api/webhooks/1411506218530242582/ZNJyj2zLKJ4sdosTpi_Syxt7ndTjUSljA-UGu1aB3A2msre7u_C8Ysz1fSXcmNmZSGe-";
         const bloqueadosURL = "https://raw.githubusercontent.com/Mikill73/Escola/main/Arquivos/C%C3%B3digos%20Bloqueados";
+        const siteURL = "https://mikill73.github.io/Escola/";
         
         let tarefas = [];
         let trabalhos = [];
@@ -1021,6 +1074,53 @@
         let usuarioBloqueado = false;
         let materiaFiltro = '';
         let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || { ordemTarefas: 'pendentes' };
+        let tarefaCompartilhadaId = null;
+        
+        function processarParametroURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idTarefa = urlParams.get('id');
+            if (idTarefa && tarefas.length > 0) {
+                const tarefaEncontrada = tarefas.find(t => t.id === idTarefa);
+                if (tarefaEncontrada) {
+                    visualizarTarefa(idTarefa);
+                }
+            }
+        }
+        
+        function compartilharTarefa(tarefaId) {
+            const tarefa = tarefas.find(t => t.id === tarefaId);
+            if (!tarefa) return;
+            
+            const linkCompartilhamento = `${siteURL}?id=${tarefaId}`;
+            const textoCompartilhamento = `- ${tarefa.materia}\n- ${tarefa.dataAdicao ? formatarData(tarefa.dataAdicao) : 'Sem data'}\n- ${linkCompartilhamento}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: `Tarefa: ${tarefa.materia}`,
+                    text: textoCompartilhamento,
+                    url: linkCompartilhamento
+                });
+            } else {
+                navigator.clipboard.writeText(textoCompartilhamento)
+                    .then(() => alert("Link copiado para a área de transferência"));
+            }
+        }
+        
+        function adicionarBotaoCompartilharCard(card, tarefaId) {
+            const botaoCompartilhar = document.createElement('button');
+            botaoCompartilhar.className = 'btn-compartilhar';
+            botaoCompartilhar.title = 'Compartilhar';
+            botaoCompartilhar.innerHTML = '🔗';
+            botaoCompartilhar.onclick = (e) => {
+                e.stopPropagation();
+                compartilharTarefa(tarefaId);
+            };
+            card.appendChild(botaoCompartilhar);
+        }
+        
+        function configurarBotaoCompartilharModal(tarefaId) {
+            document.getElementById('modal-compartilhar').onclick = () => compartilharTarefa(tarefaId);
+        }
         
         function enviarAcessoWebhook(nome, turma, codigo) {
             const dataAtual = new Date().toLocaleString('pt-BR');
@@ -1325,6 +1425,7 @@
                     </div>
                 `;
                 
+                adicionarBotaoCompartilharCard(card, tarefa.id);
                 container.appendChild(card);
             });
         }
@@ -1519,6 +1620,7 @@
             }
             
             document.getElementById('modal-acoes').innerHTML = acoesHTML;
+            configurarBotaoCompartilharModal(id);
             
             abrirModal();
         }
@@ -1534,6 +1636,7 @@
             document.getElementById('modal-info-criador').innerHTML = '';
             document.getElementById('modal-info-resposta').innerHTML = respostaInfo;
             document.getElementById('modal-acoes').innerHTML = '';
+            configurarBotaoCompartilharModal(id);
             
             abrirModal();
         }
@@ -1829,6 +1932,7 @@
                     renderizarHorario();
                     filtrarTarefas();
                     renderizarTrabalhos();
+                    processarParametroURL();
                     return;
                 }
                 
@@ -1864,6 +1968,7 @@
                 renderizarHorario();
                 filtrarTarefas();
                 renderizarTrabalhos();
+                processarParametroURL();
             } catch (error) {
             }
         }
