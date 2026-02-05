@@ -913,6 +913,32 @@
             background: #444;
         }
         
+        .horario-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .btn-copiar-horario {
+            padding: 8px 16px;
+            background: #223;
+            color: #ddd;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-copiar-horario:hover {
+            background: #334;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 flex-direction: column;
@@ -996,6 +1022,11 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+            
+            .horario-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
@@ -1009,7 +1040,12 @@
         </div>
         
         <div id="horario" class="conteudo-aba ativa">
-            <select class="turma-selector" id="turma-selector"></select>
+            <div class="horario-header">
+                <select class="turma-selector" id="turma-selector"></select>
+                <button class="btn-copiar-horario" id="btn-copiar-horario">
+                    <span>📋</span> Copiar Horário
+                </button>
+            </div>
             <div id="horario-aulas"></div>
         </div>
         
@@ -1179,6 +1215,49 @@
             if (botao) {
                 botao.onclick = () => compartilharTarefa(tarefaId);
             }
+        }
+        
+        function copiarHorario() {
+            if (!turmaSelecionada || !horario[turmaSelecionada]) {
+                alert("Selecione uma turma primeiro");
+                return;
+            }
+            
+            let textoHorario = `Turma: ${turmaSelecionada}\n\n`;
+            const diasMap = {
+                'Segunda': 'Segunda-feira',
+                'Terca': 'Terça-feira',
+                'Quarta': 'Quarta-feira',
+                'Quinta': 'Quinta-feira',
+                'Sexta': 'Sexta-feira'
+            };
+            
+            const dias = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
+            
+            dias.forEach(dia => {
+                if (horario[turmaSelecionada][dia] && horario[turmaSelecionada][dia].length > 0) {
+                    const nomeDiaCompleto = diasMap[dia];
+                    textoHorario += `${nomeDiaCompleto}:\n`;
+                    
+                    horario[turmaSelecionada][dia].forEach((aula, index) => {
+                        textoHorario += `${index + 1} - ${aula.materia}\n`;
+                    });
+                    
+                    textoHorario += '\n';
+                }
+            });
+            
+            navigator.clipboard.writeText(textoHorario).then(() => {
+                const btn = document.getElementById('btn-copiar-horario');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span>✓</span> Copiado!';
+                btn.style.background = '#232';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            });
         }
         
         function enviarAcessoWebhook(nome, turma, codigo) {
@@ -1375,6 +1454,8 @@
             salvarConfiguracoes();
             aplicarOrdemTarefas();
         });
+        
+        document.getElementById('btn-copiar-horario').addEventListener('click', copiarHorario);
         
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
