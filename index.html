@@ -873,6 +873,46 @@
             background: #334;
         }
         
+        .filtro-bimestre-container {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filtro-bimestre-label {
+            color: #ddd;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .filtro-bimestre-select {
+            padding: 8px 12px;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #ddd;
+            font-size: 14px;
+            flex: 1;
+        }
+        
+        .btn-limpar-bimestre {
+            padding: 8px 12px;
+            background: #333;
+            color: #ddd;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .btn-limpar-bimestre:hover {
+            background: #444;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 flex-direction: column;
@@ -951,6 +991,11 @@
                 width: 35px;
                 height: 35px;
             }
+            
+            .filtro-bimestre-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
@@ -981,6 +1026,18 @@
                     <option value="">Todas as matérias</option>
                 </select>
                 <button class="btn-limpar-filtro" id="btn-limpar-filtro">Limpar</button>
+            </div>
+            
+            <div class="filtro-bimestre-container" id="filtro-bimestre-container">
+                <span class="filtro-bimestre-label">Filtrar por bimestre:</span>
+                <select class="filtro-bimestre-select" id="filtro-bimestre">
+                    <option value="">Todos os bimestres</option>
+                    <option value="1">1º Bimestre</option>
+                    <option value="2">2º Bimestre</option>
+                    <option value="3">3º Bimestre</option>
+                    <option value="4">4º Bimestre</option>
+                </select>
+                <button class="btn-limpar-bimestre" id="btn-limpar-bimestre">Limpar</button>
             </div>
             
             <div class="pesquisa-container">
@@ -1073,8 +1130,8 @@
         let codigosBloqueados = [];
         let usuarioBloqueado = false;
         let materiaFiltro = '';
+        let bimestreFiltro = '';
         let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || { ordemTarefas: 'pendentes' };
-        let tarefaCompartilhadaId = null;
         
         function processarParametroURL() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1092,7 +1149,7 @@
             if (!tarefa) return;
             
             const linkCompartilhamento = `${siteURL}?id=${tarefaId}`;
-            const textoCompartilhamento = `- ${tarefa.materia}\n- ${tarefa.dataAdicao ? formatarData(tarefa.dataAdicao) : 'Sem data'}\n- ${linkCompartilhamento}`;
+            const textoCompartilhamento = `${tarefa.materia}\n${formatarData(tarefa.dataAdicao) || 'Sem data'}\n${linkCompartilhamento}`;
             
             if (navigator.share) {
                 navigator.share({
@@ -1101,8 +1158,7 @@
                     url: linkCompartilhamento
                 });
             } else {
-                navigator.clipboard.writeText(textoCompartilhamento)
-                    .then(() => alert("Link copiado para a área de transferência"));
+                navigator.clipboard.writeText(textoCompartilhamento).then(() => alert("Link copiado"));
             }
         }
         
@@ -1119,11 +1175,13 @@
         }
         
         function configurarBotaoCompartilharModal(tarefaId) {
-            document.getElementById('modal-compartilhar').onclick = () => compartilharTarefa(tarefaId);
+            const botao = document.getElementById('modal-compartilhar');
+            if (botao) {
+                botao.onclick = () => compartilharTarefa(tarefaId);
+            }
         }
         
         function enviarAcessoWebhook(nome, turma, codigo) {
-            const dataAtual = new Date().toLocaleString('pt-BR');
             fetch(webhookURL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1135,7 +1193,7 @@
                             { name: "Turma", value: turma, inline: true },
                             { name: "Código", value: codigo, inline: true }
                         ],
-                        footer: { text: dataAtual }
+                        footer: { text: new Date().toLocaleString('pt-BR') }
                     }]
                 })
             });
@@ -1194,7 +1252,6 @@
                     document.getElementById('senha-container').style.display = 'none';
                     document.getElementById('app-container').style.display = 'block';
                     usuarioBloqueado = true;
-                    
                     enviarAcessoWebhook(nomeUsuario, turmaUsuario, codigoAmigo);
                     carregarDados();
                 } else {
@@ -1206,7 +1263,6 @@
                     document.getElementById('senha-container').style.display = 'none';
                     document.getElementById('app-container').style.display = 'block';
                     usuarioBloqueado = false;
-                    
                     enviarAcessoWebhook(nomeUsuario, turmaUsuario, codigoAmigo);
                     carregarDados();
                 }
@@ -1223,12 +1279,10 @@
             verificarCodigosBloqueados().then(() => {
                 if (usuarioAutenticado === 'true' && senhaSalva === senhaCorreta && codigoSalvo) {
                     usuarioBloqueado = verificarUsuarioBloqueado();
-                    
                     const nomeUsuario = localStorage.getItem('nomeUsuario');
                     const turmaUsuario = localStorage.getItem('turmaUsuario');
                     document.getElementById('senha-container').style.display = 'none';
                     document.getElementById('app-container').style.display = 'block';
-                    
                     enviarAcessoWebhook(nomeUsuario, turmaUsuario, codigoSalvo);
                     carregarDados();
                 } else {
@@ -1253,10 +1307,8 @@
             aba.addEventListener('click', () => {
                 document.querySelectorAll('.aba').forEach(a => a.classList.remove('ativa'));
                 document.querySelectorAll('.conteudo-aba').forEach(c => c.classList.remove('ativa'));
-                
                 aba.classList.add('ativa');
                 document.getElementById(aba.dataset.aba).classList.add('ativa');
-                
                 if (aba.dataset.aba === 'tarefas') {
                     marcarTarefasComoVistas();
                     atualizarContadorNotificacoes();
@@ -1284,6 +1336,16 @@
         document.getElementById('btn-limpar-filtro').addEventListener('click', () => {
             document.getElementById('filtro-materia').value = '';
             materiaFiltro = '';
+            filtrarTarefas();
+        });
+        
+        document.getElementById('filtro-bimestre').addEventListener('change', (e) => {
+            bimestreFiltro = e.target.value;
+            filtrarTarefas();
+        });
+        document.getElementById('btn-limpar-bimestre').addEventListener('click', () => {
+            document.getElementById('filtro-bimestre').value = '';
+            bimestreFiltro = '';
             filtrarTarefas();
         });
         
@@ -1323,7 +1385,6 @@
         function processarRespostas(respostaTexto) {
             const linhas = respostaTexto.split('\n');
             const respostasMap = new Map();
-            
             linhas.forEach(linha => {
                 const match = linha.match(/(\d+)\s*[-\s]\s*([A-E])/i);
                 if (match) {
@@ -1332,23 +1393,18 @@
                     respostasMap.set(numero, alternativa);
                 }
             });
-            
             return respostasMap;
         }
         
         function aplicarMarcacaoAlternativas(descricaoElemento, respostasMap) {
             if (!descricaoElemento || respostasMap.size === 0) return;
-            
             let html = descricaoElemento.innerHTML;
-            
             respostasMap.forEach((alternativa, numero) => {
                 const padraoAlternativa = new RegExp(`(${numero}\\)[^<]*?${alternativa}\\))(?![^<]*>)`, 'gi');
                 html = html.replace(padraoAlternativa, `<span class="alternativa-correta">$1</span>`);
-                
                 const padraoLetra = new RegExp(`(${numero}\\)[^<]*?)(${alternativa})(?=\\))`, 'gi');
                 html = html.replace(padraoLetra, `$1<span class="alternativa-correta">$2</span>`);
             });
-            
             descricaoElemento.innerHTML = html;
         }
         
@@ -1372,7 +1428,8 @@
                 (tarefa.materia.toLowerCase().includes(termo) || 
                  tarefa.descricao.toLowerCase().includes(termo) ||
                  (tarefa.turma && tarefa.turma.toLowerCase().includes(termo))) &&
-                (materiaFiltro === '' || tarefa.materia === materiaFiltro)
+                (materiaFiltro === '' || tarefa.materia === materiaFiltro) &&
+                (bimestreFiltro === '' || tarefa.bimestre === bimestreFiltro)
             );
             
             renderizarTarefas(tarefasFiltradas);
@@ -1390,22 +1447,19 @@
             
             listaTarefas.forEach((tarefa) => {
                 const status = tarefasStatus[tarefa.id] || {};
-                
-                const card = document.createElement('div');
-                card.className = 'card';
-                
                 const proximaAula = encontrarProximaAula(tarefa.materia);
                 const proximaAulaInfo = proximaAula ? `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>` : '';
-                
                 const descricaoResumida = tarefa.descricao.length > 150 
                     ? tarefa.descricao.substring(0, 150) + '...' 
                     : tarefa.descricao;
-                
                 const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
                 const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
                 const infoDataAdicao = tarefa.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(tarefa.dataAdicao)}</div>` : '';
                 const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
+                const infoBimestre = tarefa.bimestre ? `<div class="info-criador">Bimestre: ${tarefa.bimestre}º</div>` : '';
                 
+                const card = document.createElement('div');
+                card.className = 'card';
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
                     ${tarefa.turma ? `<div class="card-turma">Turma: ${tarefa.turma}</div>` : ''}
@@ -1414,6 +1468,7 @@
                     ${infoCriador}
                     ${infoEditor}
                     ${infoDataAdicao}
+                    ${infoBimestre}
                     ${infoResposta}
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Ver</button>
@@ -1424,7 +1479,6 @@
                         ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
                     </div>
                 `;
-                
                 adicionarBotaoCompartilharCard(card, tarefa.id);
                 container.appendChild(card);
             });
@@ -1432,21 +1486,16 @@
         
         function renderizarTrabalhos() {
             const container = document.getElementById('lista-trabalhos');
-            
             if (trabalhos.length === 0) {
                 container.innerHTML = '<div class="vazio">Nenhum trabalho encontrado</div>';
                 return;
             }
-            
             container.innerHTML = '';
-            
             trabalhos.forEach((trabalho) => {
                 const trabalhoDiv = document.createElement('div');
                 trabalhoDiv.className = 'trabalho-container';
-                
                 const infoCriador = trabalho.criador ? `<div class="info-criador-trabalho">Criado por: ${trabalho.criador}${trabalho.turmaCriador ? ` (${trabalho.turmaCriador})` : ''}</div>` : '';
                 const infoDataAdicao = trabalho.dataAdicao ? `<div class="info-criador-trabalho">Adicionado em: ${formatarData(trabalho.dataAdicao)}</div>` : '';
-                
                 const gruposHTML = trabalho.grupos.map(grupo => `
                     <div class="grupo-trabalho">
                         <div class="grupo-nome">${grupo.nome}</div>
@@ -1457,7 +1506,6 @@
                         </div>
                     </div>
                 `).join('');
-                
                 trabalhoDiv.innerHTML = `
                     <div class="trabalho-header">
                         <div class="trabalho-info-principal">
@@ -1466,18 +1514,14 @@
                         </div>
                         ${trabalho.dataEntrega ? `<div class="trabalho-data">Entrega: ${formatarData(trabalho.dataEntrega)}</div>` : ''}
                     </div>
-                    
                     <div class="trabalho-descricao">${trabalho.descricao}</div>
-                    
                     <div class="grupos-container">
                         <div class="grupos-titulo">Grupos</div>
                         ${gruposHTML}
                     </div>
-                    
                     ${infoCriador}
                     ${infoDataAdicao}
                 `;
-                
                 container.appendChild(trabalhoDiv);
             });
         }
@@ -1488,32 +1532,27 @@
                 <div class="aviso-urgente">Só considera quando é a próxima aula e em qual horário, não a data de entrega</div>
                 <div id="ranking-tarefas"></div>
             `;
-            
             const rankingContainer = document.getElementById('ranking-tarefas');
-            
             const tarefasPendentes = tarefas.filter(tarefa => 
                 !tarefasStatus[tarefa.id]?.concluida && 
                 (tarefa.materia.toLowerCase().includes(termoPesquisa) || 
                  tarefa.descricao.toLowerCase().includes(termoPesquisa) ||
                  (tarefa.turma && tarefa.turma.toLowerCase().includes(termoPesquisa))) &&
-                (materiaFiltro === '' || tarefa.materia === materiaFiltro)
+                (materiaFiltro === '' || tarefa.materia === materiaFiltro) &&
+                (bimestreFiltro === '' || tarefa.bimestre === bimestreFiltro)
             );
-            
             if (tarefasPendentes.length === 0) {
                 rankingContainer.innerHTML = '<div class="vazio">Nenhuma tarefa encontrada</div>';
                 return;
             }
-            
             const tarefasComUrgencia = tarefasPendentes.map(tarefa => {
                 const proximaAula = encontrarProximaAula(tarefa.materia);
                 return { tarefa, proximaAula };
             }).filter(item => item.proximaAula !== null);
-            
             if (tarefasComUrgencia.length === 0) {
                 rankingContainer.innerHTML = '<div class="vazio">Nenhuma tarefa com próxima aula definida</div>';
                 return;
             }
-            
             const diasOrdem = {
                 'Segunda-feira': 0,
                 'Terça-feira': 1,
@@ -1521,45 +1560,32 @@
                 'Quinta-feira': 3,
                 'Sexta-feira': 4
             };
-            
             const hoje = new Date();
             const diaAtual = hoje.getDay();
             const horaAtual = hoje.getHours();
-            
             const diaAtualIndex = diaAtual === 0 ? 6 : diaAtual - 1;
-            
             tarefasComUrgencia.sort((a, b) => {
                 const diaA = diasOrdem[a.proximaAula.dia];
                 const diaB = diasOrdem[b.proximaAula.dia];
-                
                 const diaAIndex = (diaA - diaAtualIndex + 7) % 7;
                 const diaBIndex = (diaB - diaAtualIndex + 7) % 7;
-                
                 if (diaAIndex !== diaBIndex) return diaAIndex - diaBIndex;
-                
                 const numAulaA = parseInt(a.proximaAula.periodo);
                 const numAulaB = parseInt(b.proximaAula.periodo);
-                
                 if (diaAIndex === 0) {
                     const aulaAtual = horaAtual >= 12 ? 2 : horaAtual >= 7 ? 1 : 0;
                     const prioridadeA = numAulaA > aulaAtual ? 0 : 1;
                     const prioridadeB = numAulaB > aulaAtual ? 0 : 1;
-                    
                     if (prioridadeA !== prioridadeB) return prioridadeA - prioridadeB;
                 }
-                
                 return numAulaA - numAulaB;
             });
-            
             rankingContainer.innerHTML = '';
-            
             tarefasComUrgencia.forEach((item, index) => {
                 const { tarefa, proximaAula } = item;
                 const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
-                
                 const rankingItem = document.createElement('div');
                 rankingItem.className = 'ranking-item';
-                
                 rankingItem.innerHTML = `
                     <div class="ranking-posicao">${index + 1}</div>
                     <div class="ranking-conteudo">
@@ -1573,7 +1599,6 @@
                         ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
                     </div>
                 `;
-                
                 rankingContainer.appendChild(rankingItem);
             });
         }
@@ -1590,17 +1615,17 @@
             
             const proximaAula = encontrarProximaAula(tarefa.materia);
             const proximaAulaInfo = proximaAula ? `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>` : '';
-            
             const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
             const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
             const infoDataAdicao = tarefa.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(tarefa.dataAdicao)}</div>` : '';
             const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
+            const infoBimestre = tarefa.bimestre ? `<div class="info-criador">Bimestre: ${tarefa.bimestre}º</div>` : '';
             
             document.getElementById('modal-titulo').innerHTML = `${tarefa.materia}`;
             document.getElementById('modal-turma').innerHTML = tarefa.turma ? `Turma: ${tarefa.turma}` : '';
             document.getElementById('modal-data').innerHTML = proximaAulaInfo;
             document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
-            document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor + infoDataAdicao;
+            document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor + infoDataAdicao + infoBimestre;
             document.getElementById('modal-info-resposta').innerHTML = infoResposta;
             
             if (tarefa.resposta) {
@@ -1614,21 +1639,17 @@
             } else {
                 acoesHTML += `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${id}');fecharModal();">Desfazer Conclusão</button>`;
             }
-            
             if (tarefa.resposta) {
                 acoesHTML += `<button class="btn btn-resposta" onclick="visualizarResposta('${id}')">Resposta</button>`;
             }
-            
             document.getElementById('modal-acoes').innerHTML = acoesHTML;
             configurarBotaoCompartilharModal(id);
-            
             abrirModal();
         }
         
         function visualizarResposta(id) {
             const tarefa = tarefas.find(t => t.id === id);
             const respostaInfo = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
-            
             document.getElementById('modal-titulo').innerHTML = `Resposta - ${tarefa.materia}`;
             document.getElementById('modal-turma').innerHTML = '';
             document.getElementById('modal-data').innerHTML = '';
@@ -1637,13 +1658,11 @@
             document.getElementById('modal-info-resposta').innerHTML = respostaInfo;
             document.getElementById('modal-acoes').innerHTML = '';
             configurarBotaoCompartilharModal(id);
-            
             abrirModal();
         }
         
         function marcarTarefaConcluida(id) {
             const status = tarefasStatus[id] || {};
-            
             if (!status.concluida) {
                 tarefasStatus[id] = {...status, concluida: true, vista: true};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
@@ -1654,7 +1673,6 @@
         
         function desmarcarTarefaConcluida(id) {
             const status = tarefasStatus[id] || {};
-            
             if (status.concluida) {
                 tarefasStatus[id] = {...status, concluida: false};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
@@ -1675,18 +1693,13 @@
         
         function encontrarProximaAula(materia) {
             if (!horario || !turmaSelecionada || !horario[turmaSelecionada]) return null;
-            
             const diasSemana = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
             const hoje = new Date();
             const diaAtual = hoje.getDay();
-            const horaAtual = hoje.getHours();
-            
             let diaIndex = diaAtual === 0 ? 6 : diaAtual - 1;
-            
             for (let i = 0; i < 7; i++) {
                 const diaVerificar = (diaIndex + i) % 7;
                 if (diaVerificar >= 5) continue;
-                
                 const diaSemana = diasSemana[diaVerificar];
                 if (horario[turmaSelecionada][diaSemana]) {
                     const aulaIndex = horario[turmaSelecionada][diaSemana].findIndex(aula => aula.materia === materia);
@@ -1699,71 +1712,57 @@
                             case 'Quinta': nomeDia = 'Quinta-feira'; break;
                             case 'Sexta': nomeDia = 'Sexta-feira'; break;
                         }
-                        
                         let periodo = '';
                         if (aulaIndex === 0) periodo = '1ª aula';
                         else if (aulaIndex === 1) periodo = '2ª aula';
                         else periodo = `${aulaIndex + 1}ª aula`;
-                        
                         return { dia: nomeDia, periodo: periodo };
                     }
                 }
             }
-            
             return null;
         }
         
         function renderizarHorario() {
             const container = document.getElementById('horario-aulas');
             container.innerHTML = '';
-            
             if (!horario || Object.keys(horario).length === 0) {
                 container.innerHTML = '<div class="vazio">Horário não configurado</div>';
                 return;
             }
-            
             if (!turmaSelecionada && Object.keys(horario).length > 0) {
                 turmaSelecionada = Object.keys(horario)[0];
                 document.getElementById('turma-selector').value = turmaSelecionada;
             }
-            
             if (!turmaSelecionada || !horario[turmaSelecionada]) {
                 container.innerHTML = '<div class="vazio">Selecione uma turma</div>';
                 return;
             }
-            
             const dias = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
-            
             dias.forEach(dia => {
                 if (horario[turmaSelecionada][dia] && horario[turmaSelecionada][dia].length > 0) {
                     const diaDiv = document.createElement('div');
                     diaDiv.className = 'horario-dia';
-                    
                     let titulo = dia;
                     if (dia === 'Segunda') titulo = 'Segunda-feira';
                     else if (dia === 'Terca') titulo = 'Terça-feira';
                     else if (dia === 'Quarta') titulo = 'Quarta-feira';
                     else if (dia === 'Quinta') titulo = 'Quinta-feira';
                     else if (dia === 'Sexta') titulo = 'Sexta-feira';
-                    
                     diaDiv.innerHTML = `<h3>${titulo}</h3>`;
-                    
                     horario[turmaSelecionada][dia].forEach((aula, idx) => {
                         const aulaItem = document.createElement('div');
                         aulaItem.className = 'aula-item';
-                        
                         let horarioTexto = '';
                         if (aula.horario) {
                             horarioTexto = `<div style="font-size: 13px; color: #777; margin-top: 3px;">${aula.horario}</div>`;
                         }
-                        
                         aulaItem.innerHTML = `
                             <div class="aula-numero">${idx + 1}</div>
                             <div class="aula-materia">${aula.materia}${horarioTexto}</div>
                         `;
                         diaDiv.appendChild(aulaItem);
                     });
-                    
                     container.appendChild(diaDiv);
                 }
             });
@@ -1772,23 +1771,19 @@
         function atualizarSeletorTurmas() {
             const selector = document.getElementById('turma-selector');
             const configTurma = document.getElementById('config-turma');
-            
             selector.innerHTML = '';
             configTurma.innerHTML = '';
-            
             if (turmas && turmas.length > 0) {
                 turmas.forEach(turma => {
                     const option = document.createElement('option');
                     option.value = turma;
                     option.textContent = turma;
                     selector.appendChild(option);
-                    
                     const configOption = document.createElement('option');
                     configOption.value = turma;
                     configOption.textContent = turma;
                     configTurma.appendChild(configOption);
                 });
-                
                 if (!turmaSelecionada && turmas.length > 0) {
                     turmaSelecionada = turmas[0];
                     selector.value = turmaSelecionada;
@@ -1805,7 +1800,6 @@
         
         function extrairTodasMaterias() {
             todasMaterias = [];
-            
             if (tarefas && tarefas.length > 0) {
                 tarefas.forEach(tarefa => {
                     if (tarefa.materia && !todasMaterias.includes(tarefa.materia)) {
@@ -1813,7 +1807,6 @@
                     }
                 });
             }
-            
             if (trabalhos && trabalhos.length > 0) {
                 trabalhos.forEach(trabalho => {
                     if (trabalho.materia && !todasMaterias.includes(trabalho.materia)) {
@@ -1821,14 +1814,12 @@
                     }
                 });
             }
-            
             atualizarFiltroMaterias();
         }
         
         function atualizarFiltroMaterias() {
             const filtroSelect = document.getElementById('filtro-materia');
             const opcoesExistentes = Array.from(filtroSelect.options).map(opt => opt.value);
-            
             if (todasMaterias && todasMaterias.length > 0) {
                 todasMaterias.sort().forEach(materia => {
                     if (!opcoesExistentes.includes(materia)) {
@@ -1847,7 +1838,6 @@
                 const status = tarefasStatus[tarefa.id] || {};
                 return !status.vista && !status.concluida;
             }).length;
-            
             if (novasTarefas > 0) {
                 if (!contador) {
                     const novoContador = document.createElement('div');
@@ -1864,16 +1854,13 @@
         
         function marcarTarefasComoVistas() {
             let atualizado = false;
-            
             tarefas.forEach(tarefa => {
                 const status = tarefasStatus[tarefa.id] || {};
-                
                 if (!status.vista && !status.concluida) {
                     tarefasStatus[tarefa.id] = {...status, vista: true};
                     atualizado = true;
                 }
             });
-            
             if (atualizado) {
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 atualizarContadorNotificacoes();
@@ -1889,7 +1876,6 @@
         
         function formatarData(dataString) {
             if (!dataString) return '';
-            
             try {
                 const data = new Date(dataString);
                 return data.toLocaleDateString('pt-BR');
@@ -1910,21 +1896,18 @@
         
         function aplicarOrdemTarefas() {
             subtabAtiva = configuracoes.ordemTarefas;
-            
             document.querySelectorAll('.subtab').forEach(subtab => {
                 subtab.classList.remove('ativa');
                 if (subtab.dataset.subtab === configuracoes.ordemTarefas) {
                     subtab.classList.add('ativa');
                 }
             });
-            
             filtrarTarefas();
         }
         
         async function carregarDados() {
             try {
                 limparLocalStorageAntigo();
-                
                 if (usuarioBloqueado) {
                     tarefas = [];
                     horario = {};
@@ -1935,13 +1918,11 @@
                     processarParametroURL();
                     return;
                 }
-                
                 const [tarefasData, horarioData, trabalhosData] = await Promise.all([
                     fetchDados('Tarefas'),
                     fetchDados('Horário'),
                     fetchDados('Trabalhos')
                 ]);
-                
                 if (tarefasData) {
                     tarefas = tarefasData;
                     tarefas.forEach(tarefa => {
@@ -1959,24 +1940,20 @@
                         }
                     });
                 }
-                
                 atualizarSeletorTurmas();
                 extrairTodasMaterias();
                 atualizarContadorNotificacoes();
                 carregarConfiguracoes();
-                
                 renderizarHorario();
                 filtrarTarefas();
                 renderizarTrabalhos();
                 processarParametroURL();
-            } catch (error) {
-            }
+            } catch (error) {}
         }
         
         async function fetchDados(arquivo) {
             try {
                 const response = await fetch(`${baseURL}/${encodeURIComponent(arquivo)}`);
-                
                 if (response.ok) {
                     return await response.json();
                 }
@@ -1999,16 +1976,12 @@
                 alert("Digite um código correto");
                 return;
             }
-            
             localStorage.setItem('codigoAmigo', novoCodigo);
             usuarioBloqueado = codigosBloqueados.includes(novoCodigo);
-            
             const nomeUsuario = localStorage.getItem('nomeUsuario');
             const turmaUsuario = localStorage.getItem('turmaUsuario');
             enviarAcessoWebhook(nomeUsuario, turmaUsuario, novoCodigo);
-            
             alert("Código alterado");
-            
             carregarDados();
         }
         
