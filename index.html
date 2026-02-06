@@ -913,19 +913,19 @@
             background: #444;
         }
         
-        .horario-controles {
+        .horario-header {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
             align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
         }
         
         .btn-copiar-horario {
-            padding: 12px 16px;
+            padding: 8px 16px;
             background: #223;
             color: #ddd;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             transition: background 0.3s;
             font-size: 14px;
@@ -933,8 +933,6 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            height: 44px;
-            white-space: nowrap;
         }
         
         .btn-copiar-horario:hover {
@@ -1025,14 +1023,9 @@
                 align-items: stretch;
             }
             
-            .horario-controles {
+            .horario-header {
                 flex-direction: column;
                 align-items: stretch;
-            }
-            
-            .btn-copiar-horario {
-                width: 100%;
-                justify-content: center;
             }
         }
     </style>
@@ -1042,12 +1035,12 @@
         <div class="abas">
             <button class="aba ativa" data-aba="horario">Horário</button>
             <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
-            <button class="aba" data-aba="trabalhos" id="aba-trabalhos">Trabalhos</button>
+            <button class="aba" data-aba="trabalhos">Trabalhos</button>
             <button class="aba" data-aba="configuracoes">Configurações</button>
         </div>
         
         <div id="horario" class="conteudo-aba ativa">
-            <div class="horario-controles">
+            <div class="horario-header">
                 <select class="turma-selector" id="turma-selector"></select>
                 <button class="btn-copiar-horario" id="btn-copiar-horario">
                     <span>📋</span> Copiar Horário
@@ -1167,7 +1160,6 @@
         let horario = {};
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
-        let trabalhosStatus = JSON.parse(localStorage.getItem('trabalhosStatus')) || {};
         let subtabAtiva = 'pendentes';
         let turmaSelecionada = localStorage.getItem('turmaSelecionada') || '';
         let turmas = ["3A", "3B", "3C", "3D", "3E"];
@@ -1401,8 +1393,6 @@
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
                 } else if (aba.dataset.aba === 'trabalhos') {
-                    marcarTrabalhosComoVistos();
-                    atualizarContadorNotificacoes();
                     renderizarTrabalhos();
                 }
             });
@@ -1583,7 +1573,8 @@
             }
             container.innerHTML = '';
             trabalhos.forEach((trabalho) => {
-                const status = trabalhosStatus[trabalho.id] || {};
+                const trabalhoDiv = document.createElement('div');
+                trabalhoDiv.className = 'trabalho-container';
                 const infoCriador = trabalho.criador ? `<div class="info-criador-trabalho">Criado por: ${trabalho.criador}${trabalho.turmaCriador ? ` (${trabalho.turmaCriador})` : ''}</div>` : '';
                 const infoDataAdicao = trabalho.dataAdicao ? `<div class="info-criador-trabalho">Adicionado em: ${formatarData(trabalho.dataAdicao)}</div>` : '';
                 const gruposHTML = trabalho.grupos.map(grupo => `
@@ -1596,8 +1587,6 @@
                         </div>
                     </div>
                 `).join('');
-                const trabalhoDiv = document.createElement('div');
-                trabalhoDiv.className = 'trabalho-container';
                 trabalhoDiv.innerHTML = `
                     <div class="trabalho-header">
                         <div class="trabalho-info-principal">
@@ -1697,10 +1686,10 @@
         
         function visualizarTarefa(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            const status = tarefasStatus[tarefa.id] || {};
+            const status = tarefasStatus[id] || {};
             
             if (!status.vista && !status.concluida) {
-                tarefasStatus[tarefa.id] = {...status, vista: true};
+                tarefasStatus[id] = {...status, vista: true};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 atualizarContadorNotificacoes();
             }
@@ -1769,21 +1758,6 @@
                 tarefasStatus[id] = {...status, concluida: false};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 filtrarTarefas();
-                atualizarContadorNotificacoes();
-            }
-        }
-        
-        function marcarTrabalhosComoVistos() {
-            let atualizado = false;
-            trabalhos.forEach(trabalho => {
-                const status = trabalhosStatus[trabalho.id] || {};
-                if (!status.vista) {
-                    trabalhosStatus[trabalho.id] = {...status, vista: true};
-                    atualizado = true;
-                }
-            });
-            if (atualizado) {
-                localStorage.setItem('trabalhosStatus', JSON.stringify(trabalhosStatus));
                 atualizarContadorNotificacoes();
             }
         }
@@ -1940,45 +1914,22 @@
         }
         
         function atualizarContadorNotificacoes() {
-            const tarefasNaoVistas = tarefas.filter(tarefa => {
+            const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
+            const novasTarefas = tarefas.filter(tarefa => {
                 const status = tarefasStatus[tarefa.id] || {};
                 return !status.vista && !status.concluida;
             }).length;
-            
-            const trabalhosNaoVistos = trabalhos.filter(trabalho => {
-                const status = trabalhosStatus[trabalho.id] || {};
-                return !status.vista;
-            }).length;
-            
-            const totalNovos = tarefasNaoVistas + trabalhosNaoVistos;
-            
-            const abaTarefasContador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
-            const abaTrabalhosContador = document.getElementById('aba-trabalhos').querySelector('.notificacao-contador');
-            
-            if (tarefasNaoVistas > 0) {
-                if (!abaTarefasContador) {
+            if (novasTarefas > 0) {
+                if (!contador) {
                     const novoContador = document.createElement('div');
                     novoContador.className = 'notificacao-contador';
-                    novoContador.textContent = tarefasNaoVistas;
+                    novoContador.textContent = novasTarefas;
                     document.getElementById('aba-tarefas').appendChild(novoContador);
                 } else {
-                    abaTarefasContador.textContent = tarefasNaoVistas;
+                    contador.textContent = novasTarefas;
                 }
-            } else if (abaTarefasContador) {
-                abaTarefasContador.remove();
-            }
-            
-            if (trabalhosNaoVistos > 0) {
-                if (!abaTrabalhosContador) {
-                    const novoContador = document.createElement('div');
-                    novoContador.className = 'notificacao-contador';
-                    novoContador.textContent = trabalhosNaoVistos;
-                    document.getElementById('aba-trabalhos').appendChild(novoContador);
-                } else {
-                    abaTrabalhosContador.textContent = trabalhosNaoVistos;
-                }
-            } else if (abaTrabalhosContador) {
-                abaTrabalhosContador.remove();
+            } else if (contador) {
+                contador.remove();
             }
         }
         
