@@ -913,27 +913,28 @@
             background: #444;
         }
         
-        .horario-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 15px;
-        }
-        
-        .btn-copiar-horario {
-            padding: 8px 16px;
-            background: #223;
-            color: #ddd;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+.horario-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+.btn-copiar-horario {
+    padding: 12px 16px;
+    background: #223;
+    color: #ddd;
+    border: 1px solid #333;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 15px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 44px;
+    box-sizing: border-box;
+}
         
         .btn-copiar-horario:hover {
             background: #334;
@@ -1043,7 +1044,7 @@
             <div class="horario-header">
                 <select class="turma-selector" id="turma-selector"></select>
                 <button class="btn-copiar-horario" id="btn-copiar-horario">
-                    <span>📋</span>
+                    <span>🔗</span>
                 </button>
             </div>
             <div id="horario-aulas"></div>
