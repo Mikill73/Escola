@@ -146,14 +146,14 @@
         }
         
         .card-turma {
-            color: #232;
+            color: #ddd;
             font-size: 15px;
             margin-bottom: 6px;
             font-weight: 500;
         }
         
         .card-data {
-            color: #aaa;
+            color: #ddd;
             font-size: 14px;
             margin-bottom: 12px;
         }
@@ -361,14 +361,14 @@
         }
         
         .modal-turma {
-            color: #232;
+            color: #ddd;
             font-size: 16px;
             margin-bottom: 10px;
             font-weight: 500;
         }
         
         .modal-data {
-            color: #aaa;
+            color: #ddd;
             font-size: 15px;
             margin-bottom: 15px;
         }
@@ -381,10 +381,8 @@
             padding: 15px;
             background: #2a2a2a;
             border-radius: 6px;
-            max-height: 300px;
-            overflow-y: auto;
-            font-size: 14px;
             border: 1px solid #333;
+            font-size: 14px;
             font-family: monospace;
         }
         
@@ -430,7 +428,7 @@
         
         .proxima-aula {
             font-size: 13px;
-            color: #232;
+            color: #ddd;
             margin-top: 6px;
             font-style: italic;
         }
@@ -479,7 +477,7 @@
         
         .info-criador {
             font-size: 13px;
-            color: #777;
+            color: #bbb;
             margin-top: 6px;
             padding: 6px 0;
             border-top: 1px solid #333;
@@ -487,7 +485,7 @@
         
         .info-resposta {
             font-size: 13px;
-            color: #232;
+            color: #bbb;
             margin-top: 6px;
             padding: 6px 0;
             border-top: 1px solid #333;
@@ -532,7 +530,7 @@
         }
         
         .ranking-info {
-            color: #aaa;
+            color: #bbb;
             font-size: 14px;
         }
         
@@ -743,7 +741,7 @@
         }
         
         .trabalho-turma {
-            color: #232;
+            color: #ddd;
             font-size: 15px;
             font-weight: 500;
         }
@@ -815,7 +813,7 @@
         
         .info-criador-trabalho {
             font-size: 13px;
-            color: #777;
+            color: #bbb;
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px solid #333;
@@ -1099,7 +1097,6 @@
                     <select class="configuracao-select" id="config-ordem-tarefas">
                         <option value="pendentes">Pendentes</option>
                         <option value="rank">Rank</option>
-                        <option value="concluidas">Concluídas</option>
                     </select>
                 </div>
                 
@@ -1501,15 +1498,7 @@
         }
         
         function aplicarMarcacaoAlternativas(descricaoElemento, respostasMap) {
-            if (!descricaoElemento || respostasMap.size === 0) return;
-            let html = descricaoElemento.innerHTML;
-            respostasMap.forEach((alternativa, numero) => {
-                const padraoAlternativa = new RegExp(`(${numero}\\)[^<]*?${alternativa}\\))(?![^<]*>)`, 'gi');
-                html = html.replace(padraoAlternativa, `<span class="alternativa-correta">$1</span>`);
-                const padraoLetra = new RegExp(`(${numero}\\)[^<]*?)(${alternativa})(?=\\))`, 'gi');
-                html = html.replace(padraoLetra, `$1<span class="alternativa-correta">$2</span>`);
-            });
-            descricaoElemento.innerHTML = html;
+            return;
         }
         
         function filtrarTarefas() {
@@ -1645,18 +1634,22 @@
                 (materiaFiltro === '' || tarefa.materia === materiaFiltro) &&
                 (bimestreFiltro === '' || tarefa.bimestre === bimestreFiltro)
             );
+            
             if (tarefasPendentes.length === 0) {
                 rankingContainer.innerHTML = '<div class="vazio">Nenhuma tarefa encontrada</div>';
                 return;
             }
+            
             const tarefasComUrgencia = tarefasPendentes.map(tarefa => {
                 const proximaAula = encontrarProximaAula(tarefa.materia);
                 return { tarefa, proximaAula };
             }).filter(item => item.proximaAula !== null);
+            
             if (tarefasComUrgencia.length === 0) {
                 rankingContainer.innerHTML = '<div class="vazio">Nenhuma tarefa com próxima aula definida</div>';
                 return;
             }
+            
             const diasOrdem = {
                 'Segunda-feira': 0,
                 'Terça-feira': 1,
@@ -1664,6 +1657,7 @@
                 'Quinta-feira': 3,
                 'Sexta-feira': 4
             };
+            
             const hoje = new Date();
             const diaAtual = hoje.getDay();
             const horaAtual = hoje.getHours();
@@ -1671,24 +1665,34 @@
             const diaAtualIndex = diaAtual === 0 ? 6 : diaAtual - 1;
             const horaAtualTotal = horaAtual * 60 + minutosAtual;
             const horaAulaTermino = 12 * 60 + 10;
+            
             tarefasComUrgencia.sort((a, b) => {
                 const diaA = diasOrdem[a.proximaAula.dia];
                 const diaB = diasOrdem[b.proximaAula.dia];
-                const diaAIndex = (diaA - diaAtualIndex + 7) % 7;
-                const diaBIndex = (diaB - diaAtualIndex + 7) % 7;
-                if (horaAtualTotal >= horaAulaTermino && diaAIndex === 0) diaAIndex = (diaAIndex + 1) % 7;
-                if (horaAtualTotal >= horaAulaTermino && diaBIndex === 0) diaBIndex = (diaBIndex + 1) % 7;
+                
+                let diaAIndex = (diaA - diaAtualIndex + 7) % 7;
+                let diaBIndex = (diaB - diaAtualIndex + 7) % 7;
+                
+                if (horaAtualTotal >= horaAulaTermino) {
+                    if (diaAIndex === 0) diaAIndex = (diaAIndex + 1) % 7;
+                    if (diaBIndex === 0) diaBIndex = (diaBIndex + 1) % 7;
+                }
+                
                 if (diaAIndex !== diaBIndex) return diaAIndex - diaBIndex;
+                
                 const numAulaA = parseInt(a.proximaAula.periodo);
                 const numAulaB = parseInt(b.proximaAula.periodo);
+                
                 if (diaAIndex === 0 && horaAtualTotal < horaAulaTermino) {
                     const aulaAtual = horaAtualTotal >= 9*60+30 ? 2 : horaAtualTotal >= 7*60 ? 1 : 0;
                     const prioridadeA = numAulaA > aulaAtual ? 0 : 1;
                     const prioridadeB = numAulaB > aulaAtual ? 0 : 1;
                     if (prioridadeA !== prioridadeB) return prioridadeA - prioridadeB;
                 }
+                
                 return numAulaA - numAulaB;
             });
+            
             rankingContainer.innerHTML = '';
             tarefasComUrgencia.forEach((item, index) => {
                 const { tarefa, proximaAula } = item;
@@ -1802,6 +1806,7 @@
         
         function encontrarProximaAula(materia) {
             if (!horario || !turmaSelecionada || !horario[turmaSelecionada]) return null;
+            
             const diasSemana = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta'];
             const hoje = new Date();
             const diaAtual = hoje.getDay();
@@ -1809,13 +1814,17 @@
             const minutosAtual = hoje.getMinutes();
             const horaAtualTotal = horaAtual * 60 + minutosAtual;
             const horaAulaTermino = 12 * 60 + 10;
+            
             let diaIndex = diaAtual === 0 ? 6 : diaAtual - 1;
-            if (horaAtualTotal >= horaAulaTermino && diaAtual !== 0 && diaAtual !== 6) {
+            
+            if (horaAtualTotal >= horaAulaTermino) {
                 diaIndex = (diaIndex + 1) % 7;
             }
+            
             for (let i = 0; i < 7; i++) {
                 const diaVerificar = (diaIndex + i) % 7;
                 if (diaVerificar >= 5) continue;
+                
                 const diaSemana = diasSemana[diaVerificar];
                 if (horario[turmaSelecionada][diaSemana]) {
                     const aulaIndex = horario[turmaSelecionada][diaSemana].findIndex(aula => aula.materia === materia);
