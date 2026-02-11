@@ -131,6 +131,11 @@
             flex: 1;
         }
         
+        .card.oculta {
+            opacity: 0.7;
+            border-left: 4px solid #822;
+        }
+        
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
@@ -937,6 +942,71 @@
             background: #334;
         }
         
+        .tarefas-ocultas-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #333;
+        }
+        
+        .tarefas-ocultas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            border: 1px solid #444;
+        }
+        
+        .tarefas-ocultas-titulo {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .aviso-ocultas {
+            background: #330;
+            color: #cc0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            border: 1px solid #663;
+        }
+        
+        .btn-mostrar-ocultas {
+            background: #333;
+            color: #ddd;
+            border: 1px solid #444;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-mostrar-ocultas:hover {
+            background: #444;
+        }
+        
+        .btn-mostrar-ocultas.ativo {
+            background: #223;
+            color: #fff;
+            border-color: #446;
+        }
+        
+        .conteudo-ocultas {
+            display: none;
+        }
+        
+        .conteudo-ocultas.ativo {
+            display: block;
+        }
+        
         @media (max-width: 768px) {
             .grid-container {
                 flex-direction: column;
@@ -1025,6 +1095,12 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+            
+            .tarefas-ocultas-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -1079,6 +1155,25 @@
             </div>
             
             <div id="conteudo-subtab"></div>
+            
+            <div class="tarefas-ocultas-section">
+                <div class="tarefas-ocultas-header">
+                    <div class="tarefas-ocultas-titulo">
+                        <span>📦 Tarefas Ocultas</span>
+                        <span id="contador-ocultas" style="background: #333; padding: 4px 10px; border-radius: 12px; font-size: 13px;">0</span>
+                    </div>
+                    <button class="btn-mostrar-ocultas" id="btn-mostrar-ocultas">Mostrar Tarefas Ocultas</button>
+                </div>
+                
+                <div class="aviso-ocultas" id="aviso-ocultas">
+                    ⚠️ Essas tarefas foram ocultadas por algum motivo, exemplo: o professor(a) não vai mais pegar/vistar. 
+                    Você ainda pode concluí-las, mas enquanto não estiverem concluídas, não aparecem no ranking.
+                </div>
+                
+                <div class="conteudo-ocultas" id="conteudo-ocultas">
+                    <div id="lista-tarefas-ocultas" class="grid-container"></div>
+                </div>
+            </div>
         </div>
         
         <div id="trabalhos" class="conteudo-aba">
@@ -1166,6 +1261,7 @@
         let bimestreFiltro = '';
         let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || { ordemTarefas: 'pendentes' };
         let compartilhamentoExecutado = false;
+        let mostrarOcultas = false;
         
         function processarParametroURL() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1412,6 +1508,7 @@
                     marcarTarefasComoVistas();
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
+                    atualizarContadorOcultas();
                 } else if (aba.dataset.aba === 'trabalhos') {
                     renderizarTrabalhos();
                 }
@@ -1446,6 +1543,21 @@
             document.getElementById('filtro-bimestre').value = '';
             bimestreFiltro = '';
             filtrarTarefas();
+        });
+        
+        document.getElementById('btn-mostrar-ocultas').addEventListener('click', function() {
+            mostrarOcultas = !mostrarOcultas;
+            const conteudoOcultas = document.getElementById('conteudo-ocultas');
+            if (mostrarOcultas) {
+                conteudoOcultas.classList.add('ativo');
+                this.classList.add('ativo');
+                this.textContent = 'Ocultar Tarefas Ocultas';
+                renderizarTarefasOcultas();
+            } else {
+                conteudoOcultas.classList.remove('ativo');
+                this.classList.remove('ativo');
+                this.textContent = 'Mostrar Tarefas Ocultas';
+            }
         });
         
         document.getElementById('modal-fechar').addEventListener('click', fecharModal);
@@ -1514,8 +1626,8 @@
             const listaContainer = document.getElementById('lista-tarefas');
             
             let tarefasFiltradas = subtabAtiva === 'pendentes' 
-                ? tarefas.filter(tarefa => !tarefasStatus[tarefa.id]?.concluida)
-                : tarefas.filter(tarefa => tarefasStatus[tarefa.id]?.concluida);
+                ? tarefas.filter(tarefa => !tarefasStatus[tarefa.id]?.concluida && !tarefa.oculta)
+                : tarefas.filter(tarefa => tarefasStatus[tarefa.id]?.concluida && !tarefa.oculta);
             
             tarefasFiltradas = tarefasFiltradas.filter(tarefa => 
                 (tarefa.materia.toLowerCase().includes(termo) || 
@@ -1552,7 +1664,7 @@
                 const infoBimestre = tarefa.bimestre ? `<div class="info-criador">Bimestre: ${tarefa.bimestre}º</div>` : '';
                 
                 const card = document.createElement('div');
-                card.className = 'card';
+                card.className = `card ${tarefa.oculta ? 'oculta' : ''}`;
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
                     ${tarefa.turma ? `<div class="card-turma">Turma: ${tarefa.turma}</div>` : ''}
@@ -1577,6 +1689,55 @@
             });
         }
         
+        function renderizarTarefasOcultas() {
+            const container = document.getElementById('lista-tarefas-ocultas');
+            container.innerHTML = '';
+            
+            const tarefasOcultas = tarefas.filter(tarefa => tarefa.oculta === true);
+            
+            if (tarefasOcultas.length === 0) {
+                container.innerHTML = '<div class="vazio">Nenhuma tarefa oculta</div>';
+                return;
+            }
+            
+            tarefasOcultas.forEach((tarefa) => {
+                const status = tarefasStatus[tarefa.id] || {};
+                const descricaoResumida = tarefa.descricao.length > 150 
+                    ? tarefa.descricao.substring(0, 150) + '...' 
+                    : tarefa.descricao;
+                const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
+                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
+                const infoBimestre = tarefa.bimestre ? `<div class="info-criador">Bimestre: ${tarefa.bimestre}º</div>` : '';
+                
+                const card = document.createElement('div');
+                card.className = 'card oculta';
+                card.innerHTML = `
+                    <div class="card-titulo">${tarefa.materia} ⚠️</div>
+                    ${tarefa.turma ? `<div class="card-turma">Turma: ${tarefa.turma}</div>` : ''}
+                    <div class="card-descricao">${descricaoResumida}</div>
+                    ${infoCriador}
+                    ${infoBimestre}
+                    ${infoResposta}
+                    <div class="card-acoes">
+                        <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Ver</button>
+                        ${!status.concluida ? 
+                            `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>` : 
+                            `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${tarefa.id}')">Desfazer</button>`
+                        }
+                        ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
+                    </div>
+                `;
+                adicionarBotaoCompartilharCard(card, tarefa.id);
+                container.appendChild(card);
+            });
+        }
+        
+        function atualizarContadorOcultas() {
+            const contador = document.getElementById('contador-ocultas');
+            const quantidade = tarefas.filter(t => t.oculta === true).length;
+            contador.textContent = quantidade;
+        }
+        
         function renderizarTrabalhos() {
             const container = document.getElementById('lista-trabalhos');
             if (trabalhos.length === 0) {
@@ -1589,7 +1750,7 @@
                 trabalhoDiv.className = 'trabalho-container';
                 const infoCriador = trabalho.criador ? `<div class="info-criador-trabalho">Criado por: ${trabalho.criador}${trabalho.turmaCriador ? ` (${trabalho.turmaCriador})` : ''}</div>` : '';
                 const infoDataAdicao = trabalho.dataAdicao ? `<div class="info-criador-trabalho">Adicionado em: ${formatarData(trabalho.dataAdicao)}</div>` : '';
-                const gruposHTML = trabalho.grupos.map(grupo => `
+                const gruposHTML = trabalho.grupos ? trabalho.grupos.map(grupo => `
                     <div class="grupo-trabalho">
                         <div class="grupo-nome">${grupo.nome}</div>
                         <div class="integrantes-lista">
@@ -1598,7 +1759,7 @@
                             `).join('')}
                         </div>
                     </div>
-                `).join('');
+                `).join('') : '';
                 trabalhoDiv.innerHTML = `
                     <div class="trabalho-header">
                         <div class="trabalho-info-principal">
@@ -1608,10 +1769,12 @@
                         ${trabalho.dataEntrega ? `<div class="trabalho-data">Entrega: ${formatarData(trabalho.dataEntrega)}</div>` : ''}
                     </div>
                     <div class="trabalho-descricao">${trabalho.descricao}</div>
-                    <div class="grupos-container">
-                        <div class="grupos-titulo">Grupos</div>
-                        ${gruposHTML}
-                    </div>
+                    ${gruposHTML ? `
+                        <div class="grupos-container">
+                            <div class="grupos-titulo">Grupos</div>
+                            ${gruposHTML}
+                        </div>
+                    ` : ''}
                     ${infoCriador}
                     ${infoDataAdicao}
                 `;
@@ -1628,6 +1791,7 @@
             const rankingContainer = document.getElementById('ranking-tarefas');
             const tarefasPendentes = tarefas.filter(tarefa => 
                 !tarefasStatus[tarefa.id]?.concluida && 
+                !tarefa.oculta &&
                 (tarefa.materia.toLowerCase().includes(termoPesquisa) || 
                  tarefa.descricao.toLowerCase().includes(termoPesquisa) ||
                  (tarefa.turma && tarefa.turma.toLowerCase().includes(termoPesquisa))) &&
@@ -1734,7 +1898,7 @@
             const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
             const infoBimestre = tarefa.bimestre ? `<div class="info-criador">Bimestre: ${tarefa.bimestre}º</div>` : '';
             
-            document.getElementById('modal-titulo').innerHTML = `${tarefa.materia}`;
+            document.getElementById('modal-titulo').innerHTML = `${tarefa.materia}${tarefa.oculta ? ' ⚠️ Ocultada' : ''}`;
             document.getElementById('modal-turma').innerHTML = tarefa.turma ? `Turma: ${tarefa.turma}` : '';
             document.getElementById('modal-data').innerHTML = proximaAulaInfo;
             document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
@@ -1781,6 +1945,9 @@
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 filtrarTarefas();
                 atualizarContadorNotificacoes();
+                if (mostrarOcultas) {
+                    renderizarTarefasOcultas();
+                }
             }
         }
         
@@ -1791,6 +1958,9 @@
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 filtrarTarefas();
                 atualizarContadorNotificacoes();
+                if (mostrarOcultas) {
+                    renderizarTarefasOcultas();
+                }
             }
         }
         
@@ -1961,7 +2131,7 @@
             const contador = document.getElementById('aba-tarefas').querySelector('.notificacao-contador');
             const novasTarefas = tarefas.filter(tarefa => {
                 const status = tarefasStatus[tarefa.id] || {};
-                return !status.vista && !status.concluida;
+                return !status.vista && !status.concluida && !tarefa.oculta;
             }).length;
             if (novasTarefas > 0) {
                 if (!contador) {
@@ -1981,7 +2151,7 @@
             let atualizado = false;
             tarefas.forEach(tarefa => {
                 const status = tarefasStatus[tarefa.id] || {};
-                if (!status.vista && !status.concluida) {
+                if (!status.vista && !status.concluida && !tarefa.oculta) {
                     tarefasStatus[tarefa.id] = {...status, vista: true};
                     atualizado = true;
                 }
@@ -2054,6 +2224,9 @@
                         if (!tarefa.id) {
                             tarefa.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
                         }
+                        if (tarefa.oculta === undefined) {
+                            tarefa.oculta = false;
+                        }
                     });
                 }
                 if (horarioData) horario = horarioData;
@@ -2068,6 +2241,7 @@
                 atualizarSeletorTurmas();
                 extrairTodasMaterias();
                 atualizarContadorNotificacoes();
+                atualizarContadorOcultas();
                 carregarConfiguracoes();
                 renderizarHorario();
                 filtrarTarefas();
