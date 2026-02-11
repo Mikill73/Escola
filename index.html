@@ -1693,10 +1693,12 @@
             const container = document.getElementById('lista-tarefas-ocultas');
             container.innerHTML = '';
             
-            const tarefasOcultas = tarefas.filter(tarefa => tarefa.oculta === true);
+            const tarefasOcultas = tarefas.filter(tarefa => 
+                tarefa.oculta === true && !tarefasStatus[tarefa.id]?.concluida
+            );
             
             if (tarefasOcultas.length === 0) {
-                container.innerHTML = '<div class="vazio">Nenhuma tarefa oculta</div>';
+                container.innerHTML = '<div class="vazio">Nenhuma tarefa oculta pendente</div>';
                 return;
             }
             
@@ -1720,10 +1722,7 @@
                     ${infoResposta}
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Ver</button>
-                        ${!status.concluida ? 
-                            `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>` : 
-                            `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${tarefa.id}')">Desfazer</button>`
-                        }
+                        <button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>
                         ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
                     </div>
                 `;
@@ -1734,7 +1733,7 @@
         
         function atualizarContadorOcultas() {
             const contador = document.getElementById('contador-ocultas');
-            const quantidade = tarefas.filter(t => t.oculta === true).length;
+            const quantidade = tarefas.filter(t => t.oculta === true && !tarefasStatus[t.id]?.concluida).length;
             contador.textContent = quantidade;
         }
         
@@ -1884,7 +1883,7 @@
             const tarefa = tarefas.find(t => t.id === id);
             const status = tarefasStatus[id] || {};
             
-            if (!status.vista && !status.concluida) {
+            if (!status.vista && !status.concluida && !tarefa.oculta) {
                 tarefasStatus[id] = {...status, vista: true};
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 atualizarContadorNotificacoes();
@@ -1945,6 +1944,7 @@
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 filtrarTarefas();
                 atualizarContadorNotificacoes();
+                atualizarContadorOcultas();
                 if (mostrarOcultas) {
                     renderizarTarefasOcultas();
                 }
@@ -1958,6 +1958,7 @@
                 localStorage.setItem('tarefasStatus', JSON.stringify(tarefasStatus));
                 filtrarTarefas();
                 atualizarContadorNotificacoes();
+                atualizarContadorOcultas();
                 if (mostrarOcultas) {
                     renderizarTarefasOcultas();
                 }
