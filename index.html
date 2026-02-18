@@ -1829,16 +1829,7 @@
             const horaAtualTotal = horaAtual * 60 + minutosAtual;
             const horaAulaTermino = 12 * 60 + 10;
             
-            const mapaAulas = new Map();
-            tarefasComUrgencia.forEach(item => {
-                const chave = `${item.proximaAula.dia}_${item.proximaAula.periodo}_${item.tarefa.materia}`;
-                if (!mapaAulas.has(chave)) {
-                    mapaAulas.set(chave, item);
-                }
-            });
-            const tarefasUnicas = Array.from(mapaAulas.values());
-            
-            tarefasUnicas.sort((a, b) => {
+            tarefasComUrgencia.sort((a, b) => {
                 const diaA = diasOrdem[a.proximaAula.dia];
                 const diaB = diasOrdem[b.proximaAula.dia];
                 
@@ -1866,7 +1857,7 @@
             });
             
             rankingContainer.innerHTML = '';
-            tarefasUnicas.forEach((item, index) => {
+            tarefasComUrgencia.forEach((item, index) => {
                 const { tarefa, proximaAula } = item;
                 const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
                 const rankingItem = document.createElement('div');
