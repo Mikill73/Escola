@@ -1107,13 +1107,13 @@
 <body>
     <div class="container" id="app-container" style="display: none;">
         <div class="abas">
-            <button class="aba ativa" data-aba="horario">Horário</button>
-            <button class="aba" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
+            <button class="aba" data-aba="horario">Horário</button>
+            <button class="aba ativa" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
             <button class="aba" data-aba="trabalhos">Trabalhos</button>
             <button class="aba" data-aba="configuracoes">Configurações</button>
         </div>
         
-        <div id="horario" class="conteudo-aba ativa">
+        <div id="horario" class="conteudo-aba">
             <div class="horario-header">
                 <select class="turma-selector" id="turma-selector"></select>
                 <button class="btn-copiar-horario" id="btn-copiar-horario">
@@ -1123,7 +1123,7 @@
             <div id="horario-aulas"></div>
         </div>
         
-        <div id="tarefas" class="conteudo-aba">
+        <div id="tarefas" class="conteudo-aba ativa">
             <div class="subtabs">
                 <button class="subtab ativa" data-subtab="pendentes">Pendentes</button>
                 <button class="subtab" data-subtab="rank">Rank</button>
@@ -1829,7 +1829,16 @@
             const horaAtualTotal = horaAtual * 60 + minutosAtual;
             const horaAulaTermino = 12 * 60 + 10;
             
-            tarefasComUrgencia.sort((a, b) => {
+            const mapaAulas = new Map();
+            tarefasComUrgencia.forEach(item => {
+                const chave = `${item.proximaAula.dia}_${item.proximaAula.periodo}_${item.tarefa.materia}`;
+                if (!mapaAulas.has(chave)) {
+                    mapaAulas.set(chave, item);
+                }
+            });
+            const tarefasUnicas = Array.from(mapaAulas.values());
+            
+            tarefasUnicas.sort((a, b) => {
                 const diaA = diasOrdem[a.proximaAula.dia];
                 const diaB = diasOrdem[b.proximaAula.dia];
                 
@@ -1857,7 +1866,7 @@
             });
             
             rankingContainer.innerHTML = '';
-            tarefasComUrgencia.forEach((item, index) => {
+            tarefasUnicas.forEach((item, index) => {
                 const { tarefa, proximaAula } = item;
                 const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
                 const rankingItem = document.createElement('div');
