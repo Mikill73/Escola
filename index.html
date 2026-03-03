@@ -1376,7 +1376,8 @@
             });
         }
         
-        function enviarAcessoWebhook(nome, turma, codigo) {
+function enviarAcessoWebhook(nome, turma, codigo) {
+            if (nome === "Yuri Gomes Martins") return;
             fetch(webhookURL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
