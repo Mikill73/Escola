@@ -118,7 +118,7 @@
             background: #2a2a2a;
             border-radius: 6px;
             padding: 20px;
-            height: 400px;
+            height: 420px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
@@ -144,23 +144,36 @@
         .card-titulo {
             font-size: 20px;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: #fff;
             border-bottom: 1px solid #333;
             padding-bottom: 8px;
         }
         
-        .card-turma {
-            color: #ddd;
-            font-size: 15px;
-            margin-bottom: 6px;
-            font-weight: 500;
+        .card-info-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #ccc;
         }
         
-        .card-data {
+        .card-info-item {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+        
+        .card-info-label {
+            font-weight: 500;
+            color: #aaa;
+            min-width: 85px;
+        }
+        
+        .card-info-valor {
             color: #ddd;
-            font-size: 14px;
-            margin-bottom: 12px;
+            word-break: break-word;
         }
         
         .card-descricao {
@@ -170,13 +183,24 @@
             line-height: 1.5;
             padding-right: 8px;
             white-space: pre-wrap;
-            font-size: 14px;
+            font-size: 13px;
             background: #1a1a1a;
             padding: 12px;
             border-radius: 4px;
             margin-bottom: 12px;
-            max-height: 170px;
-            font-family: monospace;
+            max-height: 150px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .card-descricao * {
+            all: revert;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            font-size: 13px !important;
+            line-height: 1.5 !important;
+            color: #ddd !important;
+            background: transparent !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
         
         .card-descricao::-webkit-scrollbar {
@@ -357,25 +381,41 @@
         }
         
         .modal-titulo {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             color: #fff;
             border-bottom: 1px solid #333;
-            padding-bottom: 10px;
+            padding-bottom: 12px;
         }
         
-        .modal-turma {
-            color: #ddd;
-            font-size: 16px;
-            margin-bottom: 10px;
+        .modal-info-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #222;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+        
+        .modal-info-item {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .modal-info-label {
             font-weight: 500;
+            color: #aaa;
+            min-width: 100px;
         }
         
-        .modal-data {
+        .modal-info-valor {
             color: #ddd;
-            font-size: 15px;
-            margin-bottom: 15px;
         }
         
         .modal-descricao {
@@ -384,11 +424,17 @@
             white-space: pre-wrap;
             margin-bottom: 20px;
             padding: 15px;
-            background: #2a2a2a;
+            background: #222;
             border-radius: 6px;
             border: 1px solid #333;
             font-size: 14px;
-            font-family: monospace;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .modal-descricao * {
+            all: revert;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            color: #ddd !important;
         }
         
         .modal-descricao::-webkit-scrollbar {
@@ -770,7 +816,13 @@
             border-radius: 6px;
             border: 1px solid #333;
             font-size: 14px;
-            font-family: monospace;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .trabalho-descricao * {
+            all: revert;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            color: #ddd !important;
         }
         
         .grupos-container {
@@ -1015,7 +1067,7 @@
             .card {
                 width: 100%;
                 min-width: auto;
-                height: 420px;
+                height: 460px;
             }
             
             .abas {
@@ -1213,11 +1265,8 @@
                 <div class="modal-fechar" id="modal-fechar">X</div>
                 <button class="btn-compartilhar-modal" id="modal-compartilhar" title="Compartilhar">🔗</button>
                 <div class="modal-titulo" id="modal-titulo"></div>
-                <div class="modal-turma" id="modal-turma"></div>
-                <div class="modal-data" id="modal-data"></div>
+                <div class="modal-info-lista" id="modal-info-container"></div>
                 <div class="modal-descricao" id="modal-descricao"></div>
-                <div class="info-criador" id="modal-info-criador"></div>
-                <div class="info-resposta" id="modal-info-resposta"></div>
                 <div class="card-acoes" id="modal-acoes"></div>
             </div>
         </div>
@@ -1654,28 +1703,43 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             listaTarefas.forEach((tarefa) => {
                 const status = tarefasStatus[tarefa.id] || {};
                 const proximaAula = encontrarProximaAula(tarefa.materia);
-                const proximaAulaInfo = proximaAula ? `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>` : '';
+                const proximaAulaInfo = proximaAula ? `${proximaAula.dia} (${proximaAula.periodo})` : 'Não definida';
+                const bimestreInfo = tarefa.bimestre ? `${tarefa.bimestre}º` : 'Não definido';
+                const turmaInfo = tarefa.turma ? `${tarefa.turma}` : 'Não definida';
+                const dataAdicaoInfo = tarefa.dataAdicao ? formatarData(tarefa.dataAdicao) : 'Não definida';
+                const criadorInfo = tarefa.criador ? `${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}` : 'Não definido';
+                
                 const descricaoResumida = tarefa.descricao.length > 150 
                     ? tarefa.descricao.substring(0, 150) + '...' 
                     : tarefa.descricao;
-                const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
-                const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
-                const infoDataAdicao = tarefa.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(tarefa.dataAdicao)}</div>` : '';
-                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
-                const infoBimestre = tarefa.bimestre ? `<div class="info-criador">Bimestre: ${tarefa.bimestre}º</div>` : '';
                 
                 const card = document.createElement('div');
                 card.className = `card ${tarefa.oculta ? 'oculta' : ''}`;
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
-                    ${tarefa.turma ? `<div class="card-turma">Turma: ${tarefa.turma}</div>` : ''}
-                    ${proximaAulaInfo}
+                    <div class="card-info-lista">
+                        <div class="card-info-item">
+                            <span class="card-info-label">Próxima Aula:</span>
+                            <span class="card-info-valor">${proximaAulaInfo}</span>
+                        </div>
+                        <div class="card-info-item">
+                            <span class="card-info-label">Bimestre:</span>
+                            <span class="card-info-valor">${bimestreInfo}</span>
+                        </div>
+                        <div class="card-info-item">
+                            <span class="card-info-label">Turma:</span>
+                            <span class="card-info-valor">${turmaInfo}</span>
+                        </div>
+                        <div class="card-info-item">
+                            <span class="card-info-label">Adicionado em:</span>
+                            <span class="card-info-valor">${dataAdicaoInfo}</span>
+                        </div>
+                        <div class="card-info-item">
+                            <span class="card-info-label">Criado por:</span>
+                            <span class="card-info-valor">${criadorInfo}</span>
+                        </div>
+                    </div>
                     <div class="card-descricao">${descricaoResumida}</div>
-                    ${infoCriador}
-                    ${infoEditor}
-                    ${infoDataAdicao}
-                    ${infoBimestre}
-                    ${infoResposta}
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Ver</button>
                         ${!status.concluida ? 
@@ -1705,22 +1769,44 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             
             tarefasOcultas.forEach((tarefa) => {
                 const status = tarefasStatus[tarefa.id] || {};
+                const proximaAula = encontrarProximaAula(tarefa.materia);
+                const proximaAulaInfo = proximaAula ? `${proximaAula.dia} (${proximaAula.periodo})` : 'Não definida';
+                const bimestreInfo = tarefa.bimestre ? `${tarefa.bimestre}º` : 'Não definido';
+                const turmaInfo = tarefa.turma ? `${tarefa.turma}` : 'Não definida';
+                const dataAdicaoInfo = tarefa.dataAdicao ? formatarData(tarefa.dataAdicao) : 'Não definida';
+                const criadorInfo = tarefa.criador ? `${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}` : 'Não definido';
+                
                 const descricaoResumida = tarefa.descricao.length > 150 
                     ? tarefa.descricao.substring(0, 150) + '...' 
                     : tarefa.descricao;
-                const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
-                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
-                const infoBimestre = tarefa.bimestre ? `<div class="info-criador">Bimestre: ${tarefa.bimestre}º</div>` : '';
                 
                 const card = document.createElement('div');
                 card.className = 'card oculta';
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia} ⚠️</div>
-                    ${tarefa.turma ? `<div class="card-turma">Turma: ${tarefa.turma}</div>` : ''}
+                    <div class="card-info-lista">
+                        <div class="card-info-item">
+                            <span class="card-info-label">Próxima Aula:</span>
+                            <span class="card-info-valor">${proximaAulaInfo}</span>
+                        </div>
+                        <div class="card-info-item">
+                            <span class="card-info-label">Bimestre:</span>
+                            <span class="card-info-valor">${bimestreInfo}</span>
+                        </div>
+                        <div class="card-info-item">
+                            <span class="card-info-label">Turma:</span>
+                            <span class="card-info-valor">${turmaInfo}</span>
+                        </div>
+                        <div class="card-info-item">
+                            <span class="card-info-label">Adicionado em:</span>
+                            <span class="card-info-valor">${dataAdicaoInfo}</span>
+                        </div>
+                        <div class="card-info-item">
+                            <span class="card-info-label">Criado por:</span>
+                            <span class="card-info-valor">${criadorInfo}</span>
+                        </div>
+                    </div>
                     <div class="card-descricao">${descricaoResumida}</div>
-                    ${infoCriador}
-                    ${infoBimestre}
-                    ${infoResposta}
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Ver</button>
                         <button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>
@@ -1891,19 +1977,52 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             }
             
             const proximaAula = encontrarProximaAula(tarefa.materia);
-            const proximaAulaInfo = proximaAula ? `<div class="proxima-aula">Próxima aula: ${proximaAula.dia} (${proximaAula.periodo})</div>` : '';
-            const infoCriador = tarefa.criador ? `<div class="info-criador">Criado por: ${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}</div>` : '';
-            const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
-            const infoDataAdicao = tarefa.dataAdicao ? `<div class="info-criador">Adicionado em: ${formatarData(tarefa.dataAdicao)}</div>` : '';
-            const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
-            const infoBimestre = tarefa.bimestre ? `<div class="info-criador">Bimestre: ${tarefa.bimestre}º</div>` : '';
+            const proximaAulaInfo = proximaAula ? `${proximaAula.dia} (${proximaAula.periodo})` : 'Não definida';
+            const bimestreInfo = tarefa.bimestre ? `${tarefa.bimestre}º` : 'Não definido';
+            const turmaInfo = tarefa.turma ? `${tarefa.turma}` : 'Não definida';
+            const dataAdicaoInfo = tarefa.dataAdicao ? formatarData(tarefa.dataAdicao) : 'Não definida';
+            const criadorInfo = tarefa.criador ? `${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}` : 'Não definido';
+            const editorInfo = tarefa.editor && tarefa.ultimaEdicao ? `Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}` : '';
+            const respostaInfo = tarefa.autor_da_resposta ? `Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}` : '';
+            
+            const infoContainer = document.getElementById('modal-info-container');
+            infoContainer.innerHTML = `
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Próxima Aula:</span>
+                    <span class="modal-info-valor">${proximaAulaInfo}</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Bimestre:</span>
+                    <span class="modal-info-valor">${bimestreInfo}</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Turma:</span>
+                    <span class="modal-info-valor">${turmaInfo}</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Adicionado em:</span>
+                    <span class="modal-info-valor">${dataAdicaoInfo}</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Criado por:</span>
+                    <span class="modal-info-valor">${criadorInfo}</span>
+                </div>
+                ${editorInfo ? `
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Editado por:</span>
+                    <span class="modal-info-valor">${editorInfo}</span>
+                </div>
+                ` : ''}
+                ${respostaInfo ? `
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Resposta por:</span>
+                    <span class="modal-info-valor">${respostaInfo}</span>
+                </div>
+                ` : ''}
+            `;
             
             document.getElementById('modal-titulo').innerHTML = `${tarefa.materia}${tarefa.oculta ? ' ⚠️ Ocultada' : ''}`;
-            document.getElementById('modal-turma').innerHTML = tarefa.turma ? `Turma: ${tarefa.turma}` : '';
-            document.getElementById('modal-data').innerHTML = proximaAulaInfo;
             document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
-            document.getElementById('modal-info-criador').innerHTML = infoCriador + infoEditor + infoDataAdicao + infoBimestre;
-            document.getElementById('modal-info-resposta').innerHTML = infoResposta;
             
             if (tarefa.resposta) {
                 const respostasMap = processarRespostas(tarefa.resposta);
@@ -1926,13 +2045,11 @@ function enviarAcessoWebhook(nome, turma, codigo) {
         
         function visualizarResposta(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            const respostaInfo = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
+            const infoContainer = document.getElementById('modal-info-container');
+            infoContainer.innerHTML = '';
+            
             document.getElementById('modal-titulo').innerHTML = `Resposta - ${tarefa.materia}`;
-            document.getElementById('modal-turma').innerHTML = '';
-            document.getElementById('modal-data').innerHTML = '';
             document.getElementById('modal-descricao').innerHTML = tarefa.resposta;
-            document.getElementById('modal-info-criador').innerHTML = '';
-            document.getElementById('modal-info-resposta').innerHTML = respostaInfo;
             document.getElementById('modal-acoes').innerHTML = '';
             configurarBotaoCompartilharModal(id);
             abrirModal();
