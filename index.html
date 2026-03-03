@@ -118,7 +118,7 @@
             background: #2a2a2a;
             border-radius: 6px;
             padding: 20px;
-            height: 420px;
+            height: 450px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
@@ -144,63 +144,66 @@
         .card-titulo {
             font-size: 20px;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             color: #fff;
             border-bottom: 1px solid #333;
             padding-bottom: 8px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .card-info-lista {
+        .card-info-container {
+            flex: 1;
             display: flex;
             flex-direction: column;
             gap: 8px;
             margin-bottom: 12px;
             font-size: 13px;
-            color: #ccc;
+            color: #bbb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .card-info-item {
             display: flex;
-            align-items: baseline;
+            align-items: center;
             gap: 6px;
+            font-size: 13px;
+            color: #bbb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .card-info-label {
-            font-weight: 500;
-            color: #aaa;
-            min-width: 85px;
-        }
-        
-        .card-info-valor {
+        .card-info-item strong {
             color: #ddd;
-            word-break: break-word;
+            font-weight: 500;
+            min-width: 70px;
+            font-size: 13px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .card-info-item span {
+            color: #bbb;
+            font-size: 13px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .card-descricao {
-            flex: 1;
-            overflow-y: auto;
-            color: #ddd;
-            line-height: 1.5;
-            padding-right: 8px;
-            white-space: pre-wrap;
-            font-size: 13px;
             background: #1a1a1a;
             padding: 12px;
             border-radius: 4px;
             margin-bottom: 12px;
-            max-height: 150px;
+            max-height: 120px;
+            overflow-y: auto;
+            color: #ddd;
+            line-height: 1.5;
+            font-size: 14px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            border: 1px solid #333;
         }
         
         .card-descricao * {
-            all: revert;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-            font-size: 13px !important;
-            line-height: 1.5 !important;
-            color: #ddd !important;
-            background: transparent !important;
-            margin: 0 !important;
-            padding: 0 !important;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            color: inherit;
         }
         
         .card-descricao::-webkit-scrollbar {
@@ -240,6 +243,7 @@
             font-size: 13px;
             font-weight: 500;
             white-space: nowrap;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .btn:hover {
@@ -381,41 +385,47 @@
         }
         
         .modal-titulo {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #fff;
             border-bottom: 1px solid #333;
-            padding-bottom: 12px;
+            padding-bottom: 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .modal-info-lista {
+        .modal-info-container {
+            margin-bottom: 15px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: #222;
-            padding: 15px;
-            border-radius: 6px;
+            gap: 8px;
+            padding: 12px;
+            background: #2a2a2a;
+            border-radius: 4px;
             border: 1px solid #333;
         }
         
         .modal-info-item {
             display: flex;
-            align-items: baseline;
-            gap: 10px;
+            align-items: center;
+            gap: 8px;
             font-size: 14px;
-            color: #ccc;
+            color: #bbb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .modal-info-label {
-            font-weight: 500;
-            color: #aaa;
-            min-width: 100px;
-        }
-        
-        .modal-info-valor {
+        .modal-info-item strong {
             color: #ddd;
+            font-weight: 500;
+            min-width: 100px;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .modal-info-item span {
+            color: #bbb;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .modal-descricao {
@@ -424,17 +434,20 @@
             white-space: pre-wrap;
             margin-bottom: 20px;
             padding: 15px;
-            background: #222;
+            background: #2a2a2a;
             border-radius: 6px;
             border: 1px solid #333;
             font-size: 14px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-height: 300px;
+            overflow-y: auto;
         }
         
         .modal-descricao * {
-            all: revert;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-            color: #ddd !important;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            color: inherit;
         }
         
         .modal-descricao::-webkit-scrollbar {
@@ -477,13 +490,6 @@
             background: #500;
         }
         
-        .proxima-aula {
-            font-size: 13px;
-            color: #ddd;
-            margin-top: 6px;
-            font-style: italic;
-        }
-        
         .subtabs {
             display: flex;
             margin-bottom: 15px;
@@ -524,23 +530,6 @@
             color: #ddd;
             font-size: 15px;
             width: 100%;
-        }
-        
-        .info-criador {
-            font-size: 13px;
-            color: #bbb;
-            margin-top: 6px;
-            padding: 6px 0;
-            border-top: 1px solid #333;
-        }
-        
-        .info-resposta {
-            font-size: 13px;
-            color: #bbb;
-            margin-top: 6px;
-            padding: 6px 0;
-            border-top: 1px solid #333;
-            font-weight: 500;
         }
         
         .ranking-item {
@@ -820,9 +809,10 @@
         }
         
         .trabalho-descricao * {
-            all: revert;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-            color: #ddd !important;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            color: inherit;
         }
         
         .grupos-container {
@@ -1067,7 +1057,7 @@
             .card {
                 width: 100%;
                 min-width: auto;
-                height: 460px;
+                height: 480px;
             }
             
             .abas {
@@ -1265,7 +1255,7 @@
                 <div class="modal-fechar" id="modal-fechar">X</div>
                 <button class="btn-compartilhar-modal" id="modal-compartilhar" title="Compartilhar">🔗</button>
                 <div class="modal-titulo" id="modal-titulo"></div>
-                <div class="modal-info-lista" id="modal-info-container"></div>
+                <div class="modal-info-container" id="modal-info-container"></div>
                 <div class="modal-descricao" id="modal-descricao"></div>
                 <div class="card-acoes" id="modal-acoes"></div>
             </div>
@@ -1645,22 +1635,39 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             }
         });
         
-        function processarRespostas(respostaTexto) {
-            const linhas = respostaTexto.split('\n');
-            const respostasMap = new Map();
-            linhas.forEach(linha => {
-                const match = linha.match(/(\d+)\s*[-\s]\s*([A-E])/i);
-                if (match) {
-                    const numero = parseInt(match[1]);
-                    const alternativa = match[2].toUpperCase();
-                    respostasMap.set(numero, alternativa);
-                }
-            });
-            return respostasMap;
-        }
-        
-        function aplicarMarcacaoAlternativas(descricaoElemento, respostasMap) {
-            return;
+        function formatarInfoTarefa(tarefa) {
+            const proximaAula = encontrarProximaAula(tarefa.materia);
+            const infoItems = [];
+            
+            if (proximaAula) {
+                infoItems.push({ label: 'Próxima Aula', value: `${proximaAula.dia} (${proximaAula.periodo})` });
+            }
+            
+            if (tarefa.bimestre) {
+                infoItems.push({ label: 'Bimestre', value: `${tarefa.bimestre}º` });
+            }
+            
+            if (tarefa.turma) {
+                infoItems.push({ label: 'Turma', value: tarefa.turma });
+            }
+            
+            if (tarefa.dataAdicao) {
+                infoItems.push({ label: 'Adicionado em', value: formatarData(tarefa.dataAdicao) });
+            }
+            
+            if (tarefa.criador) {
+                infoItems.push({ label: 'Criado por', value: `${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}` });
+            }
+            
+            if (tarefa.editor && tarefa.ultimaEdicao) {
+                infoItems.push({ label: 'Editado por', value: `${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}` });
+            }
+            
+            if (tarefa.autor_da_resposta) {
+                infoItems.push({ label: 'Resposta por', value: `${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}` });
+            }
+            
+            return infoItems;
         }
         
         function filtrarTarefas() {
@@ -1702,42 +1709,29 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             
             listaTarefas.forEach((tarefa) => {
                 const status = tarefasStatus[tarefa.id] || {};
-                const proximaAula = encontrarProximaAula(tarefa.materia);
-                const proximaAulaInfo = proximaAula ? `${proximaAula.dia} (${proximaAula.periodo})` : 'Não definida';
-                const bimestreInfo = tarefa.bimestre ? `${tarefa.bimestre}º` : 'Não definido';
-                const turmaInfo = tarefa.turma ? `${tarefa.turma}` : 'Não definida';
-                const dataAdicaoInfo = tarefa.dataAdicao ? formatarData(tarefa.dataAdicao) : 'Não definida';
-                const criadorInfo = tarefa.criador ? `${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}` : 'Não definido';
-                
                 const descricaoResumida = tarefa.descricao.length > 150 
                     ? tarefa.descricao.substring(0, 150) + '...' 
                     : tarefa.descricao;
                 
+                const infoItems = formatarInfoTarefa(tarefa);
+                
                 const card = document.createElement('div');
                 card.className = `card ${tarefa.oculta ? 'oculta' : ''}`;
+                
+                let infoHTML = '';
+                infoItems.forEach(item => {
+                    infoHTML += `
+                        <div class="card-info-item">
+                            <strong>${item.label}:</strong>
+                            <span>${item.value}</span>
+                        </div>
+                    `;
+                });
+                
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
-                    <div class="card-info-lista">
-                        <div class="card-info-item">
-                            <span class="card-info-label">Próxima Aula:</span>
-                            <span class="card-info-valor">${proximaAulaInfo}</span>
-                        </div>
-                        <div class="card-info-item">
-                            <span class="card-info-label">Bimestre:</span>
-                            <span class="card-info-valor">${bimestreInfo}</span>
-                        </div>
-                        <div class="card-info-item">
-                            <span class="card-info-label">Turma:</span>
-                            <span class="card-info-valor">${turmaInfo}</span>
-                        </div>
-                        <div class="card-info-item">
-                            <span class="card-info-label">Adicionado em:</span>
-                            <span class="card-info-valor">${dataAdicaoInfo}</span>
-                        </div>
-                        <div class="card-info-item">
-                            <span class="card-info-label">Criado por:</span>
-                            <span class="card-info-valor">${criadorInfo}</span>
-                        </div>
+                    <div class="card-info-container">
+                        ${infoHTML}
                     </div>
                     <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
@@ -1769,42 +1763,29 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             
             tarefasOcultas.forEach((tarefa) => {
                 const status = tarefasStatus[tarefa.id] || {};
-                const proximaAula = encontrarProximaAula(tarefa.materia);
-                const proximaAulaInfo = proximaAula ? `${proximaAula.dia} (${proximaAula.periodo})` : 'Não definida';
-                const bimestreInfo = tarefa.bimestre ? `${tarefa.bimestre}º` : 'Não definido';
-                const turmaInfo = tarefa.turma ? `${tarefa.turma}` : 'Não definida';
-                const dataAdicaoInfo = tarefa.dataAdicao ? formatarData(tarefa.dataAdicao) : 'Não definida';
-                const criadorInfo = tarefa.criador ? `${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}` : 'Não definido';
-                
                 const descricaoResumida = tarefa.descricao.length > 150 
                     ? tarefa.descricao.substring(0, 150) + '...' 
                     : tarefa.descricao;
                 
+                const infoItems = formatarInfoTarefa(tarefa);
+                
                 const card = document.createElement('div');
                 card.className = 'card oculta';
+                
+                let infoHTML = '';
+                infoItems.forEach(item => {
+                    infoHTML += `
+                        <div class="card-info-item">
+                            <strong>${item.label}:</strong>
+                            <span>${item.value}</span>
+                        </div>
+                    `;
+                });
+                
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia} ⚠️</div>
-                    <div class="card-info-lista">
-                        <div class="card-info-item">
-                            <span class="card-info-label">Próxima Aula:</span>
-                            <span class="card-info-valor">${proximaAulaInfo}</span>
-                        </div>
-                        <div class="card-info-item">
-                            <span class="card-info-label">Bimestre:</span>
-                            <span class="card-info-valor">${bimestreInfo}</span>
-                        </div>
-                        <div class="card-info-item">
-                            <span class="card-info-label">Turma:</span>
-                            <span class="card-info-valor">${turmaInfo}</span>
-                        </div>
-                        <div class="card-info-item">
-                            <span class="card-info-label">Adicionado em:</span>
-                            <span class="card-info-valor">${dataAdicaoInfo}</span>
-                        </div>
-                        <div class="card-info-item">
-                            <span class="card-info-label">Criado por:</span>
-                            <span class="card-info-valor">${criadorInfo}</span>
-                        </div>
+                    <div class="card-info-container">
+                        ${infoHTML}
                     </div>
                     <div class="card-descricao">${descricaoResumida}</div>
                     <div class="card-acoes">
@@ -1946,7 +1927,6 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             rankingContainer.innerHTML = '';
             tarefasComUrgencia.forEach((item, index) => {
                 const { tarefa, proximaAula } = item;
-                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
                 const rankingItem = document.createElement('div');
                 rankingItem.className = 'ranking-item';
                 rankingItem.innerHTML = `
@@ -1954,7 +1934,6 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                     <div class="ranking-conteudo">
                         <div class="ranking-materia">${tarefa.materia}</div>
                         <div class="ranking-info">${proximaAula.dia} - ${proximaAula.periodo}</div>
-                        ${infoResposta}
                     </div>
                     <div class="ranking-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Visualizar</button>
@@ -1976,58 +1955,21 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                 atualizarContadorNotificacoes();
             }
             
-            const proximaAula = encontrarProximaAula(tarefa.materia);
-            const proximaAulaInfo = proximaAula ? `${proximaAula.dia} (${proximaAula.periodo})` : 'Não definida';
-            const bimestreInfo = tarefa.bimestre ? `${tarefa.bimestre}º` : 'Não definido';
-            const turmaInfo = tarefa.turma ? `${tarefa.turma}` : 'Não definida';
-            const dataAdicaoInfo = tarefa.dataAdicao ? formatarData(tarefa.dataAdicao) : 'Não definida';
-            const criadorInfo = tarefa.criador ? `${tarefa.criador}${tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : ''}` : 'Não definido';
-            const editorInfo = tarefa.editor && tarefa.ultimaEdicao ? `Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}` : '';
-            const respostaInfo = tarefa.autor_da_resposta ? `Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}` : '';
-            
-            const infoContainer = document.getElementById('modal-info-container');
-            infoContainer.innerHTML = `
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Próxima Aula:</span>
-                    <span class="modal-info-valor">${proximaAulaInfo}</span>
-                </div>
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Bimestre:</span>
-                    <span class="modal-info-valor">${bimestreInfo}</span>
-                </div>
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Turma:</span>
-                    <span class="modal-info-valor">${turmaInfo}</span>
-                </div>
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Adicionado em:</span>
-                    <span class="modal-info-valor">${dataAdicaoInfo}</span>
-                </div>
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Criado por:</span>
-                    <span class="modal-info-valor">${criadorInfo}</span>
-                </div>
-                ${editorInfo ? `
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Editado por:</span>
-                    <span class="modal-info-valor">${editorInfo}</span>
-                </div>
-                ` : ''}
-                ${respostaInfo ? `
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Resposta por:</span>
-                    <span class="modal-info-valor">${respostaInfo}</span>
-                </div>
-                ` : ''}
-            `;
-            
             document.getElementById('modal-titulo').innerHTML = `${tarefa.materia}${tarefa.oculta ? ' ⚠️ Ocultada' : ''}`;
-            document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
             
-            if (tarefa.resposta) {
-                const respostasMap = processarRespostas(tarefa.resposta);
-                aplicarMarcacaoAlternativas(document.getElementById('modal-descricao'), respostasMap);
-            }
+            const infoItems = formatarInfoTarefa(tarefa);
+            let infoHTML = '';
+            infoItems.forEach(item => {
+                infoHTML += `
+                    <div class="modal-info-item">
+                        <strong>${item.label}:</strong>
+                        <span>${item.value}</span>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('modal-info-container').innerHTML = infoHTML;
+            document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
             
             let acoesHTML = '';
             if (!status.concluida) {
@@ -2045,10 +1987,27 @@ function enviarAcessoWebhook(nome, turma, codigo) {
         
         function visualizarResposta(id) {
             const tarefa = tarefas.find(t => t.id === id);
-            const infoContainer = document.getElementById('modal-info-container');
-            infoContainer.innerHTML = '';
-            
             document.getElementById('modal-titulo').innerHTML = `Resposta - ${tarefa.materia}`;
+            
+            const infoItems = [];
+            if (tarefa.autor_da_resposta) {
+                infoItems.push({ 
+                    label: 'Resposta por', 
+                    value: `${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}` 
+                });
+            }
+            
+            let infoHTML = '';
+            infoItems.forEach(item => {
+                infoHTML += `
+                    <div class="modal-info-item">
+                        <strong>${item.label}:</strong>
+                        <span>${item.value}</span>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('modal-info-container').innerHTML = infoHTML;
             document.getElementById('modal-descricao').innerHTML = tarefa.resposta;
             document.getElementById('modal-acoes').innerHTML = '';
             configurarBotaoCompartilharModal(id);
