@@ -118,7 +118,7 @@
             background: #2a2a2a;
             border-radius: 6px;
             padding: 16px;
-            height: 400px;
+            height: 420px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
@@ -148,6 +148,7 @@
             color: #fff;
             border-bottom: 1px solid #333;
             padding-bottom: 6px;
+            flex-shrink: 0;
         }
         
         .card-info-container {
@@ -156,6 +157,7 @@
             gap: 4px;
             margin-bottom: 8px;
             padding: 4px 0;
+            flex-shrink: 0;
         }
         
         .card-info-item {
@@ -179,36 +181,62 @@
             font-size: 12px;
         }
         
+        .card-descricao-wrapper {
+            flex: 1;
+            min-height: 0;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        
         .card-descricao {
             background: #1a1a1a;
             padding: 10px;
             border-radius: 4px;
-            margin-bottom: 10px;
             border: 1px solid #333;
-            min-height: 80px;
-            max-height: 120px;
+            height: 100%;
             overflow-y: auto;
         }
         
-        .card-descricao * {
+        .card-descricao-conteudo {
+            color: #ddd;
+            line-height: 1.4;
+            font-size: 13px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .card-descricao-conteudo * {
             all: revert;
             max-width: 100%;
         }
         
-        .card-descricao p {
-            margin: 0 0 5px 0;
+        .card-descricao::-webkit-scrollbar {
+            width: 6px;
         }
         
-        .card-descricao div {
-            margin: 0;
+        .card-descricao::-webkit-scrollbar-track {
+            background: #333;
+            border-radius: 4px;
+        }
+        
+        .card-descricao::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+        
+        .card-descricao::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
         
         .card-acoes {
             display: flex;
             justify-content: flex-end;
             gap: 6px;
-            margin-top: 0;
-            padding-top: 0;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+            margin-top: auto;
         }
         
         .btn {
@@ -223,6 +251,7 @@
             font-weight: 500;
             white-space: nowrap;
             display: inline-block;
+            pointer-events: auto;
         }
         
         .btn:hover {
@@ -370,6 +399,7 @@
             color: #fff;
             border-bottom: 1px solid #333;
             padding-bottom: 8px;
+            flex-shrink: 0;
         }
         
         .modal-info-container {
@@ -381,6 +411,7 @@
             background: #2a2a2a;
             border-radius: 4px;
             border: 1px solid #333;
+            flex-shrink: 0;
         }
         
         .modal-info-item {
@@ -404,27 +435,59 @@
             font-size: 13px;
         }
         
+        .modal-descricao-wrapper {
+            margin-bottom: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+        
         .modal-descricao {
             background: #2a2a2a;
             border-radius: 6px;
             padding: 15px;
-            margin-bottom: 20px;
+            border: 1px solid #333;
             max-height: 400px;
             overflow-y: auto;
-            border: 1px solid #333;
         }
         
-        .modal-descricao * {
+        .modal-descricao-conteudo {
+            color: #ddd;
+            line-height: 1.6;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .modal-descricao-conteudo * {
             all: revert;
             max-width: 100%;
         }
         
-        .modal-descricao p {
-            margin: 0 0 5px 0;
+        .modal-descricao::-webkit-scrollbar {
+            width: 8px;
         }
         
-        .modal-descricao div {
-            margin: 0;
+        .modal-descricao::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+        
+        .modal-descricao::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        
+        .modal-descricao::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+        
+        .modal-acoes {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
         }
         
         .modal-fechar {
@@ -443,6 +506,7 @@
             font-weight: bold;
             transition: background 0.3s;
             font-size: 14px;
+            z-index: 10;
         }
         
         .modal-fechar:hover {
@@ -754,25 +818,29 @@
             border: 1px solid #444;
         }
         
+        .trabalho-descricao-wrapper {
+            margin-bottom: 20px;
+        }
+        
         .trabalho-descricao {
             background: #1a1a1a;
             border-radius: 6px;
             padding: 15px;
-            margin-bottom: 20px;
             border: 1px solid #333;
         }
         
-        .trabalho-descricao * {
+        .trabalho-descricao-conteudo {
+            color: #ddd;
+            line-height: 1.5;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .trabalho-descricao-conteudo * {
             all: revert;
             max-width: 100%;
-        }
-        
-        .trabalho-descricao p {
-            margin: 0 0 5px 0;
-        }
-        
-        .trabalho-descricao div {
-            margin: 0;
         }
         
         .grupos-container {
@@ -842,6 +910,7 @@
             justify-content: center;
             border-radius: 50%;
             transition: background 0.3s;
+            z-index: 5;
         }
         
         .btn-compartilhar:hover {
@@ -864,6 +933,7 @@
             transition: background 0.3s;
             font-size: 14px;
             border: none;
+            z-index: 10;
         }
         
         .btn-compartilhar-modal:hover {
@@ -1009,7 +1079,7 @@
             .card {
                 width: 100%;
                 min-width: auto;
-                height: 420px;
+                height: 440px;
             }
             
             .abas {
@@ -1208,8 +1278,12 @@
                 <button class="btn-compartilhar-modal" id="modal-compartilhar" title="Compartilhar">🔗</button>
                 <div class="modal-titulo" id="modal-titulo"></div>
                 <div class="modal-info-container" id="modal-info-container"></div>
-                <div class="modal-descricao" id="modal-descricao"></div>
-                <div class="card-acoes" id="modal-acoes"></div>
+                <div class="modal-descricao-wrapper">
+                    <div class="modal-descricao">
+                        <div class="modal-descricao-conteudo" id="modal-descricao-conteudo"></div>
+                    </div>
+                </div>
+                <div class="modal-acoes" id="modal-acoes"></div>
             </div>
         </div>
     </div>
@@ -1685,7 +1759,11 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                     <div class="card-info-container">
                         ${infoHTML}
                     </div>
-                    <div class="card-descricao">${descricaoResumida}</div>
+                    <div class="card-descricao-wrapper">
+                        <div class="card-descricao">
+                            <div class="card-descricao-conteudo">${descricaoResumida}</div>
+                        </div>
+                    </div>
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Ver</button>
                         ${!status.concluida ? 
@@ -1739,7 +1817,11 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                     <div class="card-info-container">
                         ${infoHTML}
                     </div>
-                    <div class="card-descricao">${descricaoResumida}</div>
+                    <div class="card-descricao-wrapper">
+                        <div class="card-descricao">
+                            <div class="card-descricao-conteudo">${descricaoResumida}</div>
+                        </div>
+                    </div>
                     <div class="card-acoes">
                         <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Ver</button>
                         <button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>
@@ -1787,7 +1869,11 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                         </div>
                         ${trabalho.dataEntrega ? `<div class="trabalho-data">Entrega: ${formatarData(trabalho.dataEntrega)}</div>` : ''}
                     </div>
-                    <div class="trabalho-descricao">${trabalho.descricao}</div>
+                    <div class="trabalho-descricao-wrapper">
+                        <div class="trabalho-descricao">
+                            <div class="trabalho-descricao-conteudo">${trabalho.descricao}</div>
+                        </div>
+                    </div>
                     ${gruposHTML ? `
                         <div class="grupos-container">
                             <div class="grupos-titulo">Grupos</div>
@@ -1921,7 +2007,7 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             });
             
             document.getElementById('modal-info-container').innerHTML = infoHTML;
-            document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
+            document.getElementById('modal-descricao-conteudo').innerHTML = tarefa.descricao;
             
             let acoesHTML = '';
             if (!status.concluida) {
@@ -1960,7 +2046,7 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             });
             
             document.getElementById('modal-info-container').innerHTML = infoHTML;
-            document.getElementById('modal-descricao').innerHTML = tarefa.resposta;
+            document.getElementById('modal-descricao-conteudo').innerHTML = tarefa.resposta;
             document.getElementById('modal-acoes').innerHTML = '';
             configurarBotaoCompartilharModal(id);
             abrirModal();
