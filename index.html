@@ -194,7 +194,6 @@
             border-radius: 4px;
             margin-bottom: 12px;
             max-height: 170px;
-            font-family: monospace;
         }
         
         .card-descricao::-webkit-scrollbar {
@@ -422,7 +421,6 @@
             border-radius: 6px;
             border: 1px solid #333;
             font-size: 14px;
-            font-family: monospace;
         }
         
         .modal-descricao::-webkit-scrollbar {
@@ -780,7 +778,6 @@
             border-radius: 6px;
             border: 1px solid #333;
             font-size: 14px;
-            font-family: monospace;
         }
         
         .grupos-container {
@@ -1007,6 +1004,10 @@
         
         .conteudo-ocultas.ativo {
             display: block;
+        }
+
+        [style*="color:"] {
+            display: inline;
         }
         
         @media (max-width: 768px) {
@@ -1273,6 +1274,27 @@
         let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || { ordemTarefas: 'pendentes' };
         let compartilhamentoExecutado = false;
         let mostrarOcultas = false;
+
+        function aplicarFormatacao(texto) {
+            if (!texto) return '';
+            
+            let formatado = texto;
+            
+            formatado = formatado.replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>');
+            formatado = formatado.replace(/\[i\](.*?)\[\/i\]/g, '<em>$1</em>');
+            formatado = formatado.replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>');
+            
+            formatado = formatado.replace(/\[color=(.*?)\](.*?)\[\/color\]/g, '<span style="color:$1;">$2</span>');
+            
+            formatado = formatado.replace(/\[font=(.*?)\](.*?)\[\/font\]/g, '<span style="font-family:$1;">$2</span>');
+            
+            formatado = formatado.replace(/\[size=(.*?)\](.*?)\[\/size\]/g, (match, size, content) => {
+                const tamanhos = { '1':'12px', '2':'14px', '3':'16px', '4':'18px', '5':'20px' };
+                return `<span style="font-size:${tamanhos[size] || '14px'};">${content}</span>`;
+            });
+            
+            return formatado;
+        }
         
         function processarParametroURL() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1679,9 +1701,10 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             container.innerHTML = '';
             listaTarefas.forEach((tarefa) => {
                 const status = tarefasStatus[tarefa.id] || {};
-                const descricaoResumida = tarefa.descricao.length > 150 
-                    ? tarefa.descricao.substring(0, 150) + '...' 
-                    : tarefa.descricao;
+                const descricaoFormatada = aplicarFormatacao(tarefa.descricao);
+                const descricaoResumida = descricaoFormatada.length > 150 
+                    ? descricaoFormatada.substring(0, 150) + '...' 
+                    : descricaoFormatada;
                 const metaHTML = construirMetaItens(tarefa);
                 const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
                 const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
@@ -1718,9 +1741,10 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                 return;
             }
             tarefasOcultas.forEach((tarefa) => {
-                const descricaoResumida = tarefa.descricao.length > 150 
-                    ? tarefa.descricao.substring(0, 150) + '...' 
-                    : tarefa.descricao;
+                const descricaoFormatada = aplicarFormatacao(tarefa.descricao);
+                const descricaoResumida = descricaoFormatada.length > 150 
+                    ? descricaoFormatada.substring(0, 150) + '...' 
+                    : descricaoFormatada;
                 const metaHTML = construirMetaItens(tarefa);
                 const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
                 const card = document.createElement('div');
@@ -1904,9 +1928,12 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             }
             const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
             const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
+            
+            const descricaoFormatada = aplicarFormatacao(tarefa.descricao);
+            
             document.getElementById('modal-titulo').innerHTML = `${tarefa.materia}${tarefa.oculta ? ' ⚠️ Ocultada' : ''}`;
             document.getElementById('modal-meta').innerHTML = metaItens.join('');
-            document.getElementById('modal-descricao').innerHTML = tarefa.descricao;
+            document.getElementById('modal-descricao').innerHTML = descricaoFormatada;
             if (tarefa.resposta) {
                 const respostasMap = processarRespostas(tarefa.resposta);
             }
@@ -1917,6 +1944,7 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                 acoesHTML += `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${id}');fecharModal();">Desfazer Conclusão</button>`;
             }
             if (tarefa.resposta) {
+                const respostaFormatada = aplicarFormatacao(tarefa.resposta);
                 acoesHTML += `<button class="btn btn-resposta" onclick="visualizarResposta('${id}')">Resposta</button>`;
             }
             document.getElementById('modal-acoes').innerHTML = acoesHTML + infoEditor + infoResposta;
@@ -1926,10 +1954,11 @@ function enviarAcessoWebhook(nome, turma, codigo) {
         
         function visualizarResposta(id) {
             const tarefa = tarefas.find(t => t.id === id);
+            const respostaFormatada = aplicarFormatacao(tarefa.resposta);
             const respostaInfo = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
             document.getElementById('modal-titulo').innerHTML = `Resposta - ${tarefa.materia}`;
             document.getElementById('modal-meta').innerHTML = '';
-            document.getElementById('modal-descricao').innerHTML = tarefa.resposta;
+            document.getElementById('modal-descricao').innerHTML = respostaFormatada;
             document.getElementById('modal-acoes').innerHTML = respostaInfo;
             configurarBotaoCompartilharModal(id);
             abrirModal();
