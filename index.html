@@ -184,16 +184,28 @@
         .card-descricao {
             flex: 1;
             overflow-y: auto;
+            padding-right: 8px;
+            margin-bottom: 12px;
+            max-height: 170px;
+        }
+
+        .descricao-conteudo {
             color: #ddd;
             line-height: 1.5;
-            padding-right: 8px;
             white-space: pre-wrap;
             font-size: 14px;
             background: #1a1a1a;
             padding: 12px;
             border-radius: 4px;
-            margin-bottom: 12px;
-            max-height: 170px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100%;
+            width: 100%;
+            overflow-y: auto;
+        }
+
+        .descricao-conteudo * {
+            max-width: 100%;
+            font-family: inherit;
         }
         
         .card-descricao::-webkit-scrollbar {
@@ -220,6 +232,8 @@
             margin-top: auto;
             gap: 8px;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 10;
         }
         
         .btn {
@@ -233,6 +247,8 @@
             font-size: 13px;
             font-weight: 500;
             white-space: nowrap;
+            position: relative;
+            z-index: 10;
         }
         
         .btn:hover {
@@ -421,6 +437,12 @@
             border-radius: 6px;
             border: 1px solid #333;
             font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .modal-descricao * {
+            max-width: 100%;
+            font-family: inherit;
         }
         
         .modal-descricao::-webkit-scrollbar {
@@ -457,6 +479,7 @@
             font-weight: bold;
             transition: background 0.3s;
             font-size: 14px;
+            z-index: 10000;
         }
         
         .modal-fechar:hover {
@@ -551,6 +574,8 @@
             margin-left: 15px;
             display: flex;
             gap: 10px;
+            position: relative;
+            z-index: 10;
         }
         
         .aviso-urgente {
@@ -778,6 +803,12 @@
             border-radius: 6px;
             border: 1px solid #333;
             font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .trabalho-descricao * {
+            max-width: 100%;
+            font-family: inherit;
         }
         
         .grupos-container {
@@ -847,6 +878,7 @@
             justify-content: center;
             border-radius: 50%;
             transition: background 0.3s;
+            z-index: 20;
         }
         
         .btn-compartilhar:hover {
@@ -869,6 +901,7 @@
             transition: background 0.3s;
             font-size: 14px;
             border: none;
+            z-index: 10000;
         }
         
         .btn-compartilhar-modal:hover {
@@ -1004,10 +1037,6 @@
         
         .conteudo-ocultas.ativo {
             display: block;
-        }
-
-        [style*="color:"] {
-            display: inline;
         }
         
         @media (max-width: 768px) {
@@ -1284,13 +1313,13 @@
             formatado = formatado.replace(/\[i\](.*?)\[\/i\]/g, '<em>$1</em>');
             formatado = formatado.replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>');
             
-            formatado = formatado.replace(/\[color=(.*?)\](.*?)\[\/color\]/g, '<span style="color:$1;">$2</span>');
+            formatado = formatado.replace(/\[color=(.*?)\](.*?)\[\/color\]/g, '<span style="color:$1; display:inline;">$2</span>');
             
-            formatado = formatado.replace(/\[font=(.*?)\](.*?)\[\/font\]/g, '<span style="font-family:$1;">$2</span>');
+            formatado = formatado.replace(/\[font=(.*?)\](.*?)\[\/font\]/g, '<span style="font-family:$1; display:inline;">$2</span>');
             
             formatado = formatado.replace(/\[size=(.*?)\](.*?)\[\/size\]/g, (match, size, content) => {
                 const tamanhos = { '1':'12px', '2':'14px', '3':'16px', '4':'18px', '5':'20px' };
-                return `<span style="font-size:${tamanhos[size] || '14px'};">${content}</span>`;
+                return `<span style="font-size:${tamanhos[size] || '14px'}; display:inline;">${content}</span>`;
             });
             
             return formatado;
@@ -1706,25 +1735,63 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                     ? descricaoFormatada.substring(0, 150) + '...' 
                     : descricaoFormatada;
                 const metaHTML = construirMetaItens(tarefa);
-                const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
-                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
+                const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador" style="font-size:12px; color:#888; margin-bottom:5px;">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
+                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta" style="font-size:12px; color:#888; margin-bottom:5px;">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
                 const card = document.createElement('div');
                 card.className = `card ${tarefa.oculta ? 'oculta' : ''}`;
+                
+                const descricaoDiv = document.createElement('div');
+                descricaoDiv.className = 'card-descricao';
+                
+                const descricaoConteudo = document.createElement('div');
+                descricaoConteudo.className = 'descricao-conteudo';
+                descricaoConteudo.innerHTML = descricaoResumida;
+                descricaoDiv.appendChild(descricaoConteudo);
+                
+                const acoesDiv = document.createElement('div');
+                acoesDiv.className = 'card-acoes';
+                
+                const btnVer = document.createElement('button');
+                btnVer.className = 'btn btn-visualizar';
+                btnVer.textContent = 'Ver';
+                btnVer.onclick = () => visualizarTarefa(tarefa.id);
+                acoesDiv.appendChild(btnVer);
+                
+                if (!status.concluida) {
+                    const btnConcluir = document.createElement('button');
+                    btnConcluir.className = 'btn btn-concluida';
+                    btnConcluir.textContent = 'Concluir';
+                    btnConcluir.onclick = () => marcarTarefaConcluida(tarefa.id);
+                    acoesDiv.appendChild(btnConcluir);
+                } else {
+                    const btnDesfazer = document.createElement('button');
+                    btnDesfazer.className = 'btn btn-desfazer';
+                    btnDesfazer.textContent = 'Desfazer';
+                    btnDesfazer.onclick = () => desmarcarTarefaConcluida(tarefa.id);
+                    acoesDiv.appendChild(btnDesfazer);
+                }
+                
+                if (tarefa.resposta) {
+                    const btnResposta = document.createElement('button');
+                    btnResposta.className = 'btn btn-resposta';
+                    btnResposta.textContent = 'Resposta';
+                    btnResposta.onclick = () => visualizarResposta(tarefa.id);
+                    acoesDiv.appendChild(btnResposta);
+                }
+                
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia}</div>
                     ${metaHTML ? `<div class="card-meta-grid">${metaHTML}</div>` : ''}
-                    <div class="card-descricao">${descricaoResumida}</div>
-                    ${infoEditor}
-                    ${infoResposta}
-                    <div class="card-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Ver</button>
-                        ${!status.concluida ? 
-                            `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>` : 
-                            `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${tarefa.id}')">Desfazer</button>`
-                        }
-                        ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
-                    </div>
                 `;
+                
+                card.appendChild(descricaoDiv);
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.innerHTML = infoEditor + infoResposta;
+                card.appendChild(infoDiv);
+                
+                card.appendChild(acoesDiv);
+                
                 adicionarBotaoCompartilharCard(card, tarefa.id);
                 container.appendChild(card);
             });
@@ -1746,20 +1813,49 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                     ? descricaoFormatada.substring(0, 150) + '...' 
                     : descricaoFormatada;
                 const metaHTML = construirMetaItens(tarefa);
-                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
+                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta" style="font-size:12px; color:#888; margin-bottom:5px;">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
                 const card = document.createElement('div');
                 card.className = 'card oculta';
+                
+                const descricaoDiv = document.createElement('div');
+                descricaoDiv.className = 'card-descricao';
+                
+                const descricaoConteudo = document.createElement('div');
+                descricaoConteudo.className = 'descricao-conteudo';
+                descricaoConteudo.innerHTML = descricaoResumida;
+                descricaoDiv.appendChild(descricaoConteudo);
+                
+                const acoesDiv = document.createElement('div');
+                acoesDiv.className = 'card-acoes';
+                
+                const btnVer = document.createElement('button');
+                btnVer.className = 'btn btn-visualizar';
+                btnVer.textContent = 'Ver';
+                btnVer.onclick = () => visualizarTarefa(tarefa.id);
+                acoesDiv.appendChild(btnVer);
+                
+                const btnConcluir = document.createElement('button');
+                btnConcluir.className = 'btn btn-concluida';
+                btnConcluir.textContent = 'Concluir';
+                btnConcluir.onclick = () => marcarTarefaConcluida(tarefa.id);
+                acoesDiv.appendChild(btnConcluir);
+                
+                if (tarefa.resposta) {
+                    const btnResposta = document.createElement('button');
+                    btnResposta.className = 'btn btn-resposta';
+                    btnResposta.textContent = 'Resposta';
+                    btnResposta.onclick = () => visualizarResposta(tarefa.id);
+                    acoesDiv.appendChild(btnResposta);
+                }
+                
                 card.innerHTML = `
                     <div class="card-titulo">${tarefa.materia} ⚠️</div>
                     ${metaHTML ? `<div class="card-meta-grid">${metaHTML}</div>` : ''}
-                    <div class="card-descricao">${descricaoResumida}</div>
-                    ${infoResposta}
-                    <div class="card-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Ver</button>
-                        <button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>
-                        ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
-                    </div>
                 `;
+                
+                card.appendChild(descricaoDiv);
+                card.appendChild(acoesDiv);
+                
                 adicionarBotaoCompartilharCard(card, tarefa.id);
                 container.appendChild(card);
             });
@@ -1880,22 +1976,45 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             rankingContainer.innerHTML = '';
             tarefasComUrgencia.forEach((item, index) => {
                 const { tarefa, proximaAula } = item;
-                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
+                const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta" style="font-size:12px; color:#888; margin-top:5px;">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
                 const rankingItem = document.createElement('div');
                 rankingItem.className = 'ranking-item';
-                rankingItem.innerHTML = `
-                    <div class="ranking-posicao">${index + 1}</div>
-                    <div class="ranking-conteudo">
-                        <div class="ranking-materia">${tarefa.materia}</div>
-                        <div class="ranking-info">${proximaAula.dia} - ${proximaAula.periodo}</div>
-                        ${infoResposta}
-                    </div>
-                    <div class="ranking-acoes">
-                        <button class="btn btn-visualizar" onclick="visualizarTarefa('${tarefa.id}')">Visualizar</button>
-                        <button class="btn btn-concluida" onclick="marcarTarefaConcluida('${tarefa.id}')">Concluir</button>
-                        ${tarefa.resposta ? `<button class="btn btn-resposta" onclick="visualizarResposta('${tarefa.id}')">Resposta</button>` : ''}
-                    </div>
+                
+                const rankingConteudo = document.createElement('div');
+                rankingConteudo.className = 'ranking-conteudo';
+                rankingConteudo.innerHTML = `
+                    <div class="ranking-materia">${tarefa.materia}</div>
+                    <div class="ranking-info">${proximaAula.dia} - ${proximaAula.periodo}</div>
+                    ${infoResposta}
                 `;
+                
+                const rankingAcoes = document.createElement('div');
+                rankingAcoes.className = 'ranking-acoes';
+                
+                const btnVer = document.createElement('button');
+                btnVer.className = 'btn btn-visualizar';
+                btnVer.textContent = 'Visualizar';
+                btnVer.onclick = () => visualizarTarefa(tarefa.id);
+                rankingAcoes.appendChild(btnVer);
+                
+                const btnConcluir = document.createElement('button');
+                btnConcluir.className = 'btn btn-concluida';
+                btnConcluir.textContent = 'Concluir';
+                btnConcluir.onclick = () => marcarTarefaConcluida(tarefa.id);
+                rankingAcoes.appendChild(btnConcluir);
+                
+                if (tarefa.resposta) {
+                    const btnResposta = document.createElement('button');
+                    btnResposta.className = 'btn btn-resposta';
+                    btnResposta.textContent = 'Resposta';
+                    btnResposta.onclick = () => visualizarResposta(tarefa.id);
+                    rankingAcoes.appendChild(btnResposta);
+                }
+                
+                rankingItem.innerHTML = `<div class="ranking-posicao">${index + 1}</div>`;
+                rankingItem.appendChild(rankingConteudo);
+                rankingItem.appendChild(rankingAcoes);
+                
                 rankingContainer.appendChild(rankingItem);
             });
         }
@@ -1926,17 +2045,15 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                 const turmaCriador = tarefa.turmaCriador ? ` (${tarefa.turmaCriador})` : '';
                 metaItens.push(`<span class="modal-meta-item"><span class="rotulo">Criado por:</span> <span class="valor">${tarefa.criador}${turmaCriador}</span></span>`);
             }
-            const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
-            const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
+            const infoEditor = tarefa.editor && tarefa.ultimaEdicao ? `<div class="info-criador" style="font-size:12px; color:#888; margin-top:10px;">Editado por: ${tarefa.editor}${tarefa.turmaEditor ? ` (${tarefa.turmaEditor})` : ''} em ${formatarData(tarefa.ultimaEdicao)}</div>` : '';
+            const infoResposta = tarefa.autor_da_resposta ? `<div class="info-resposta" style="font-size:12px; color:#888; margin-top:5px;">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
             
             const descricaoFormatada = aplicarFormatacao(tarefa.descricao);
             
             document.getElementById('modal-titulo').innerHTML = `${tarefa.materia}${tarefa.oculta ? ' ⚠️ Ocultada' : ''}`;
             document.getElementById('modal-meta').innerHTML = metaItens.join('');
             document.getElementById('modal-descricao').innerHTML = descricaoFormatada;
-            if (tarefa.resposta) {
-                const respostasMap = processarRespostas(tarefa.resposta);
-            }
+            
             let acoesHTML = '';
             if (!status.concluida) {
                 acoesHTML += `<button class="btn btn-concluida" onclick="marcarTarefaConcluida('${id}');fecharModal();">Marcar como Concluída</button>`;
@@ -1944,7 +2061,6 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                 acoesHTML += `<button class="btn btn-desfazer" onclick="desmarcarTarefaConcluida('${id}');fecharModal();">Desfazer Conclusão</button>`;
             }
             if (tarefa.resposta) {
-                const respostaFormatada = aplicarFormatacao(tarefa.resposta);
                 acoesHTML += `<button class="btn btn-resposta" onclick="visualizarResposta('${id}')">Resposta</button>`;
             }
             document.getElementById('modal-acoes').innerHTML = acoesHTML + infoEditor + infoResposta;
@@ -1955,7 +2071,7 @@ function enviarAcessoWebhook(nome, turma, codigo) {
         function visualizarResposta(id) {
             const tarefa = tarefas.find(t => t.id === id);
             const respostaFormatada = aplicarFormatacao(tarefa.resposta);
-            const respostaInfo = tarefa.autor_da_resposta ? `<div class="info-resposta">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
+            const respostaInfo = tarefa.autor_da_resposta ? `<div class="info-resposta" style="font-size:12px; color:#888; margin-top:10px;">Resposta por: ${tarefa.autor_da_resposta}${tarefa.turma_autor_da_resposta ? ` (${tarefa.turma_autor_da_resposta})` : ''}</div>` : '';
             document.getElementById('modal-titulo').innerHTML = `Resposta - ${tarefa.materia}`;
             document.getElementById('modal-meta').innerHTML = '';
             document.getElementById('modal-descricao').innerHTML = respostaFormatada;
