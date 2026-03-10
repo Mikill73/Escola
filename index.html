@@ -1210,8 +1210,7 @@
                 </div>
                 
                 <div class="aviso-ocultas" id="aviso-ocultas">
-                    ⚠️ Essas tarefas foram ocultadas por algum motivo, exemplo: o professor(a) não vai mais pegar/vistar. 
-                    Você ainda pode concluí-las, mas enquanto não estiverem concluídas, não aparecem no ranking.
+                    ⚠️ Essas tarefas foram ocultadas por algum motivo, exemplo: o professor(a) não vai mais pegar/vistar ou a tarefa tem mais de 20 dias (pode ser útil para colocar tudo em dia no fim do bimestre). Você ainda pode concluí-las, mas enquanto não estiverem concluídas, não aparecem no ranking.
                 </div>
                 
                 <div class="conteudo-ocultas" id="conteudo-ocultas">
@@ -2343,6 +2342,20 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             });
             filtrarTarefas();
         }
+
+        function ocultarTarefasAntigas() {
+            const hoje = new Date();
+            const vinteDiasAtras = new Date(hoje);
+            vinteDiasAtras.setDate(hoje.getDate() - 20);
+            tarefas.forEach(tarefa => {
+                if (tarefa.dataAdicao) {
+                    const dataAdicao = new Date(tarefa.dataAdicao);
+                    if (dataAdicao < vinteDiasAtras && !tarefasStatus[tarefa.id]?.concluida) {
+                        tarefa.oculta = true;
+                    }
+                }
+            });
+        }
         
         async function carregarDados() {
             try {
@@ -2372,6 +2385,7 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                             tarefa.oculta = false;
                         }
                     });
+                    ocultarTarefasAntigas();
                 }
                 if (horarioData) horario = horarioData;
                 if (trabalhosData) {
