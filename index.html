@@ -749,119 +749,6 @@
             font-size: 14px;
         }
         
-        .trabalho-container {
-            background: #2a2a2a;
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
-        }
-        
-        .trabalho-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 12px;
-        }
-        
-        .trabalho-info-principal {
-            flex: 1;
-        }
-        
-        .trabalho-materia {
-            font-size: 20px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 6px;
-        }
-        
-        .trabalho-turma {
-            color: #ddd;
-            font-size: 15px;
-            font-weight: 500;
-        }
-        
-        .trabalho-data {
-            background: #333;
-            padding: 6px 12px;
-            border-radius: 4px;
-            color: #ddd;
-            font-size: 13px;
-            border: 1px solid #444;
-        }
-        
-        .trabalho-descricao {
-            color: #ddd;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #1a1a1a;
-            border-radius: 6px;
-            border: 1px solid #333;
-            font-size: 14px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .trabalho-descricao * {
-            max-width: 100%;
-            font-family: inherit;
-        }
-        
-        .grupos-container {
-            margin-top: 15px;
-        }
-        
-        .grupos-titulo {
-            font-size: 16px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 6px;
-        }
-        
-        .grupo-trabalho {
-            background: #1a1a1a;
-            border-radius: 4px;
-            padding: 12px;
-            margin-bottom: 12px;
-            border: 1px solid #333;
-        }
-        
-        .grupo-nome {
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 8px;
-            font-size: 15px;
-        }
-        
-        .integrantes-lista {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        
-        .integrante-item {
-            background: #2a2a2a;
-            padding: 5px 10px;
-            border-radius: 4px;
-            color: #ddd;
-            font-size: 13px;
-            border: 1px solid #333;
-        }
-        
-        .info-criador-trabalho {
-            font-size: 13px;
-            color: #bbb;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #333;
-        }
-        
         .btn-compartilhar {
             position: absolute;
             top: 20px;
@@ -1102,15 +989,6 @@
                 font-size: 13px;
             }
             
-            .trabalho-header {
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .trabalho-data {
-                align-self: flex-start;
-            }
-            
             .btn-compartilhar-modal {
                 right: 50px;
                 top: 20px;
@@ -1151,20 +1029,9 @@
 <body>
     <div class="container" id="app-container" style="display: none;">
         <div class="abas">
-            <button class="aba" data-aba="horario">Horário</button>
             <button class="aba ativa" data-aba="tarefas" id="aba-tarefas">Tarefas</button>
-            <button class="aba" data-aba="trabalhos">Trabalhos</button>
+            <button class="aba" data-aba="horario">Horário</button>
             <button class="aba" data-aba="configuracoes">Configurações</button>
-        </div>
-        
-        <div id="horario" class="conteudo-aba">
-            <div class="horario-header">
-                <select class="turma-selector" id="turma-selector"></select>
-                <button class="btn-copiar-horario" id="btn-copiar-horario">
-                    <span>📋</span> Copiar Horário
-                </button>
-            </div>
-            <div id="horario-aulas"></div>
         </div>
         
         <div id="tarefas" class="conteudo-aba ativa">
@@ -1219,8 +1086,14 @@
             </div>
         </div>
         
-        <div id="trabalhos" class="conteudo-aba">
-            <div id="lista-trabalhos"></div>
+        <div id="horario" class="conteudo-aba">
+            <div class="horario-header">
+                <select class="turma-selector" id="turma-selector"></select>
+                <button class="btn-copiar-horario" id="btn-copiar-horario">
+                    <span>📋</span> Copiar Horário
+                </button>
+            </div>
+            <div id="horario-aulas"></div>
         </div>
         
         <div id="configuracoes" class="conteudo-aba">
@@ -1231,11 +1104,18 @@
                 </div>
                 
                 <div class="configuracao-item">
-                    <div class="configuracao-titulo">Ordem das Tarefas</div>
-                    <select class="configuracao-select" id="config-ordem-tarefas">
+                    <div class="configuracao-titulo">Visualização das Tarefas</div>
+                    <select class="configuracao-select" id="config-visualizacao-tarefas">
                         <option value="pendentes">Pendentes</option>
                         <option value="rank">Rank</option>
                     </select>
+                </div>
+                
+                <div class="configuracao-item">
+                    <div class="configuracao-titulo">Mostrar botão compartilhar</div>
+                    <label class="configuracao-checkbox">
+                        <input type="checkbox" id="config-mostrar-compartilhar" checked> Exibir botão 🔗 nos cards
+                    </label>
                 </div>
                 
                 <div class="configuracao-item">
@@ -1288,7 +1168,6 @@
         const siteURL = "https://mikill73.github.io/Escola/";
         
         let tarefas = [];
-        let trabalhos = [];
         let horario = {};
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
@@ -1299,7 +1178,7 @@
         let usuarioBloqueado = false;
         let materiaFiltro = '';
         let bimestreFiltro = '';
-        let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || { ordemTarefas: 'pendentes' };
+        let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || { visualizacaoTarefas: 'pendentes', mostrarCompartilhar: true };
         let compartilhamentoExecutado = false;
         let mostrarOcultas = false;
 
@@ -1376,6 +1255,7 @@
         }
         
         function adicionarBotaoCompartilharCard(card, tarefaId) {
+            if (!configuracoes.mostrarCompartilhar) return;
             const botaoCompartilhar = document.createElement('button');
             botaoCompartilhar.className = 'btn-compartilhar';
             botaoCompartilhar.title = 'Compartilhar';
@@ -1390,7 +1270,12 @@
         function configurarBotaoCompartilharModal(tarefaId) {
             const botao = document.getElementById('modal-compartilhar');
             if (botao) {
-                botao.onclick = () => compartilharTarefa(tarefaId);
+                if (configuracoes.mostrarCompartilhar) {
+                    botao.style.display = 'flex';
+                    botao.onclick = () => compartilharTarefa(tarefaId);
+                } else {
+                    botao.style.display = 'none';
+                }
             }
         }
         
@@ -1571,8 +1456,6 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
                     atualizarContadorOcultas();
-                } else if (aba.dataset.aba === 'trabalhos') {
-                    renderizarTrabalhos();
                 }
             });
         });
@@ -1643,10 +1526,16 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             salvarConfiguracoes();
         });
         
-        document.getElementById('config-ordem-tarefas').addEventListener('change', (e) => {
-            configuracoes.ordemTarefas = e.target.value;
+        document.getElementById('config-visualizacao-tarefas').addEventListener('change', (e) => {
+            configuracoes.visualizacaoTarefas = e.target.value;
             salvarConfiguracoes();
-            aplicarOrdemTarefas();
+            aplicarVisualizacaoTarefas();
+        });
+
+        document.getElementById('config-mostrar-compartilhar').addEventListener('change', (e) => {
+            configuracoes.mostrarCompartilhar = e.target.checked;
+            salvarConfiguracoes();
+            filtrarTarefas();
         });
         
         document.getElementById('btn-copiar-horario').addEventListener('click', copiarHorario);
@@ -1656,20 +1545,6 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                 fecharModal();
             }
         });
-        
-        function processarRespostas(respostaTexto) {
-            const linhas = respostaTexto.split('\n');
-            const respostasMap = new Map();
-            linhas.forEach(linha => {
-                const match = linha.match(/(\d+)\s*[-\s]\s*([A-E])/i);
-                if (match) {
-                    const numero = parseInt(match[1]);
-                    const alternativa = match[2].toUpperCase();
-                    respostasMap.set(numero, alternativa);
-                }
-            });
-            return respostasMap;
-        }
         
         function filtrarTarefas() {
             const termo = document.getElementById('pesquisa-tarefas').value.toLowerCase();
@@ -1864,50 +1739,6 @@ function enviarAcessoWebhook(nome, turma, codigo) {
             const contador = document.getElementById('contador-ocultas');
             const quantidade = tarefas.filter(t => t.oculta === true && !tarefasStatus[t.id]?.concluida).length;
             contador.textContent = quantidade;
-        }
-        
-        function renderizarTrabalhos() {
-            const container = document.getElementById('lista-trabalhos');
-            if (trabalhos.length === 0) {
-                container.innerHTML = '<div class="vazio">Nenhum trabalho encontrado</div>';
-                return;
-            }
-            container.innerHTML = '';
-            trabalhos.forEach((trabalho) => {
-                const trabalhoDiv = document.createElement('div');
-                trabalhoDiv.className = 'trabalho-container';
-                const infoCriador = trabalho.criador ? `<div class="info-criador-trabalho">Criado por: ${trabalho.criador}${trabalho.turmaCriador ? ` (${trabalho.turmaCriador})` : ''}</div>` : '';
-                const infoDataAdicao = trabalho.dataAdicao ? `<div class="info-criador-trabalho">Adicionado em: ${formatarData(trabalho.dataAdicao)}</div>` : '';
-                const gruposHTML = trabalho.grupos ? trabalho.grupos.map(grupo => `
-                    <div class="grupo-trabalho">
-                        <div class="grupo-nome">${grupo.nome}</div>
-                        <div class="integrantes-lista">
-                            ${grupo.integrantes.map(integrante => `
-                                <div class="integrante-item">${integrante}</div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `).join('') : '';
-                trabalhoDiv.innerHTML = `
-                    <div class="trabalho-header">
-                        <div class="trabalho-info-principal">
-                            <div class="trabalho-materia">${trabalho.materia}</div>
-                            ${trabalho.turma ? `<div class="trabalho-turma">Turma: ${trabalho.turma}</div>` : ''}
-                        </div>
-                        ${trabalho.dataEntrega ? `<div class="trabalho-data">Entrega: ${formatarData(trabalho.dataEntrega)}</div>` : ''}
-                    </div>
-                    <div class="trabalho-descricao">${trabalho.descricao}</div>
-                    ${gruposHTML ? `
-                        <div class="grupos-container">
-                            <div class="grupos-titulo">Grupos</div>
-                            ${gruposHTML}
-                        </div>
-                    ` : ''}
-                    ${infoCriador}
-                    ${infoDataAdicao}
-                `;
-                container.appendChild(trabalhoDiv);
-            });
         }
         
         function renderizarTarefasRank(termoPesquisa = '') {
@@ -2245,13 +2076,6 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                     }
                 });
             }
-            if (trabalhos && trabalhos.length > 0) {
-                trabalhos.forEach(trabalho => {
-                    if (trabalho.materia && !todasMaterias.includes(trabalho.materia)) {
-                        todasMaterias.push(trabalho.materia);
-                    }
-                });
-            }
             atualizarFiltroMaterias();
         }
         
@@ -2327,16 +2151,17 @@ function enviarAcessoWebhook(nome, turma, codigo) {
         }
         
         function carregarConfiguracoes() {
-            document.getElementById('config-ordem-tarefas').value = configuracoes.ordemTarefas;
+            document.getElementById('config-visualizacao-tarefas').value = configuracoes.visualizacaoTarefas;
+            document.getElementById('config-mostrar-compartilhar').checked = configuracoes.mostrarCompartilhar;
             document.getElementById('config-codigo-amigo').value = localStorage.getItem('codigoAmigo') || '';
-            aplicarOrdemTarefas();
+            aplicarVisualizacaoTarefas();
         }
         
-        function aplicarOrdemTarefas() {
-            subtabAtiva = configuracoes.ordemTarefas;
+        function aplicarVisualizacaoTarefas() {
+            subtabAtiva = configuracoes.visualizacaoTarefas;
             document.querySelectorAll('.subtab').forEach(subtab => {
                 subtab.classList.remove('ativa');
-                if (subtab.dataset.subtab === configuracoes.ordemTarefas) {
+                if (subtab.dataset.subtab === configuracoes.visualizacaoTarefas) {
                     subtab.classList.add('ativa');
                 }
             });
@@ -2363,17 +2188,14 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                 if (usuarioBloqueado) {
                     tarefas = [];
                     horario = {};
-                    trabalhos = [];
                     renderizarHorario();
                     filtrarTarefas();
-                    renderizarTrabalhos();
                     processarParametroURL();
                     return;
                 }
-                const [tarefasData, horarioData, trabalhosData] = await Promise.all([
+                const [tarefasData, horarioData] = await Promise.all([
                     fetchDados('Tarefas'),
-                    fetchDados('Horário'),
-                    fetchDados('Trabalhos')
+                    fetchDados('Horário')
                 ]);
                 if (tarefasData) {
                     tarefas = tarefasData;
@@ -2388,14 +2210,6 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                     ocultarTarefasAntigas();
                 }
                 if (horarioData) horario = horarioData;
-                if (trabalhosData) {
-                    trabalhos = trabalhosData;
-                    trabalhos.forEach(trabalho => {
-                        if (!trabalho.id) {
-                            trabalho.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-                        }
-                    });
-                }
                 atualizarSeletorTurmas();
                 extrairTodasMaterias();
                 atualizarContadorNotificacoes();
@@ -2403,7 +2217,6 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                 carregarConfiguracoes();
                 renderizarHorario();
                 filtrarTarefas();
-                renderizarTrabalhos();
                 processarParametroURL();
             } catch (error) {}
         }
