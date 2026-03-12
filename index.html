@@ -33,6 +33,7 @@
             background: #1a1a1a;
             border-radius: 6px;
             padding: 4px;
+            flex-wrap: wrap;
         }
         
         .aba {
@@ -46,6 +47,7 @@
             transition: all 0.3s;
             font-weight: 500;
             position: relative;
+            min-width: 80px;
         }
         
         .notificacao-contador {
@@ -319,12 +321,16 @@
             background: #2a2a2a;
             border-radius: 6px;
             border: 1px solid #333;
-            transition: background 0.5s, box-shadow 0.5s;
+            transition: all 0.3s ease;
+            position: relative;
         }
         
         .horario-dia.destaque {
-            background: #2a4a2a;
-            box-shadow: 0 0 20px #2a6a2a;
+            background: #2a3a2a;
+            border-color: #484;
+            box-shadow: 0 0 15px #3a5a3a;
+            transform: scale(1.01);
+            transition: all 0.5s ease;
         }
         
         .horario-dia h3 {
@@ -363,6 +369,22 @@
             flex: 1;
             color: #ddd;
             font-size: 15px;
+        }
+        
+        .btn-ver-resumo-dia {
+            margin-top: 10px;
+            background: #232;
+            color: #fff;
+            border: 1px solid #353;
+            width: 100%;
+            text-align: center;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-ver-resumo-dia:hover {
+            background: #343;
         }
         
         .modal {
@@ -498,6 +520,7 @@
             background: #111;
             border-radius: 6px;
             padding: 3px;
+            flex-wrap: wrap;
         }
         
         .subtab {
@@ -511,6 +534,7 @@
             transition: all 0.3s;
             font-size: 14px;
             font-weight: 500;
+            min-width: 80px;
         }
         
         .subtab.ativa {
@@ -868,25 +892,6 @@
             background: #334;
         }
         
-        .btn-ver-resumo {
-            padding: 8px 16px;
-            background: #232;
-            color: #ddd;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .btn-ver-resumo:hover {
-            background: #343;
-        }
-        
         .tarefas-ocultas-section {
             margin-top: 40px;
             padding-top: 20px;
@@ -902,6 +907,8 @@
             background: #2a2a2a;
             border-radius: 6px;
             border: 1px solid #444;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .tarefas-ocultas-titulo {
@@ -952,51 +959,54 @@
             display: block;
         }
         
-        .resumo-item {
+        .resumos-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .resumo-card {
             background: #2a2a2a;
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 16px;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        
+        .resumo-card:hover {
+            background: #2f2f2f;
+            border-color: #4a6;
         }
         
         .resumo-data {
-            color: #8af;
-            font-size: 14px;
+            color: #6a9;
+            font-size: 13px;
+            font-weight: 600;
             margin-bottom: 10px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #3a3a3a;
+            padding-bottom: 6px;
         }
         
         .resumo-conteudo {
-            color: #ddd;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            font-size: 14px;
-            background: #1e1e1e;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-        
-        .resumo-aula-linha {
-            margin-left: 20px;
-            padding: 5px 0;
-            border-left: 2px solid #446;
-            padding-left: 15px;
             color: #ccc;
+            line-height: 1.5;
+            font-size: 14px;
         }
         
-        .resumo-aula-linha strong {
-            color: #8af;
+        .resumo-conteudo .aula-linha {
+            margin-left: 10px;
+            border-left: 2px solid #4a6;
+            padding-left: 12px;
+            margin-bottom: 8px;
+            color: #bbb;
         }
         
-        .resumo-vazio {
-            color: #777;
-            text-align: center;
-            padding: 40px;
-            font-style: italic;
+        .resumo-conteudo .aula-linha strong {
+            color: #8c8;
+            margin-right: 6px;
         }
         
         @media (max-width: 768px) {
@@ -1081,7 +1091,6 @@
             
             .tarefas-ocultas-header {
                 flex-direction: column;
-                gap: 10px;
                 align-items: flex-start;
             }
             
@@ -1095,6 +1104,10 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 8px;
+            }
+            
+            .horario-header {
+                flex-direction: column;
             }
         }
     </style>
@@ -1166,20 +1179,12 @@
                 <button class="btn-copiar-horario" id="btn-copiar-horario">
                     <span>📋</span> Copiar Horário
                 </button>
-                <button class="btn-ver-resumo" id="btn-ver-resumo-hoje" style="display: none;">
-                    <span>📝</span> Ver Resumo do Dia
-                </button>
             </div>
             <div id="horario-aulas"></div>
         </div>
         
         <div id="resumos" class="conteudo-aba">
-            <div class="subtabs">
-                <button class="subtab ativa" data-subtab-resumo="lista">Lista de Resumos</button>
-                <button class="subtab" data-subtab-resumo="novo">Novo Resumo</button>
-            </div>
-            
-            <div id="conteudo-resumos"></div>
+            <div class="resumos-grid" id="resumos-lista"></div>
         </div>
         
         <div id="configuracoes" class="conteudo-aba">
@@ -1255,6 +1260,7 @@
         
         let tarefas = [];
         let horario = {};
+        let resumos = [];
         let todasMaterias = [];
         let tarefasStatus = JSON.parse(localStorage.getItem('tarefasStatus')) || {};
         let subtabAtiva = 'pendentes';
@@ -1267,7 +1273,6 @@
         let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || { visualizacaoTarefas: 'pendentes', mostrarCompartilhar: true };
         let compartilhamentoExecutado = false;
         let mostrarOcultas = false;
-        let resumosDiarios = JSON.parse(localStorage.getItem('resumosDiarios')) || [];
 
         function aplicarFormatacao(texto) {
             if (!texto) return '';
@@ -1409,7 +1414,7 @@
             });
         }
         
-        function enviarAcessoWebhook(nome, turma, codigo) {
+function enviarAcessoWebhook(nome, turma, codigo) {
             if (nome === "Yuri Gomes Martins") return;
             fetch(webhookURL, {
                 method: "POST",
@@ -1543,31 +1548,24 @@
                     atualizarContadorNotificacoes();
                     filtrarTarefas();
                     atualizarContadorOcultas();
-                } else if (aba.dataset.aba === 'horario') {
-                    rolarParaDiaAtual();
-                    verificarResumoHoje();
-                } else if (aba.dataset.aba === 'resumos') {
+                }
+                if (aba.dataset.aba === 'resumos') {
                     renderizarResumos();
+                }
+                if (aba.dataset.aba === 'horario') {
+                    setTimeout(() => {
+                        rolarParaDiaAtual();
+                    }, 100);
                 }
             });
         });
         
         document.querySelectorAll('.subtab').forEach(subtab => {
             subtab.addEventListener('click', () => {
-                if (subtab.dataset.subtab) {
-                    document.querySelectorAll('.subtab').forEach(s => s.classList.remove('ativa'));
-                    subtab.classList.add('ativa');
-                    subtabAtiva = subtab.dataset.subtab;
-                    filtrarTarefas();
-                } else if (subtab.dataset.subtabResumo) {
-                    document.querySelectorAll('[data-subtab-resumo]').forEach(s => s.classList.remove('ativa'));
-                    subtab.classList.add('ativa');
-                    if (subtab.dataset.subtabResumo === 'lista') {
-                        renderizarResumos();
-                    } else {
-                        renderizarNovoResumo();
-                    }
-                }
+                document.querySelectorAll('.subtab').forEach(s => s.classList.remove('ativa'));
+                subtab.classList.add('ativa');
+                subtabAtiva = subtab.dataset.subtab;
+                filtrarTarefas();
             });
         });
         
@@ -1618,7 +1616,9 @@
             turmaSelecionada = e.target.value;
             localStorage.setItem('turmaSelecionada', turmaSelecionada);
             renderizarHorario();
-            verificarResumoHoje();
+            setTimeout(() => {
+                adicionarBotaoResumoNoHorario();
+            }, 100);
         });
         
         document.getElementById('config-turma').addEventListener('change', (e) => {
@@ -1626,8 +1626,10 @@
             localStorage.setItem('turmaSelecionada', turmaSelecionada);
             document.getElementById('turma-selector').value = turmaSelecionada;
             renderizarHorario();
-            verificarResumoHoje();
             salvarConfiguracoes();
+            setTimeout(() => {
+                adicionarBotaoResumoNoHorario();
+            }, 100);
         });
         
         document.getElementById('config-visualizacao-tarefas').addEventListener('change', (e) => {
@@ -1643,7 +1645,6 @@
         });
         
         document.getElementById('btn-copiar-horario').addEventListener('click', copiarHorario);
-        document.getElementById('btn-ver-resumo-hoje').addEventListener('click', verResumoHoje);
         
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -2140,166 +2141,73 @@
                     container.appendChild(diaDiv);
                 }
             });
+            adicionarBotaoResumoNoHorario();
+        }
+        
+        function adicionarBotaoResumoNoHorario() {
+            const diasDivs = document.querySelectorAll('.horario-dia');
+            const diasMapa = {
+                'Segunda-feira': 'Segunda',
+                'Terça-feira': 'Terca',
+                'Quarta-feira': 'Quarta',
+                'Quinta-feira': 'Quinta',
+                'Sexta-feira': 'Sexta'
+            };
+            diasDivs.forEach(div => {
+                const titulo = div.querySelector('h3')?.textContent;
+                if (!titulo) return;
+                const diaAbreviado = diasMapa[titulo];
+                if (!diaAbreviado) return;
+                const resumoDoDia = resumos.find(r => {
+                    const dataResumo = new Date(r.data.split('/').reverse().join('-'));
+                    const hoje = new Date();
+                    return dataResumo.toDateString() === hoje.toDateString() && 
+                           (r.texto.includes(diaAbreviado) || r.texto.includes(titulo));
+                });
+                const botaoExistente = div.querySelector('.btn-ver-resumo-dia');
+                if (botaoExistente) botaoExistente.remove();
+                if (resumoDoDia) {
+                    const botao = document.createElement('button');
+                    botao.className = 'btn-ver-resumo-dia';
+                    botao.innerHTML = '📋 Ver resumo do dia';
+                    botao.onclick = () => {
+                        document.querySelector('[data-aba="resumos"]').click();
+                        setTimeout(() => {
+                            const resumoCard = document.querySelector(`.resumo-card[data-id="${resumoDoDia.id}"]`);
+                            if (resumoCard) {
+                                resumoCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                resumoCard.style.background = '#2a3a2a';
+                                setTimeout(() => {
+                                    resumoCard.style.background = '#2a2a2a';
+                                }, 1000);
+                            }
+                        }, 100);
+                    };
+                    div.appendChild(botao);
+                }
+            });
         }
         
         function rolarParaDiaAtual() {
-            setTimeout(() => {
-                const hoje = new Date();
-                const diaSemanaHoje = hoje.getDay();
-                const diasNomes = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-                const diaHoje = diasNomes[diaSemanaHoje];
-                const diaElementos = document.querySelectorAll('.horario-dia');
-                for (let elem of diaElementos) {
-                    const titulo = elem.querySelector('h3')?.textContent;
-                    if (titulo === diaHoje) {
-                        elem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        elem.classList.add('destaque');
-                        setTimeout(() => {
-                            elem.classList.remove('destaque');
-                        }, 2000);
-                        break;
-                    }
-                }
-            }, 100);
-        }
-        
-        function verificarResumoHoje() {
-            const hoje = new Date();
-            const dataHoje = hoje.toLocaleDateString('pt-BR');
-            const resumoHoje = resumosDiarios.find(r => r.data === dataHoje);
-            const btn = document.getElementById('btn-ver-resumo-hoje');
-            if (resumoHoje) {
-                btn.style.display = 'flex';
-            } else {
-                btn.style.display = 'none';
-            }
-        }
-        
-        function verResumoHoje() {
-            const hoje = new Date();
-            const dataHoje = hoje.toLocaleDateString('pt-BR');
-            const resumoHoje = resumosDiarios.find(r => r.data === dataHoje);
-            if (resumoHoje) {
-                document.querySelectorAll('.aba').forEach(a => a.classList.remove('ativa'));
-                document.querySelectorAll('.conteudo-aba').forEach(c => c.classList.remove('ativa'));
-                document.querySelector('[data-aba="resumos"]').classList.add('ativa');
-                document.getElementById('resumos').classList.add('ativa');
-                renderizarResumos();
-                setTimeout(() => {
-                    const resumoElemento = document.getElementById(`resumo-${resumoHoje.id}`);
-                    if (resumoElemento) {
-                        resumoElemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        resumoElemento.style.transition = 'background 1s';
-                        resumoElemento.style.background = '#2a4a2a';
-                        setTimeout(() => {
-                            resumoElemento.style.background = '#2a2a2a';
-                        }, 2000);
-                    }
-                }, 200);
-            }
-        }
-        
-        function renderizarResumos() {
-            const container = document.getElementById('conteudo-resumos');
-            if (resumosDiarios.length === 0) {
-                container.innerHTML = '<div class="resumo-vazio">Nenhum resumo salvo ainda. Crie um resumo hoje!</div>';
-                return;
-            }
-            container.innerHTML = resumosDiarios.map(resumo => {
-                const linhas = resumo.texto.split('\n');
-                const linhasFormatadas = linhas.map(linha => {
-                    if (linha.startsWith('Aula -')) {
-                        return `<div class="resumo-aula-linha"><strong>${linha.split(':')[0]}:</strong>${linha.includes(':') ? linha.split(':')[1] : ''}</div>`;
-                    }
-                    return `<div>${linha}</div>`;
-                }).join('');
-                return `
-                    <div class="resumo-item" id="resumo-${resumo.id}">
-                        <div class="resumo-data">
-                            <span>📅 ${resumo.data}</span>
-                            <button class="btn btn-perigo btn-sm" onclick="deletarResumo(${resumo.id})">Deletar</button>
-                        </div>
-                        <div class="resumo-conteudo">
-                            ${linhasFormatadas}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        function renderizarNovoResumo() {
-            const container = document.getElementById('conteudo-resumos');
-            container.innerHTML = `
-                <div class="card">
-                    <div class="card-titulo">Novo Resumo do Dia</div>
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <textarea id="novo-resumo-texto" class="pesquisa" rows="8" placeholder="Escreva aqui o resumo do dia..."></textarea>
-                    </div>
-                    <div class="btn-group" style="display: flex; gap: 10px;">
-                        <button class="btn btn-concluida" onclick="salvarResumo()">Salvar Resumo</button>
-                        <button class="btn" onclick="resumirAulasHoje()">Resumir por Aula</button>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function salvarResumo() {
-            const texto = document.getElementById('novo-resumo-texto').value.trim();
-            if (!texto) {
-                alert('Digite um resumo antes de salvar.');
-                return;
-            }
-            const hoje = new Date();
-            const dataHoje = hoje.toLocaleDateString('pt-BR');
-            const resumoExistente = resumosDiarios.findIndex(r => r.data === dataHoje);
-            const novoResumo = {
-                id: Date.now(),
-                data: dataHoje,
-                texto: texto
+            const diasMapa = {
+                1: 'Segunda-feira',
+                2: 'Terça-feira',
+                3: 'Quarta-feira',
+                4: 'Quinta-feira',
+                5: 'Sexta-feira'
             };
-            if (resumoExistente !== -1) {
-                resumosDiarios[resumoExistente] = novoResumo;
-            } else {
-                resumosDiarios.unshift(novoResumo);
-            }
-            if (resumosDiarios.length > 5) {
-                resumosDiarios.pop();
-            }
-            localStorage.setItem('resumosDiarios', JSON.stringify(resumosDiarios));
-            document.querySelector('[data-subtab-resumo="lista"]').click();
-            renderizarResumos();
-            verificarResumoHoje();
-        }
-        
-        function resumirAulasHoje() {
-            if (!turmaSelecionada || !horario[turmaSelecionada]) {
-                alert('Selecione uma turma primeiro.');
-                return;
-            }
-            const hoje = new Date();
-            const diaSemanaHoje = hoje.getDay();
-            const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-            const diaHoje = diasSemana[diaSemanaHoje];
-            const diaAjustado = diaHoje === 'Terça' ? 'Terca' : diaHoje;
-            const aulasHoje = horario[turmaSelecionada][diaAjustado];
-            if (!aulasHoje || aulasHoje.length === 0) {
-                alert('Não há aulas hoje.');
-                return;
-            }
-            const materiasUnicas = [...new Set(aulasHoje.map(a => a.materia).filter(Boolean))];
-            let resumoTexto = '';
-            materiasUnicas.forEach(materia => {
-                resumoTexto += `Aula - ${materia}:\n`;
+            const diaSemanaNumero = new Date().getDay();
+            const diaHoje = diasMapa[diaSemanaNumero === 0 ? 6 : diaSemanaNumero - 1];
+            if (!diaHoje) return;
+            const diaElemento = Array.from(document.querySelectorAll('.horario-dia')).find(div => {
+                return div.querySelector('h3')?.textContent === diaHoje;
             });
-            document.getElementById('novo-resumo-texto').value = resumoTexto;
-        }
-        
-        function deletarResumo(id) {
-            if (confirm('Deletar este resumo?')) {
-                resumosDiarios = resumosDiarios.filter(r => r.id !== id);
-                localStorage.setItem('resumosDiarios', JSON.stringify(resumosDiarios));
-                renderizarResumos();
-                verificarResumoHoje();
+            if (diaElemento) {
+                diaElemento.classList.add('destaque');
+                diaElemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    diaElemento.classList.remove('destaque');
+                }, 1500);
             }
         }
         
@@ -2448,20 +2356,51 @@
             });
         }
         
+        function renderizarResumos() {
+            const container = document.getElementById('resumos-lista');
+            if (!container) return;
+            if (resumos.length === 0) {
+                container.innerHTML = '<div class="vazio">Nenhum resumo disponível</div>';
+                return;
+            }
+            container.innerHTML = '';
+            resumos.slice(0, 5).forEach(resumo => {
+                const card = document.createElement('div');
+                card.className = 'resumo-card';
+                card.setAttribute('data-id', resumo.id);
+                const linhas = resumo.texto.split('\n');
+                const conteudoHTML = linhas.map(linha => {
+                    if (linha.startsWith('Aula -')) {
+                        const partes = linha.split(':');
+                        return `<div class="aula-linha"><strong>${partes[0]}:</strong>${partes[1] || ''}</div>`;
+                    }
+                    return `<div>${linha}</div>`;
+                }).join('');
+                card.innerHTML = `
+                    <div class="resumo-data">📅 ${resumo.data}</div>
+                    <div class="resumo-conteudo">${conteudoHTML}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
         async function carregarDados() {
             try {
                 limparLocalStorageAntigo();
                 if (usuarioBloqueado) {
                     tarefas = [];
                     horario = {};
+                    resumos = [];
                     renderizarHorario();
                     filtrarTarefas();
+                    renderizarResumos();
                     processarParametroURL();
                     return;
                 }
-                const [tarefasData, horarioData] = await Promise.all([
+                const [tarefasData, horarioData, resumosData] = await Promise.all([
                     fetchDados('Tarefas'),
-                    fetchDados('Horário')
+                    fetchDados('Horário'),
+                    fetchDados('Resumos')
                 ]);
                 if (tarefasData) {
                     tarefas = tarefasData;
@@ -2476,6 +2415,7 @@
                     ocultarTarefasAntigas();
                 }
                 if (horarioData) horario = horarioData;
+                if (resumosData) resumos = resumosData;
                 atualizarSeletorTurmas();
                 extrairTodasMaterias();
                 atualizarContadorNotificacoes();
@@ -2483,8 +2423,13 @@
                 carregarConfiguracoes();
                 renderizarHorario();
                 filtrarTarefas();
+                renderizarResumos();
                 processarParametroURL();
-                verificarResumoHoje();
+                if (document.querySelector('[data-aba="horario"].ativa')) {
+                    setTimeout(() => {
+                        rolarParaDiaAtual();
+                    }, 100);
+                }
             } catch (error) {}
         }
         
