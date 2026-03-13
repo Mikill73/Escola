@@ -2197,7 +2197,7 @@ function enviarAcessoWebhook(nome, turma, codigo) {
                 5: 'Sexta-feira'
             };
             const diaSemanaNumero = new Date().getDay();
-            const diaHoje = diasMapa[diaSemanaNumero === 0 ? 6 : diaSemanaNumero - 1];
+            const diaHoje = diasMapa[diaSemanaNumero === 0 ? 5 : diaSemanaNumero - 1];
             if (!diaHoje) return;
             const diaElemento = Array.from(document.querySelectorAll('.horario-dia')).find(div => {
                 return div.querySelector('h3')?.textContent === diaHoje;
