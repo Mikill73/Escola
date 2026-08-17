@@ -1274,6 +1274,14 @@
         let compartilhamentoExecutado = false;
         let mostrarOcultas = false;
 
+        function substituirLinksImagem(texto) {
+            if (!texto) return '';
+            const regex = /(https?:\/\/ibb\.co\/[^\s]+)/g;
+            return texto.replace(regex, function(url) {
+                return `<a href="${url}" target="_blank" style="font-size: 2em; display: inline-block; margin: 8px 0;">📷 Imagem da Tarefa</a>`;
+            });
+        }
+
         function aplicarFormatacao(texto) {
             if (!texto) return '';
             
@@ -1291,6 +1299,8 @@
                 const tamanhos = { '1':'12px', '2':'14px', '3':'16px', '4':'18px', '5':'20px' };
                 return `<span style="font-size:${tamanhos[size] || '14px'}; display:inline;">${content}</span>`;
             });
+            
+            formatado = substituirLinksImagem(formatado);
             
             return formatado;
         }
