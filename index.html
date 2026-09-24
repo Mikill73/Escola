@@ -10,6 +10,9 @@
     height: 100%;
     background: #ffffff;
     font-family: sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   #feedback {
     position: fixed;
@@ -32,7 +35,7 @@
 </head>
 <body>
 
-<div id="feedback">Copiado!</div>
+<div id="feedback">Tampermonkey aberto!</div>
 
 <script>
   const CODIGO = `(function() {
@@ -171,28 +174,47 @@
     executar(ler());
 })();`;
 
+  const CABECALHO = `// ==UserScript==
+// @name         New Userscript
+// @namespace    http://tampermonkey.net/
+// @version      ${new Date().toISOString().slice(0,10)}
+// @description  try to take over the world!
+// @author       You
+// @match        https://*/*
+// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        unsafeWindow
+// ==/UserScript==
+
+`;
+
+  const ARQUIVO_COMPLETO = CABECALHO + CODIGO;
+
   const feedback = document.getElementById('feedback');
+
+  function instalar() {
+    const blob = new Blob([ARQUIVO_COMPLETO], { type: 'text/javascript' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'New-Userscript.user.js';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(function() { URL.revokeObjectURL(url); }, 3000);
+
+    feedback.textContent = 'Arquivo baixado. Abra-o para o Tampermonkey instalar.';
+    feedback.classList.add('show');
+    setTimeout(function() { feedback.classList.remove('show'); }, 2500);
+  }
 
   document.addEventListener('keydown', function(e) {
     if (e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey) {
       e.preventDefault();
-      navigator.clipboard.writeText(CODIGO).then(function() {
-        feedback.classList.add('show');
-        setTimeout(function() {
-          feedback.classList.remove('show');
-        }, 1200);
-      }).catch(function() {
-        const ta = document.createElement('textarea');
-        ta.value = CODIGO;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        feedback.classList.add('show');
-        setTimeout(function() {
-          feedback.classList.remove('show');
-        }, 1200);
-      });
+      instalar();
     }
   });
 </script>
