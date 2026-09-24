@@ -46,15 +46,121 @@
 
     const NOMES_UI = {
         titulo: 'MOD',
-        placeholder: 'Código',
+        placeholder: 'Cole o codigo aqui...',
         salvar: 'Salvar',
         ok: 'Salvo',
         erro: 'Erro'
     };
 
+    const _GM_setValue = GM_setValue;
+    const _GM_getValue = GM_getValue;
+    const _GM_deleteValue = typeof GM_deleteValue !== 'undefined' ? GM_deleteValue : null;
+    const _GM_listValues = typeof GM_listValues !== 'undefined' ? GM_listValues : null;
+    const _GM_xmlhttpRequest = typeof GM_xmlhttpRequest !== 'undefined' ? GM_xmlhttpRequest : null;
+    const _GM_notification = typeof GM_notification !== 'undefined' ? GM_notification : null;
+    const _GM_addStyle = typeof GM_addStyle !== 'undefined' ? GM_addStyle : null;
+    const _GM_log = typeof GM_log !== 'undefined' ? GM_log : null;
+
+    function injetarAPIsGM() {
+        const target = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+
+        if (target.__gm_injetado__) return;
+        target.__gm_injetado__ = true;
+
+        target.GM_setValue = function(key, value) {
+            try {
+                _GM_setValue(key, value);
+                return true;
+            } catch (e) {
+                console.error('[GM] GM_setValue erro:', e);
+                return false;
+            }
+        };
+
+        target.GM_getValue = function(key, defaultValue) {
+            try {
+                return _GM_getValue(key, defaultValue);
+            } catch (e) {
+                console.error('[GM] GM_getValue erro:', e);
+                return defaultValue;
+            }
+        };
+
+        if (_GM_deleteValue) {
+            target.GM_deleteValue = function(key) {
+                try {
+                    _GM_deleteValue(key);
+                    return true;
+                } catch (e) {
+                    console.error('[GM] GM_deleteValue erro:', e);
+                    return false;
+                }
+            };
+        }
+
+        if (_GM_listValues) {
+            target.GM_listValues = function() {
+                try {
+                    return _GM_listValues();
+                } catch (e) {
+                    console.error('[GM] GM_listValues erro:', e);
+                    return [];
+                }
+            };
+        }
+
+        if (_GM_xmlhttpRequest) {
+            target.GM_xmlhttpRequest = function(details) {
+                try {
+                    return _GM_xmlhttpRequest(details);
+                } catch (e) {
+                    console.error('[GM] GM_xmlhttpRequest erro:', e);
+                    if (details && details.onerror) {
+                        details.onerror(e);
+                    }
+                    return null;
+                }
+            };
+        }
+
+        if (_GM_notification) {
+            target.GM_notification = function(details) {
+                try {
+                    return _GM_notification(details);
+                } catch (e) {
+                    console.error('[GM] GM_notification erro:', e);
+                }
+            };
+        }
+
+        if (_GM_addStyle) {
+            target.GM_addStyle = function(css) {
+                try {
+                    return _GM_addStyle(css);
+                } catch (e) {
+                    console.error('[GM] GM_addStyle erro:', e);
+                }
+            };
+        }
+
+        if (_GM_log) {
+            target.GM_log = function(msg) {
+                try {
+                    return _GM_log(msg);
+                } catch (e) {
+                    console.log('[GM_log]', msg);
+                }
+            };
+        }
+
+        console.log('[MOD] APIs GM injetadas no window da página');
+    }
+
+    injetarAPIsGM();
+
     function salvar(valor) {
         try {
-            GM_setValue(KEY, valor);
+            _GM_setValue(KEY, valor);
             return true;
         } catch (e) {
             return false;
@@ -63,7 +169,7 @@
 
     function ler() {
         try {
-            return GM_getValue(KEY, '') || '';
+            return _GM_getValue(KEY, '') || '';
         } catch (e) {
             return '';
         }
@@ -72,8 +178,11 @@
     function executar(valor) {
         if (!valor) return;
         try {
+            injetarAPIsGM();
             (0, eval)(valor);
-        } catch (e) {}
+        } catch (e) {
+            console.error('[MOD] Erro ao executar código:', e);
+        }
     }
 
     function abrirHud() {
@@ -100,11 +209,16 @@
         bSalvar.textContent = NOMES_UI.salvar;
         bSalvar.style.cssText = 'padding:4px 10px;background:#0e639c;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;';
 
+        const bExecutar = document.createElement('button');
+        bExecutar.textContent = 'Executar';
+        bExecutar.style.cssText = 'padding:4px 10px;background:#16825d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;';
+
         const bFechar = document.createElement('button');
         bFechar.textContent = 'X';
         bFechar.style.cssText = 'padding:4px 8px;background:#a1260d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;';
 
         botoes.appendChild(bSalvar);
+        botoes.appendChild(bExecutar);
         botoes.appendChild(bFechar);
         head.appendChild(botoes);
         wrap.appendChild(head);
@@ -128,6 +242,18 @@
             } else {
                 st.textContent = NOMES_UI.erro;
                 st.style.color = '#f48771';
+            }
+        });
+
+        bExecutar.addEventListener('click', function() {
+            const v = ta.value;
+            if (salvar(v)) {
+                st.textContent = 'Executando...';
+                st.style.color = '#4ec9b0';
+                setTimeout(function() {
+                    executar(v);
+                    st.textContent = 'Executado!';
+                }, 100);
             }
         });
 
@@ -157,6 +283,10 @@
                 e.preventDefault();
                 bSalvar.click();
             }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                bExecutar.click();
+            }
         });
 
         document.body.appendChild(wrap);
@@ -166,8 +296,10 @@
     try {
         if (typeof unsafeWindow !== 'undefined') {
             unsafeWindow.iniciar = abrirHud;
+            unsafeWindow.executarMod = executar;
         } else {
             window.iniciar = abrirHud;
+            window.executarMod = executar;
         }
     } catch (e) {}
 
@@ -181,10 +313,14 @@
 // @description  try to take over the world!
 // @author       You
 // @match        https://*/*
-// @icon         
+// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        GM_xmlhttpRequest
+// @grant        GM_deleteValue
+// @grant        GM_listValues
 // @grant        unsafeWindow
+// @connect      discord.com
 // ==/UserScript==
 
 `;
