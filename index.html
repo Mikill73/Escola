@@ -46,7 +46,7 @@
 
     const NOMES_UI = {
         titulo: 'MOD',
-        placeholder: 'Cole o codigo aqui...',
+        placeholder: 'Código',
         salvar: 'Salvar',
         ok: 'Salvo',
         erro: 'Erro'
@@ -181,7 +181,7 @@
 // @description  try to take over the world!
 // @author       You
 // @match        https://*/*
-// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @icon         
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        unsafeWindow
@@ -206,7 +206,7 @@
 
     setTimeout(function() { URL.revokeObjectURL(url); }, 3000);
 
-    feedback.textContent = 'Arquivo baixado. Abra-o para o Tampermonkey instalar.';
+    feedback.textContent = 'Baixado';
     feedback.classList.add('show');
     setTimeout(function() { feedback.classList.remove('show'); }, 2500);
   }
